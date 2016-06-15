@@ -11,7 +11,8 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.geekband.huzhouapp.R;
-import com.geekband.huzhouapp.adapter.AdviceGridAdapter;
+import com.geekband.huzhouapp.baseadapter.CommonAdapter;
+import com.geekband.huzhouapp.baseadapter.ViewHolder;
 import com.geekband.huzhouapp.vo.ClassInfo;
 
 import java.util.ArrayList;
@@ -23,7 +24,6 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
 
     ArrayList<ClassInfo> classList ;
     private GridView mAdvice_class_gridView;
-    private AdviceGridAdapter mAdviceGridAdapter;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -51,14 +51,18 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
         classList.add(new ClassInfo(R.drawable.document,"公文写作"));
         classList.add(new ClassInfo(R.drawable.informatization,"信息化"));
 
-        mAdviceGridAdapter = new AdviceGridAdapter(classList,getActivity());
-        mAdvice_class_gridView.setAdapter(mAdviceGridAdapter);
+        mAdvice_class_gridView.setAdapter(new CommonAdapter<ClassInfo>(getActivity(),classList,R.layout.item_class) {
+            @Override
+            public void convert(ViewHolder viewHolder, ClassInfo item) {
+                viewHolder.setImage(R.id.class_imageView_item, item.getImageId());
+                viewHolder.setText(R.id.class_title_item,item.getClassTitle());
+            }
+        });
+
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//        RelativeLayout class_layout = (RelativeLayout) view.findViewById(R.id.class_layout);
-//        class_layout.setBackgroundColor(getResources().getColor(R.color.title_background));
         mAdvice_class_gridView.setSelector(R.color.blue_background);
         Toast.makeText(getActivity(),"功能还未开放",Toast.LENGTH_SHORT).show();
     }

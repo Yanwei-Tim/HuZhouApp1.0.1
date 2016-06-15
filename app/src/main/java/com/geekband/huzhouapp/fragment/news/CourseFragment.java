@@ -11,7 +11,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.geekband.huzhouapp.R;
-import com.geekband.huzhouapp.adapter.CourseClassAdapter;
+import com.geekband.huzhouapp.baseadapter.CommonAdapter;
+import com.geekband.huzhouapp.baseadapter.ViewHolder;
 import com.geekband.huzhouapp.vo.CourseClass;
 
 import java.util.ArrayList;
@@ -26,25 +27,20 @@ public class CourseFragment extends Fragment implements AdapterView.OnItemClickL
         return new CourseFragment();
     }
 
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_course, null);
         ListView courseClass_listView = (ListView) view.findViewById(R.id.courseClass_listView);
-
         courseClass_listView.setOnItemClickListener(this);
         //初始化
         initCourseClass(courseClass_listView);
-
-
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
     }
 
     private void initCourseClass(ListView course_listView) {
@@ -52,8 +48,14 @@ public class CourseFragment extends Fragment implements AdapterView.OnItemClickL
         courseList.add(new CourseClass(R.drawable.app_icon_org_contacts, "全部课程"));
         courseList.add(new CourseClass(R.drawable.app_icon_wddb, "已选课程"));
         courseList.add(new CourseClass(R.drawable.app_icon_t, "成绩表单"));
-        CourseClassAdapter courseClassAdapter = new CourseClassAdapter(courseList, getActivity());
-        course_listView.setAdapter(courseClassAdapter);
+        course_listView.setAdapter(new CommonAdapter<CourseClass>(getActivity(),courseList,R.layout.item_course) {
+            @Override
+            public void convert(ViewHolder viewHolder, CourseClass item) {
+                viewHolder.setImage(R.id.course_ico_item, item.getImageId());
+                viewHolder.setText(R.id.course_title_item, item.getTitle());
+                viewHolder.setImage(R.id.course_normal_item, R.drawable.app_ui_ai_icon_next_c);
+            }
+        });
     }
 
     @Override

@@ -13,9 +13,12 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.geekband.huzhouapp.R;
-import com.geekband.huzhouapp.adapter.CameraAdapter;
+import com.geekband.huzhouapp.baseadapter.CommonAdapter;
+import com.geekband.huzhouapp.baseadapter.ViewHolder;
+import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.FileUtil;
 import com.geekband.huzhouapp.utils.FileUtils;
+import com.lidroid.xutils.BitmapUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ public class CameraActivity extends Activity implements View.OnClickListener, Ad
     private ImageButton mVideotape_imageBtn;
     private TextView mCamera_back_textBtn;
     private ArrayList<String> mImagesList;
+    private BitmapUtils mBitmapUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,8 +50,13 @@ public class CameraActivity extends Activity implements View.OnClickListener, Ad
 
         mImagesList = FileUtil.getLocalImagePath(this);
         GridView gridView_camera = (GridView) findViewById(R.id.gridView_camera);
-        CameraAdapter cameraAdapter = new CameraAdapter(this, gridView_camera, mImagesList);
-        gridView_camera.setAdapter(cameraAdapter);
+        mBitmapUtils = BitmapHelper.getBitmapUtils(this, gridView_camera, 0, 0);
+        gridView_camera.setAdapter(new CommonAdapter<String>(this,mImagesList,R.layout.item_camera_list) {
+            @Override
+            public void convert(ViewHolder viewHolder, String item) {
+                mBitmapUtils.display(viewHolder.getView(R.id.imageView_camera),item);
+            }
+        });
         gridView_camera.setOnItemClickListener(this);
 
     }

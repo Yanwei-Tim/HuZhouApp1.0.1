@@ -12,8 +12,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.geekband.huzhouapp.R;
-import com.geekband.huzhouapp.adapter.CourseListAdapter;
 import com.geekband.huzhouapp.application.MyApplication;
+import com.geekband.huzhouapp.baseadapter.CommonAdapter;
+import com.geekband.huzhouapp.baseadapter.ViewHolder;
 import com.geekband.huzhouapp.utils.BaseInfo;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.vo.CourseInfo;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 /**
  * Created by Administrator on 2016/5/29
  */
-public class CourseListActivity extends Activity implements AdapterView.OnItemClickListener ,View.OnClickListener{
+public class CourseListActivity extends Activity implements AdapterView.OnItemClickListener, View.OnClickListener {
 
     private ProgressBar mCourse_progress;
     private TextView mNo_course_text;
@@ -43,7 +44,7 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
         mNo_course_text = (TextView) findViewById(R.id.no_course_text);
         mCourseList_backBtn = (Button) findViewById(R.id.courseList_backBtn);
 
-        mCourse_listView.setOnItemClickListener(this);
+
         mCourseList_backBtn.setOnClickListener(this);
 
         //加载网络数据
@@ -52,28 +53,17 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        CourseInfo courseInfo = mCourseList.get(position);
         Intent intent = new Intent(this, CourseContentActivity.class);
-        if (mCourseList != null) {
-            ArrayList<CharSequence> cs = new ArrayList<>();
-            String title = mCourseList.get(position).getTitle();
-            String type = mCourseList.get(position).getType();
-            String time = mCourseList.get(position).getTime();
-            String intro = mCourseList.get(position).getIntro();
-            String detailed = mCourseList.get(position).getDetailed();
-            cs.add(title);
-            cs.add(type);
-            cs.add(time);
-            cs.add(intro);
-            cs.add(detailed);
-            intent.putCharSequenceArrayListExtra(Constants.COURSE_CONTENT, cs);
-            startActivity(intent);
-        }
-
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(Constants.COURSE_CONTENT, courseInfo);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.courseList_backBtn:
 //                startActivity(new Intent(this, MainActivity.class));
                 this.finish();
@@ -91,7 +81,7 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
 
         @Override
         protected Integer doInBackground(String... params) {
-            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null);
+            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
             BaseInfo.saveCourse(contentId);
             return null;
         }
@@ -129,7 +119,15 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
     }
 
     private void initCourseList() {
-            CourseListAdapter courseListAdapter = new CourseListAdapter(this, mCourseList);
-            mCourse_listView.setAdapter(courseListAdapter);
+        mCourse_listView.setAdapter(new CommonAdapter<CourseInfo>(this,mCourseList,R.layout.item_course_list) {
+            @Override
+            public void convert(ViewHolder viewHolder, CourseInfo item) {
+                viewHolder.setText(R.id.course_list_id,String.valueOf(item.getId()));
+                viewHolder.setText(R.id.course_list_title,item.getTitle());
+                viewHolder.setText(R.id.course_list_type,item.getType());
+                viewHolder.setText(R.id.course_list_time,item.getTime());
+            }
+        });
+        mCourse_listView.setOnItemClickListener(this);
     }
 }

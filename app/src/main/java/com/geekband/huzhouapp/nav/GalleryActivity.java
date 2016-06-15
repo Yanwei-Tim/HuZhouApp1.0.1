@@ -2,7 +2,6 @@ package com.geekband.huzhouapp.nav;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -30,13 +29,16 @@ import com.database.dto.DataOperation;
 import com.database.pojo.AlbumTable;
 import com.database.pojo.Document;
 import com.geekband.huzhouapp.R;
-import com.geekband.huzhouapp.adapter.GalleryGridAdapter;
 import com.geekband.huzhouapp.application.MyApplication;
+import com.geekband.huzhouapp.baseadapter.CommonAdapter;
+import com.geekband.huzhouapp.baseadapter.ViewHolder;
 import com.geekband.huzhouapp.utils.BaseInfo;
+import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.SelectPicPopupWindow;
 import com.geekband.huzhouapp.utils.UriToPathUtils;
 import com.geekband.huzhouapp.vo.AlbumInfo;
+import com.lidroid.xutils.BitmapUtils;
 import com.lidroid.xutils.db.sqlite.WhereBuilder;
 import com.lidroid.xutils.exception.DbException;
 
@@ -74,11 +76,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
      * 获取到的图片路径
      */
     public String picPath = "";
-    private static ProgressDialog pd;
-    private String resultStr = "";    // 服务端返回结果集
-    private String imgUrl = "";
     private ImageView mSelected_pic;
-    private GalleryGridAdapter mGalleryGridAdapter;
     private ScrollView mSelected_layout;
     private Button mUp_btn;
     private ArrayList<AlbumInfo> mAlbumInfoList;
@@ -86,6 +84,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
     private final String IMAGE_TYPE = "image/*";
     private final int IMAGE_CODE = 0;   //这里的IMAGE_CODE是自己任意定义的
+    private BitmapUtils mBitmapUtils;
 
 
     @Override
@@ -102,8 +101,16 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     }
 
     private void initAlbum() {
-        mGalleryGridAdapter = new GalleryGridAdapter(this, mGallery_gridView, mAlbumInfoList, mImageThumbUrls);
-        mGallery_gridView.setAdapter(mGalleryGridAdapter);
+        mBitmapUtils = BitmapHelper.getBitmapUtils(this, mGallery_gridView, 0, 0);
+        mGallery_gridView.setAdapter(new CommonAdapter<AlbumInfo>(this,mAlbumInfoList,R.layout.item_album) {
+            @Override
+            public void convert(ViewHolder viewHolder, AlbumInfo item) {
+                viewHolder.setText(R.id.item_albumName, item.getAlbumName());
+                viewHolder.setText(R.id.item_albumCount, String.valueOf(item.getAlbumCount()));
+                ImageView imageView = viewHolder.getView(R.id.item_albumImage);
+                mBitmapUtils.display(imageView,item.getAlbumUrl());
+            }
+        });
         mGallery_gridView.setOnItemClickListener(this);
     }
 

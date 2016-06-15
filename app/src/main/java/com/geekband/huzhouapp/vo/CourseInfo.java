@@ -1,9 +1,12 @@
 package com.geekband.huzhouapp.vo;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
- * Created by Administrator on 2016/5/27.
+ * Created by Administrator on 2016/5/27
  */
-public class CourseInfo {
+public class CourseInfo implements Parcelable{
     private int id;
     //课程名
     private String title;
@@ -17,6 +20,32 @@ public class CourseInfo {
     private String time;
     //详细内容
     private String detailed;
+
+    public CourseInfo(Parcel in) {
+        id = in.readInt();
+        title = in.readString();
+        type = in.readString();
+        intro = in.readString();
+        point = in.readString();
+        time = in.readString();
+        detailed = in.readString();
+    }
+
+    public static final Creator<CourseInfo> CREATOR = new Creator<CourseInfo>() {
+        @Override
+        public CourseInfo createFromParcel(Parcel in) {
+            return new CourseInfo(in);
+        }
+
+        @Override
+        public CourseInfo[] newArray(int size) {
+            return new CourseInfo[size];
+        }
+    };
+
+    public CourseInfo() {
+
+    }
 
     public String getDetailed() {
         return detailed;
@@ -85,5 +114,21 @@ public class CourseInfo {
                 ", time='" + time + '\'' +
                 ", detailed='" + detailed + '\'' +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(title);
+        dest.writeString(type);
+        dest.writeString(intro);
+        dest.writeString(point);
+        dest.writeString(time);
+        dest.writeString(detailed);
     }
 }
