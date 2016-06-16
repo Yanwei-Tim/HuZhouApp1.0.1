@@ -21,7 +21,7 @@ import com.database.pojo.AppVersionTable;
 import com.database.pojo.BaseTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.utils.BaseInfo;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.LinkNet;
 
@@ -56,13 +56,13 @@ public class SplashActivity extends BaseActivity {
     private void showUpdateDialog(final BaseTable versionTable) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("版本更新");
-        builder.setMessage(versionTable.getRecord().getField(AppVersionTable.FIELD_DETAIL));
+        builder.setMessage(versionTable.getField(AppVersionTable.FIELD_DETAIL));
         builder.setPositiveButton("欣然接受", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 File dir = Environment.getExternalStorageDirectory();
-                BaseInfo.download(versionTable.getAccessaryFileList().get(0), dir, SplashActivity.this);
-                System.out.println("得到的url：" + versionTable.getAccessaryFileList().get(0));
+                DataUtils.download(versionTable.getAccessaryFileUrlList().get(0), dir, SplashActivity.this);
+                System.out.println("得到的url：" + versionTable.getAccessaryFileUrlList().get(0));
             }
         });
 
@@ -121,14 +121,15 @@ public class SplashActivity extends BaseActivity {
             @Override
             public void run() {
 
-                ArrayList<BaseTable> versionTables = DataOperation.queryAppVersionTableList();
-                if (versionTables != null) {
+                //noinspection unchecked
+                ArrayList<BaseTable> versionTables = (ArrayList<BaseTable>) DataOperation.queryTable(AppVersionTable.TABLE_NAME);
+                if (versionTables != null&&versionTables.size()!=0) {
                     int position = 0;
                     if (versionTables.size() > 1) {
                         for (int i = 0; i < versionTables.size() - 1; i++) {
-                            String firstTime = versionTables.get(i).getRecord().getField(AppVersionTable.FIELD_TIME);
+                            String firstTime = versionTables.get(i).getField(AppVersionTable.FIELD_TIME);
                             long firstMillion = getMillionTime(firstTime);
-                            String secondTime = versionTables.get(i + 1).getRecord().getField(AppVersionTable.FIELD_TIME);
+                            String secondTime = versionTables.get(i + 1).getField(AppVersionTable.FIELD_TIME);
                             long secondMillion = getMillionTime(secondTime);
                             if (firstMillion > secondMillion) {
                                 position = i;
@@ -140,7 +141,7 @@ public class SplashActivity extends BaseActivity {
                         position = 0;
                     }
                     BaseTable versionTable = versionTables.get(position);
-                    String app_vn = versionTable.getRecord().getField(AppVersionTable.FIELD_VN);
+                    String app_vn = versionTable.getField(AppVersionTable.FIELD_VN);
                     String currentVersionName = getVersionName();
 
                     if (!app_vn.equals(currentVersionName)) {
@@ -207,21 +208,21 @@ public class SplashActivity extends BaseActivity {
 
             //预加载新闻缓存信息
             //1.轮播新闻
-            BaseInfo.saveNetNews();
+            DataUtils.saveNetNews();
             //2.服务器新闻
-            BaseInfo.saveLocalNews();
+            DataUtils.saveLocalNews();
 
             String isAuto = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
 
             if (isAuto != null) {
                 //缓存个人信息
-                BaseInfo.saveUserBaseInfo(isAuto);
+                DataUtils.saveUserBaseInfo(isAuto);
                 //缓存相册信息
-                BaseInfo.saveAlbum(isAuto);
+                DataUtils.saveAlbum(isAuto);
                 //缓存课程信息
-                BaseInfo.saveCourse(isAuto);
+                DataUtils.saveCourse(isAuto);
                 //获取学分
-                BaseInfo.saveGrade(isAuto);
+                DataUtils.saveGrade(isAuto);
 
                 return 1;
 

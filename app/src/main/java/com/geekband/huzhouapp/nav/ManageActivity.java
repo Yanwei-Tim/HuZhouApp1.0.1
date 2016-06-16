@@ -1,6 +1,7 @@
 package com.geekband.huzhouapp.nav;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,9 +19,10 @@ import com.database.pojo.UserInfoTable;
 import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.activity.MainActivity;
-import com.geekband.huzhouapp.adapter.ManageListAdapter;
 import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.utils.BaseInfo;
+import com.geekband.huzhouapp.baseadapter.CommonAdapter;
+import com.geekband.huzhouapp.baseadapter.ViewHolder;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.vo.ManageInfo;
 import com.geekband.huzhouapp.vo.UserBaseInfo;
@@ -59,6 +61,8 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
     private UserTable mUserTable;
     private UserInfoTable mUserInfoTable;
     private TextView mManage_hint;
+    private CommonAdapter<ManageInfo> mCommonAdapter;
+    private ProgressDialog mPd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,12 +94,13 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         mManage_back_textBtn.setOnClickListener(this);
         mUpdate_manage_btn.setOnClickListener(this);
 
+        new LocalTask().execute();
 
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onPause() {
+        super.onPause();
         //获取用户信息
         new NetTask().execute();
     }
@@ -113,9 +118,7 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
                     //加载浏览布局
                     mManage_listView.setVisibility(View.VISIBLE);
                     mScrollView.setVisibility(View.GONE);
-                    ManageListAdapter manageListAdapter = new ManageListAdapter(mManageList, ManageActivity.this);
-                    mManage_listView.setAdapter(manageListAdapter);
-                    manageListAdapter.notifyDataSetChanged();
+                    mCommonAdapter.notifyDataSetChanged();
 
                     //更改btn
                     mPrivate_info.setText("个人信息");
@@ -207,22 +210,33 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
                 mManageList.add(new ManageInfo("地址", mAddress, R.drawable.app_ailistview_item_three_back));
                 mManageList.add(new ManageInfo("生日", mBirthday, R.drawable.app_ailistview_item_three_back));
 
-                ManageListAdapter manageListAdapter = new ManageListAdapter(mManageList, ManageActivity.this);
-                mManage_listView.setAdapter(manageListAdapter);
-                manageListAdapter.notifyDataSetChanged();
+                mCommonAdapter = new CommonAdapter<ManageInfo>(ManageActivity.this, mManageList, R.layout.item_manage_text) {
+                    @Override
+                    public void convert(ViewHolder viewHolder, ManageInfo item) {
+                        viewHolder.setText(R.id.manage_class,item.getTitle());
+                        viewHolder.setText(R.id.manage_content,item.getContent());
+                        viewHolder.setImage(R.id.manage_image,item.getImageId());
+                    }
+                };
+
+                mManage_listView.setAdapter(mCommonAdapter);
                 isUpdate = true;
             }else {
                 mManage_hint.setVisibility(View.VISIBLE);
             }
 
+
+
         }
+
+
     }
 
     class UpdateTask extends AsyncTask<String, Integer, Integer> {
 
         @Override
         protected void onPreExecute() {
-            Toast.makeText(ManageActivity.this, "正在保存信息", Toast.LENGTH_LONG).show();
+            mPd = ProgressDialog.show(ManageActivity.this, null, "正在保存信息...");
         }
 
         @Override
@@ -230,13 +244,13 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
             DataOperation.insertOrUpdateTable(mUserTable, null);
             DataOperation.insertOrUpdateTable(mUserInfoTable, null);
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            BaseInfo.saveUserBaseInfo(contentId);
+            DataUtils.saveUserBaseInfo(contentId);
             return null;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
-            Toast.makeText(ManageActivity.this, "保存完毕", Toast.LENGTH_LONG).show();
+            mPd.dismiss();
             //加载更新后的浏览布局
             mScrollView.setVisibility(View.GONE);
             //获取用户信息
@@ -257,23 +271,23 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         //保存修改后的资料信息
         //userTable
         if (!mUpdate_realName.getText().toString().equals(mRealName)) {
-            mUserTable.getRecord().putField(UserTable.FIELD_REALNAME, mUpdate_realName.getText().toString());
+            mUserTable.putField(UserTable.FIELD_REALNAME, mUpdate_realName.getText().toString());
         }
         if (!mUpdate_phoneNum.getText().toString().equals(mTelephone)) {
-            mUserTable.getRecord().putField(UserTable.FIELD_TELEPHONE, mUpdate_phoneNum.getText().toString());
+            mUserTable.putField(UserTable.FIELD_TELEPHONE, mUpdate_phoneNum.getText().toString());
         }
         if (!mUpdate_emailAddress.getText().toString().equals(mEmail)) {
-            mUserTable.getRecord().putField(UserTable.FIELD_EMAIL, mUpdate_emailAddress.getText().toString());
+            mUserTable.putField(UserTable.FIELD_EMAIL, mUpdate_emailAddress.getText().toString());
         }
         //userTableInfo
         if (!mUpdate_sex.getText().toString().equals(mSex)) {
-            mUserInfoTable.getRecord().putField(UserInfoTable.FIELD_SEX, mUpdate_sex.getText().toString());
+            mUserInfoTable.putField(UserInfoTable.FIELD_SEX, mUpdate_sex.getText().toString());
         }
         if (!mUpdate_address.getText().toString().equals(mAddress)) {
-            mUserInfoTable.getRecord().putField(UserInfoTable.FIELD_ADDRESS, mUpdate_address.getText().toString());
+            mUserInfoTable.putField(UserInfoTable.FIELD_ADDRESS, mUpdate_address.getText().toString());
         }
         if (!mUpdate_birthday.getText().toString().equals(mBirthday)) {
-            mUserInfoTable.getRecord().putField(UserInfoTable.FIELD_BIRTHDAY, mUpdate_birthday.getText().toString());
+            mUserInfoTable.putField(UserInfoTable.FIELD_BIRTHDAY, mUpdate_birthday.getText().toString());
         }
     }
 
@@ -282,8 +296,8 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         @Override
         protected Integer doInBackground(String... params) {
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            mUserTable = DataOperation.queryUserTableFormContentId(contentId);
-            mUserInfoTable = DataOperation.queryUserInfoTable(contentId);
+            mUserTable = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME,UserTable.CONTENTID,contentId).get(0);
+            mUserInfoTable = (UserInfoTable) DataOperation.queryTable(UserInfoTable.TABLE_NAME,UserTable.CONTENTID,contentId).get(0);
             return null;
         }
 
@@ -305,15 +319,16 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
 
         @Override
         protected void onPreExecute() {
-            new LocalTask().execute();
+
         }
 
         @Override
         protected Integer doInBackground(String... params) {
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null);
-            BaseInfo.saveUserBaseInfo(contentId);
+            DataUtils.saveUserBaseInfo(contentId);
             return null;
         }
     }
+
 
 }

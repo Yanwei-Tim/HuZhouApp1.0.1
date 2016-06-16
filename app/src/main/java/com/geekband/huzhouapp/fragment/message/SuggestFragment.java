@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,20 +112,18 @@ public class SuggestFragment extends Fragment {
             Date d = new Date(time);
             SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String postTime = sf.format(d);
+
             //插入一张需求建议表
             OpinionTable opinionTable = new OpinionTable();
-            opinionTable.getRecord().putField(OpinionTable.FIELD_USERID, contentId);
-            opinionTable.getRecord().putField(OpinionTable.FIELD_POSTTIME, postTime);
-            //插入表单并获得表单的contentId
-            String opinionIId = DataOperation.insertOrUpdateTable(opinionTable, null);
-            Log.i(TAG,"opinionIId:"+opinionIId);
-            Log.i(TAG,"contentId:"+contentId);
-            //获取通用表并插入数据
-            ContentTable contentTable = new ContentTable();
-            contentTable.getRecord().putField(ContentTable.FIELD_SUBSTANCE,params[0]);
-            contentTable.getRecord().putField(ContentTable.FIELD_NEWSID,opinionIId);
-            DataOperation.insertOrUpdateTable(contentTable,null);
-            Log.i(TAG, "params[0]:" + params[0]);
+            opinionTable.putField(OpinionTable.FIELD_USERID, contentId);
+            opinionTable.putField(OpinionTable.FIELD_POSTTIME, postTime);
+            if (DataOperation.insertOrUpdateTable(opinionTable, null)){
+                //获取通用表并插入数据
+                ContentTable contentTable = new ContentTable();
+                contentTable.putField(ContentTable.FIELD_SUBSTANCE, params[0]);
+                contentTable.putField(ContentTable.FIELD_NEWSID, opinionTable.getContentId());
+                DataOperation.insertOrUpdateTable(contentTable, null);
+            }
             return null;
         }
 

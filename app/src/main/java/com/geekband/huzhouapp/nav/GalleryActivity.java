@@ -28,11 +28,12 @@ import android.widget.Toast;
 import com.database.dto.DataOperation;
 import com.database.pojo.AlbumTable;
 import com.database.pojo.Document;
+import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
-import com.geekband.huzhouapp.utils.BaseInfo;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.SelectPicPopupWindow;
@@ -95,9 +96,15 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         getWidget();
         //加载本地数据
         new LocalTask().execute();
+
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         //加载网络数据
         new NetTask().execute();
-
     }
 
     private void initAlbum() {
@@ -383,11 +390,11 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
             DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
             String str = df.format(date);
 
-            albumTable.getRecord().putField(AlbumTable.FIELD_NAME, str);
-            albumTable.getRecord().putField(AlbumTable.FIELD_USERID, contentId);
+            albumTable.putField(AlbumTable.FIELD_NAME, str);
+            albumTable.putField(AlbumTable.FIELD_USERID, contentId);
             DataOperation.insertOrUpdateTable(albumTable, new Document(picPath));
 
-            BaseInfo.saveAlbum(contentId);
+            DataUtils.saveAlbum(contentId);
 
             return null;
         }
@@ -406,7 +413,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         @Override
         protected Integer doInBackground(String... params) {
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            BaseInfo.saveAlbum(contentId);
+            DataUtils.saveAlbum(contentId);
             return null;
         }
     }
@@ -442,10 +449,11 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
             AlbumTable selectAlbum = null;
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            ArrayList<AlbumTable> albumTables = DataOperation.queryUserAlbumTableList(contentId);
+            //noinspection unchecked
+            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, UserTable.CONTENTID,contentId);
             if (albumTables != null) {
                 for (AlbumTable albumTable : albumTables) {
-                    if (albumTable.getRecord().getField(AlbumTable.FIELD_NAME).equals(params[0])) {
+                    if (albumTable.getField(AlbumTable.FIELD_NAME).equals(params[0])) {
                         selectAlbum = albumTable;
                         break;
                     }

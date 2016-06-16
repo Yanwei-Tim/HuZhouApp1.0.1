@@ -15,19 +15,19 @@ import java.util.Map;
 public class BaseTable implements Serializable
 {
 	private static final long serialVersionUID = -8683731660085242057L;
-	public static final String CONTENTID = "contentid";
-
+	
+	public static final String CONTENTID = "contentId";
 	
 	/** id */
 	private int id;
 	/** 每条表记录的contentId */
 	private String contentId;
 	/** 每条表记录的附件URL列表 */
-	private List<String> accessaryFileList;
+	private List<String> accessaryFileUrlList;
 	/** 表名 */
 	private String tableName;
-	/** 表记录，包含当前表记录的所有字段 */
-	private TableRecord record;
+	/** 当前表记录的所有字段名-字段值映射 */
+	private Map<String, String> fieldList;
 	
 	public BaseTable()
 	{
@@ -38,9 +38,9 @@ public class BaseTable implements Serializable
 	{
 		id = 0;
 		contentId = "";
-		accessaryFileList = new ArrayList<>();
+		accessaryFileUrlList = new ArrayList<>();
 		tableName = "";
-		record = new TableRecord();
+		fieldList = new HashMap<>();
 	}
 	
 	public int getId()
@@ -63,9 +63,9 @@ public class BaseTable implements Serializable
 		this.contentId = contentId;
 	}
 	
-	public List<String> getAccessaryFileList()
+	public List<String> getAccessaryFileUrlList()
 	{
-		return accessaryFileList;
+		return accessaryFileUrlList;
 	}
 
 	public String getTableName()
@@ -79,12 +79,56 @@ public class BaseTable implements Serializable
 	}
 	
 	/**
-	 * 获取当前表记录
+	 * 从当前表记录中获取指定字段的值
+	 * @param fieldName
 	 * @return
 	 */
-	public TableRecord getRecord()
+	public String getField(String fieldName)
 	{
-		return record;
+		return fieldList.get(fieldName);
+	}
+	
+	/**
+	 * 向当前表记录添加一条字段/更新当前表记录中的一条字段
+	 * @param fieldName
+	 * @param fieldValue
+	 * @return
+	 */
+	public String putField(String fieldName, String fieldValue)
+	{
+		return fieldList.put(fieldName, fieldValue);
+	}
+	
+	/**
+	 * 获取当前表记录的字段名称列表
+	 * @return
+	 */
+	public String[] getFieldNameList()
+	{
+		Object[] list = fieldList.keySet().toArray();
+		String[] fieldNameList = new String[list.length];
+		for (int i = 0; i < list.length; i++)
+		{
+			fieldNameList[i] = (String) list[i];
+		}
+		return fieldNameList;
+	}
+	
+	/**
+	 * 获取当前表记录的字段列表
+	 * @return
+	 */
+	public Map<String, String> getFieldList()
+	{
+		Map<String, String> backups = new HashMap<>();
+		Iterator<?> iterator = fieldList.keySet().iterator();
+		while(iterator.hasNext())
+		{
+			String key = (String) iterator.next();
+			String value = fieldList.get(key);
+			backups.put(key, value);
+		}
+		return backups;
 	}
 	
 	/**
@@ -97,11 +141,11 @@ public class BaseTable implements Serializable
 		str.append(getClass().getName()+":");
 		str.append("[");
 		str.append("contentId="+contentId+",");
-		str.append("accessaryFileList="+accessaryFileList+",");
+		str.append("accessaryFileList="+accessaryFileUrlList+",");
 		str.append("fieldList=[");
-		for (int i = 0; i < record.getFieldList().size(); i++)
+		for (int i = 0; i < getFieldList().size(); i++)
 		{
-			str.append(record.getFieldNameList()[i]+"="+record.getField(record.getFieldNameList()[i])+",");
+			str.append(getFieldNameList()[i]+"="+getField(getFieldNameList()[i])+",");
 		}
 		str.append("]");
 		str.append("]");
@@ -110,67 +154,19 @@ public class BaseTable implements Serializable
 	}
 	
 	/**
-	 * 
-	 * 表记录
-	 * 
+	 * 通过判断两条表记录的contentId是否相同来判断它们是否相同(相等)
 	 */
-	public class TableRecord
+	public boolean equals(Object table)
 	{
-		/** 当前表记录的所有字段名-字段值映射 */
-		private Map<String, String> fieldList = new HashMap<>();
-
-		/**
-		 * 从当前表记录中获取指定字段的值
-		 * @param fieldName
-		 * @return
-		 */
-		public String getField(String fieldName)
+		try
 		{
-			return fieldList.get(fieldName);
+			if(table instanceof BaseTable) return getContentId().equals(((BaseTable) table).getContentId());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 		
-		/**
-		 * 向当前表记录添加一条字段/更新当前表记录中的一条字段
-		 * @param fieldName
-		 * @param fieldValue
-		 * @return
-		 */
-		public String putField(String fieldName, String fieldValue)
-		{
-			return fieldList.put(fieldName, fieldValue);
-		}
-		
-		/**
-		 * 获取当前表记录的字段名称列表
-		 * @return
-		 */
-		public String[] getFieldNameList()
-		{
-			Object[] list = fieldList.keySet().toArray();
-			String[] fieldNameList = new String[list.length];
-			for (int i = 0; i < list.length; i++)
-			{
-				fieldNameList[i] = (String) list[i];
-			}
-			return fieldNameList;
-		}
-		
-		/**
-		 * 获取当前表记录的字段列表
-		 * @return
-		 */
-		public Map<String, String> getFieldList()
-		{
-			Map<String, String> backups = new HashMap<>();
-			Iterator<?> iterator = fieldList.keySet().iterator();
-			while(iterator.hasNext())
-			{
-				String key = (String) iterator.next();
-				String value = fieldList.get(key);
-				backups.put(key, value);
-			}
-			return backups;
-		}
+		return false;
 	}
-	
 }

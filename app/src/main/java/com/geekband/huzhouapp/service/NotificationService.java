@@ -8,7 +8,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 
 import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.utils.BaseInfo;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.vo.GradeInfo;
 import com.lidroid.xutils.exception.DbException;
@@ -64,7 +64,7 @@ public class NotificationService extends Service {
             @Override
             public void run() {
                 String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-                BaseInfo.saveGrade(contentId);
+                DataUtils.saveGrade(contentId);
                 try {
                     GradeInfo gradeInfo = MyApplication.sDbUtils.findFirst(GradeInfo.class);
                     if (gradeInfo != null) {

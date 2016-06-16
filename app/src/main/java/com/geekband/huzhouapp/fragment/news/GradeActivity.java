@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.utils.BaseInfo;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.vo.GradeInfo;
 import com.lidroid.xutils.exception.DbException;
@@ -30,8 +30,6 @@ public class GradeActivity extends Activity {
     private TextView mCurrent_grade;
     private ProgressBar mGrade_progress;
     private TextView mGrade_hint;
-    private LocalTask mLocalTask;
-    private NetThread mNetTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +38,14 @@ public class GradeActivity extends Activity {
 
         initView();
         //初始化加载器
-        mLocalTask = new LocalTask();
-        mNetTask = new NetThread();
+        new LocalTask().execute();
+
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        mLocalTask.execute();
-        mNetTask.start();
+    protected void onPause() {
+        super.onPause();
+        new NetThread().start();
     }
 
     private void initView() {
@@ -131,7 +128,7 @@ public class GradeActivity extends Activity {
         @Override
         public void run() {
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            BaseInfo.saveGrade(contentId);
+            DataUtils.saveGrade(contentId);
         }
     }
 

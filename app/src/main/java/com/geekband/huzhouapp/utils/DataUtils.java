@@ -37,7 +37,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2016/5/25
  */
-public class BaseInfo {
+public class DataUtils {
 
     /**
      * @return 本地新闻信息
@@ -46,29 +46,36 @@ public class BaseInfo {
     public static ArrayList<LocalNews> getLocalNewsList() {
         ArrayList<LocalNews> localNewsList = new ArrayList<>();
         //获取服务器新闻信息
-        ArrayList<NewsTable> newsList = DataOperation.queryNewsTableList();
+        //noinspection unchecked
+        ArrayList<NewsTable> newsList = (ArrayList<NewsTable>) DataOperation.queryTable(NewsTable.TABLE_NAME);
         if (newsList != null) {
             for (int i = 0; i < newsList.size(); i++) {
                 LocalNews localNews = new LocalNews();
-                String title = newsList.get(i).getRecord().getField(NewsTable.FIELD_TITLE);
-                ArrayList<String> picUrlList = (ArrayList<String>) newsList.get(i).getAccessaryFileList();
+                String title = newsList.get(i).getField(NewsTable.FIELD_TITLE);
+//
+                ArrayList<String> picUrlList = (ArrayList<String>) newsList.get(i).getAccessaryFileUrlList();
+//                System.out.println("新闻picUrlList内容测试："+picUrlList);
                 String picUrl = null;
                 if (picUrlList.size() != 0) {
                     picUrl = picUrlList.get(0);
                 }
                 String contentID = newsList.get(i).getContentId();
-                String date = newsList.get(i).getRecord().getField(NewsTable.FIELD_DATETIME);
+                String date = newsList.get(i).getField(NewsTable.FIELD_DATETIME);
 
                 //根据contentId获取新闻内容
-                ContentTable contentTable = DataOperation.queryContentTable(contentID);
-                if (contentTable != null) {
-                    String content = contentTable.getRecord().getField(ContentTable.FIELD_SUBSTANCE);
-                    //将获取的新闻信息放入本地LocalNews
-                    localNews.setTitle(title);
-                    localNews.setPicUrl(picUrl);
-                    localNews.setDate(date);
-                    localNews.setContent(content);
-                    localNews.setId(i);
+                //noinspection unchecked
+                ArrayList<ContentTable> contentTables = (ArrayList<ContentTable>) DataOperation.queryTable(ContentTable.TABLE_NAME, ContentTable.FIELD_NEWSID, contentID);
+                if (contentTables != null && contentTables.size() != 0) {
+                    ContentTable contentTable = contentTables.get(0);
+                    if (contentTable != null) {
+                        String content = contentTable.getField(ContentTable.FIELD_SUBSTANCE);
+                        //将获取的新闻信息放入本地LocalNews
+                        localNews.setTitle(title);
+                        localNews.setPicUrl(picUrl);
+                        localNews.setDate(date);
+                        localNews.setContent(content);
+                        localNews.setId(i);
+                    }
                 }
                 localNewsList.add(localNews);
             }
@@ -121,7 +128,7 @@ public class BaseInfo {
         @Override
         protected Integer doInBackground(String... params) {
 
-            ArrayList<LocalNews> localNewsList = BaseInfo.getLocalNewsList();
+            ArrayList<LocalNews> localNewsList = DataUtils.getLocalNewsList();
             if (localNewsList != null) {
                 try {
                     MyApplication.sDbUtils.deleteAll(LocalNews.class);
@@ -138,7 +145,7 @@ public class BaseInfo {
     /**
      * 保存网络新闻到本地数据库
      */
-    public static void saveNetNews() {
+    public static void  saveNetNews() {
         new NetNewsTask().execute();
     }
 
@@ -175,38 +182,40 @@ public class BaseInfo {
             String contentId = params[0];
             UserBaseInfo userBaseInfo = new UserBaseInfo();
 
-            UserTable userTable = DataOperation.queryUserTableFormContentId(contentId);
-            if (userTable != null) {
+            //noinspection unchecked
+            ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, contentId);
+            if (userTables != null && userTables.size() != 0) {
+                UserTable userTable = userTables.get(0);
+                if (userTable != null) {
+                    int id = 0;
+                    String userName = userTable.getField(UserTable.FIELD_USERNAME);
+                    String realName = userTable.getField(UserTable.FIELD_REALNAME);
+                    String phoneNum = userTable.getField(UserTable.FIELD_TELEPHONE);
+                    String emailAddress = userTable.getField(UserTable.FIELD_EMAIL);
 
-                int id = 0;
+                    UserInfoTable userInfoTable = (UserInfoTable) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, contentId).get(0);
+                    if (userInfoTable != null) {
+                        String sex = userInfoTable.getField(UserInfoTable.FIELD_SEX);
+                        String address = userInfoTable.getField(UserInfoTable.FIELD_ADDRESS);
+                        String birthday = userInfoTable.getField(UserInfoTable.FIELD_BIRTHDAY);
 
-                String userName = userTable.getRecord().getField(UserTable.FIELD_USERNAME);
-                String realName = userTable.getRecord().getField(UserTable.FIELD_REALNAME);
-                String phoneNum = userTable.getRecord().getField(UserTable.FIELD_TELEPHONE);
-                String emailAddress = userTable.getRecord().getField(UserTable.FIELD_EMAIL);
+                        userBaseInfo.setId(id);
+                        userBaseInfo.setUserName(userName);
+                        userBaseInfo.setContentId(contentId);
+                        userBaseInfo.setRealName(realName);
+                        userBaseInfo.setPhoneNum(phoneNum);
+                        userBaseInfo.setEmailAddress(emailAddress);
+                        userBaseInfo.setSex(sex);
+                        userBaseInfo.setAddress(address);
+                        userBaseInfo.setBirthday(birthday);
 
-                UserInfoTable userInfoTable = DataOperation.queryUserInfoTable(contentId);
-                if (userInfoTable != null) {
-                    String sex = userInfoTable.getRecord().getField(UserInfoTable.FIELD_SEX);
-                    String address = userInfoTable.getRecord().getField(UserInfoTable.FIELD_ADDRESS);
-                    String birthday = userInfoTable.getRecord().getField(UserInfoTable.FIELD_BIRTHDAY);
+                        try {
+                            MyApplication.sDbUtils.deleteAll(UserBaseInfo.class);
+                            MyApplication.sDbUtils.save(userBaseInfo);
 
-                    userBaseInfo.setId(id);
-                    userBaseInfo.setUserName(userName);
-                    userBaseInfo.setContentId(contentId);
-                    userBaseInfo.setRealName(realName);
-                    userBaseInfo.setPhoneNum(phoneNum);
-                    userBaseInfo.setEmailAddress(emailAddress);
-                    userBaseInfo.setSex(sex);
-                    userBaseInfo.setAddress(address);
-                    userBaseInfo.setBirthday(birthday);
-
-                    try {
-                        MyApplication.sDbUtils.deleteAll(UserBaseInfo.class);
-                        MyApplication.sDbUtils.save(userBaseInfo);
-
-                    } catch (DbException e) {
-                        e.printStackTrace();
+                        } catch (DbException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -228,7 +237,8 @@ public class BaseInfo {
 
         @Override
         protected Integer doInBackground(String... params) {
-            mAlbumTableList = DataOperation.queryUserAlbumTableList(params[0]);
+            //noinspection unchecked
+            mAlbumTableList = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, params[0]);
             //相册信息列表
             mAlbumInfoList = new ArrayList<>();
 
@@ -236,8 +246,8 @@ public class BaseInfo {
                 for (int i = 0; i < mAlbumTableList.size(); i++) {
                     //获取单个相册及其名称和所包含的相册数量
                     AlbumTable albumTable = mAlbumTableList.get(i);
-                    String albumName = albumTable.getRecord().getField(AlbumTable.FIELD_NAME);
-                    List<String> phoUrlList = albumTable.getAccessaryFileList();
+                    String albumName = albumTable.getField(AlbumTable.FIELD_NAME);
+                    List<String> phoUrlList = albumTable.getAccessaryFileUrlList();
                     int albumCount = phoUrlList.size();
                     AlbumInfo albumInfo = new AlbumInfo();
                     //相册封面默认第一张
@@ -278,34 +288,39 @@ public class BaseInfo {
         protected Integer doInBackground(String... params) {
 
             ArrayList<CourseInfo> courseList = new ArrayList<>();
-            ArrayList<StudyInfoTable> StudyInfoTables = DataOperation.queryStudyInfoTableList(params[0]);
+            //noinspection unchecked
+            ArrayList<StudyInfoTable> StudyInfoTables = (ArrayList<StudyInfoTable>) DataOperation.queryTable(StudyInfoTable.TABLE_NAME, StudyInfoTable.FIELD_USERNO, params[0]);
             if (StudyInfoTables != null) {
                 for (int i = 0; i < StudyInfoTables.size(); i++) {
-                    String courseNo = StudyInfoTables.get(i).getRecord().getField(StudyInfoTable.FIELD_COURSENO);
-                    CourseTable courseTable = DataOperation.queryCourseTable(courseNo);
-                    if (courseTable != null) {
-                        CourseInfo courseInfo = new CourseInfo();
-                        //课程名
-                        String title = courseTable.getRecord().getField(CourseTable.FIELD_COURSENAME);
-                        //选修必修
-                        String type = courseTable.getRecord().getField(CourseTable.FIELD_COURSETYPE);
-                        //课程简介
-                        String intro = courseTable.getRecord().getField(CourseTable.FIELD_COURSEINTRO);
-                        //详细内容
-                        String detailed = courseTable.getRecord().getField(CourseTable.FIELD_DETAILED);
-                        //积分
-                        String point = courseTable.getRecord().getField(CourseTable.FIELD_POINT);
-                        //学习时长
-                        String time = courseTable.getRecord().getField(CourseTable.FIELD_NEEDTIME);
+                    String courseNo = StudyInfoTables.get(i).getField(StudyInfoTable.FIELD_COURSENO);
+                    //noinspection unchecked
+                    ArrayList<CourseTable> courseTables = (ArrayList<CourseTable>) DataOperation.queryTable(CourseTable.TABLE_NAME, CourseTable.CONTENTID, courseNo);
+                    if (courseTables != null && courseTables.size() != 0) {
+                        CourseTable courseTable = courseTables.get(0);
+                        if (courseTable != null) {
+                            CourseInfo courseInfo = new CourseInfo();
+                            //课程名
+                            String title = courseTable.getField(CourseTable.FIELD_COURSENAME);
+                            //选修必修
+                            String type = courseTable.getField(CourseTable.FIELD_COURSETYPE);
+                            //课程简介
+                            String intro = courseTable.getField(CourseTable.FIELD_COURSEINTRO);
+                            //详细内容
+                            String detailed = courseTable.getField(CourseTable.FIELD_DETAILED);
+                            //积分
+                            String point = courseTable.getField(CourseTable.FIELD_POINT);
+                            //学习时长
+                            String time = courseTable.getField(CourseTable.FIELD_NEEDTIME);
 
-                        courseInfo.setId(i);
-                        courseInfo.setTitle(title);
-                        courseInfo.setType(type);
-                        courseInfo.setPoint(point);
-                        courseInfo.setIntro(intro);
-                        courseInfo.setTime(time);
-                        courseInfo.setDetailed(detailed);
-                        courseList.add(courseInfo);
+                            courseInfo.setId(i);
+                            courseInfo.setTitle(title);
+                            courseInfo.setType(type);
+                            courseInfo.setPoint(point);
+                            courseInfo.setIntro(intro);
+                            courseInfo.setTime(time);
+                            courseInfo.setDetailed(detailed);
+                            courseList.add(courseInfo);
+                        }
                     }
                 }
                 //保存到本地

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#FFF"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#0080FF" >
+        <ImageButton
+            android:id="@+id/btn_createquestion_back"
+            android:src="@drawable/back_btn"
+            android:background="@drawable/bg_btn_back"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp" />
+        <TextView
+            android:id="@+id/tv_createquestion_title"
+            android:text="描述你的问题"
+            android:textColor="#FFF"
+            android:textSize="20sp"
+            android:singleLine="true"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+        <View
+        	android:background="@color/divider_clolor_2"
+        	android:layout_width="match_parent"
+        	android:layout_height="1px" />
+        <EditText
+            android:id="@+id/et_createquestion_content"
+            android:hint="请将问题极可能清晰、详尽的描述出来，这样可以吸引更多的回答者前来为你解答"
+            android:background="#FFF"
+            android:gravity="top|left"
+            android:padding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        <View
+        	android:background="@color/divider_clolor_2"
+        	android:layout_width="match_parent"
+        	android:layout_height="1px" />
+    </LinearLayout>
+    
+    <RelativeLayout
+        android:background="@color/layout_bg_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp" >
+        <!-- <Button
+            android:visibility="gone"
+            android:text="添加图片"
+            android:textColor="#000"
+            android:background="@drawable/bg_btn_1"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true" /> -->
+        <Button
+            android:id="@+id/btn_createquestion_submin"
+            android:text="提交问题"
+            android:textColor="#000"
+            android:background="@drawable/bg_btn_2"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true" />
+        <Button
+            android:id="@+id/btn_createquestion_category"
+            android:text="选择分类"
+            android:textColor="#000"
+            android:background="@drawable/bg_btn_2"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true" />
+    </RelativeLayout>
+    
+</LinearLayout>

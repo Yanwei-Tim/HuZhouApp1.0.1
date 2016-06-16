@@ -27,7 +27,7 @@ import com.geekband.huzhouapp.activity.NewsContentActivity;
 import com.geekband.huzhouapp.activity.WebViewActivity;
 import com.geekband.huzhouapp.adapter.NewsRvAdapter;
 import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.utils.BaseInfo;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.Paging;
 import com.geekband.huzhouapp.vo.LocalNews;
@@ -80,11 +80,8 @@ public class BreakingNewsFragment extends Fragment implements
         mPtrClassicFrameLayout = (PtrClassicFrameLayout) view.findViewById(R.id.rotate_header_list_view_frame);
         mLocalNewsList = new ArrayList<>();
         mDisplayList = new ArrayList<>();
+        //加载本地数据
         configPtr();
-//        //加载本地数据
-//        new DbNewsTask().execute();
-        //加载网络数据
-        new ReLoadTask().execute();
         //加载轮播新闻
         new BannerThread().start();
 
@@ -148,6 +145,8 @@ public class BreakingNewsFragment extends Fragment implements
         super.onPause();
         //停止翻页
         convenientBanner.stopTurning();
+        //加载网络数据
+        new ReLoadTask().execute();
     }
 
 
@@ -176,8 +175,8 @@ public class BreakingNewsFragment extends Fragment implements
 
         @Override
         protected Integer doInBackground(String... params) {
-            BaseInfo.saveNetNews();
-            BaseInfo.saveLocalNews();
+            DataUtils.saveNetNews();
+            DataUtils.saveLocalNews();
             return null;
         }
 
@@ -190,6 +189,7 @@ public class BreakingNewsFragment extends Fragment implements
         protected Integer doInBackground(String... params) {
 
             //加载服务器新闻
+            mLocalNewsList.clear();
             mLocalNewsList.addAll(getLocalNewsData());
             if (mLocalNewsList != null) {
                 return 1;
@@ -202,6 +202,7 @@ public class BreakingNewsFragment extends Fragment implements
             //初始化本地新闻列表
             if (integer == 1) {
                 //允许显示的数据列表
+                mDisplayList.clear();
                 mDisplayList.addAll(getNewsList(mLocalNewsList));
                 mAdapterWithHF.notifyDataSetChanged();
                 mPtrClassicFrameLayout.refreshComplete();
@@ -295,7 +296,6 @@ public class BreakingNewsFragment extends Fragment implements
                     @Override
                     public void onRefreshBegin(PtrFrameLayout frame) {
                         //重载数据
-                        mDisplayList.clear();
                         //从头开始加载
                         currentPage=1;
                         new DbNewsTask().execute();

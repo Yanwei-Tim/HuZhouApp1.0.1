@@ -1,6 +1,7 @@
 package com.geekband.huzhouapp.fragment.advice;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -8,8 +9,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.chat.activity.ExpertActivity;
+import com.chat.activity.OthersQuestionActivity;
+import com.chat.activity.PersonalQuestionActivity;
+import com.chat.adapter.QuestionMenuItemListAdapter;
+import com.chat.adapter.pojo.QuestionMenuItem;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
@@ -25,6 +32,9 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
     ArrayList<ClassInfo> classList ;
     private GridView mAdvice_class_gridView;
 
+    private ListView lv_questionMenuListView;
+    private QuestionMenuItemListAdapter questionMenuItemListAdapter;
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_advice, container, false);
@@ -34,8 +44,17 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
         mAdvice_class_gridView.setOnItemClickListener(this);
         mAdvice_class_gridView.setSelector(R.color.blue_background);
 
+//        QuestionMenuFragment qmf = new QuestionMenuFragment();
+//        getFragmentManager().beginTransaction().replace(R.id.container, qmf).commit();
+
         //初始化分类列表
         initClassList();
+
+
+        lv_questionMenuListView = (ListView) view.findViewById(R.id.lv_questionmenu_menuItemList);
+        initVar();
+        initView();
+        initListener();
 
         return view;
     }
@@ -66,4 +85,58 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
         mAdvice_class_gridView.setSelector(R.color.blue_background);
         Toast.makeText(getActivity(),"功能还未开放",Toast.LENGTH_SHORT).show();
     }
+
+
+
+    private void initView()
+    {
+        lv_questionMenuListView.setAdapter(questionMenuItemListAdapter);
+    }
+
+    private void initVar()
+    {
+        questionMenuItemListAdapter = new QuestionMenuItemListAdapter(getActivity());
+
+        questionMenuItemListAdapter.addItem(new QuestionMenuItem(R.drawable.app_icon_org_contacts, MENU_ITEM_1));
+        questionMenuItemListAdapter.addItem(new QuestionMenuItem(R.drawable.app_icon_wddb, MENU_ITEM_2));
+        questionMenuItemListAdapter.addItem(new QuestionMenuItem(R.drawable.app_icon_t, MENU_ITEM_3));
+    }
+
+    private void initListener()
+    {
+        lv_questionMenuListView.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                switch(position)
+                {
+                    case 0:
+                    {
+                        Intent intent = new Intent();
+                        intent.setClass(getActivity(), PersonalQuestionActivity.class);
+                        startActivity(intent);
+                    }break;
+
+                    case 1:
+                    {
+                        Intent intent = new Intent();
+                        intent.setClass(getActivity(), ExpertActivity.class);
+                        startActivity(intent);
+                    }break;
+
+                    case 2:
+                    {
+                        Intent intent = new Intent();
+                        intent.setClass(getActivity(), OthersQuestionActivity.class);
+                        startActivity(intent);
+                    }break;
+                }
+            }
+        });
+    }
+
+    public static final String MENU_ITEM_1 = "我的提问";
+    public static final String MENU_ITEM_2 = "咨询专家";
+    public static final String MENU_ITEM_3 = "最新问答";
 }

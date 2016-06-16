@@ -57,26 +57,6 @@ public class Document extends File
 	public static final String FILE_TYPE_ = "";
 	public static final String FILE_TYPE_ = "";
 	public static final String FILE_TYPE_ = "";*/
-
-	/*public Document(File dir, String name)
-	{
-		super(dir, name);
-	}
-	
-	public Document(String path)
-	{
-		super(path);
-	}
-	
-	public Document(String dirPath, String name)
-	{
-		super(dirPath, name);
-	}
-	
-	public Document(URI uri)
-	{
-		super(uri);
-	}*/
 	
 	public Document(String path)
 	{

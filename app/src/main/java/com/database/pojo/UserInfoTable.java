@@ -1,7 +1,5 @@
 package com.database.pojo;
 
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * 

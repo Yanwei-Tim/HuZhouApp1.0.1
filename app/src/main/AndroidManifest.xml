@@ -8,6 +8,18 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:name=".application.MyApplication"
@@ -37,6 +49,12 @@
         <activity android:name=".fragment.news.CourseListActivity"/>
         <activity android:name=".fragment.news.CourseContentActivity"/>
         <activity android:name=".fragment.news.GradeActivity"/>
+        <activity android:name="com.chat.activity.ChatActivity"/>
+        <activity android:name="com.chat.activity.PersonalQuestionActivity"/>
+        <activity android:name="com.chat.activity.ExpertActivity"/>
+        <activity android:name="com.chat.activity.QuestionDetailActivity"/>
+        <activity android:name="com.chat.activity.OthersQuestionActivity"/>
+        <activity android:name="com.chat.activity.CreateQuestionActivity"/>
 
         <receiver android:name=".service.NotificationBroadCast">
             <intent-filter>
@@ -45,7 +63,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name="com.chat.receiver.MyReceiver" >
+            <intent-filter >
+                <action android:name="whyd.APP_STATE_START"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name=".service.NotificationService"/>
+
 
     </application>
 

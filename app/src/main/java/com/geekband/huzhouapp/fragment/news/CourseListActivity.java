@@ -15,7 +15,7 @@ import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
-import com.geekband.huzhouapp.utils.BaseInfo;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.vo.CourseInfo;
 import com.lidroid.xutils.exception.DbException;
@@ -47,6 +47,13 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
 
         mCourseList_backBtn.setOnClickListener(this);
 
+        new LocalTask().execute();
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         //加载网络数据
         new NetTask().execute();
     }
@@ -75,14 +82,9 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
     private class NetTask extends AsyncTask<String, Integer, Integer> {
 
         @Override
-        protected void onPreExecute() {
-            new LocalTask().execute();
-        }
-
-        @Override
         protected Integer doInBackground(String... params) {
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            BaseInfo.saveCourse(contentId);
+            DataUtils.saveCourse(contentId);
             return null;
         }
     }
