@@ -2,8 +2,10 @@ package com.chat.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageButton;
 
@@ -14,7 +16,7 @@ import com.viewpagerindicator.TabPageIndicator;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OthersQuestionActivity extends BaseActivity implements View.OnClickListener
+public class OthersQuestionActivity extends FragmentActivity implements View.OnClickListener
 {
 	private ImageButton btn_back;
 	private TabPageIndicator tpi_categories;
@@ -28,8 +30,8 @@ public class OthersQuestionActivity extends BaseActivity implements View.OnClick
 	protected void onCreate(Bundle saveInstanceState)
 	{
 		super.onCreate(saveInstanceState);
-		
-		setContentView(R.layout.activity_othersquestion);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		this.setContentView(R.layout.activity_othersquestion);
 		findView();
 		initVar();
 		initView();

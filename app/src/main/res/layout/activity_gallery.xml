@@ -126,7 +126,7 @@
                 android:layout_below="@+id/animation_imageView"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp"
-                android:text="上传照片"/>
+                android:text="谢谢光临"/>
 
         </RelativeLayout>
 

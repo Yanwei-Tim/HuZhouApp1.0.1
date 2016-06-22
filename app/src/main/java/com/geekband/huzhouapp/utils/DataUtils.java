@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2016/5/25
@@ -85,6 +86,46 @@ public class DataUtils {
     }
 
     /**
+     * @return 分页获取本地新闻信息
+     */
+    public static ArrayList<LocalNews> getLocalNewsList(int pageSize, int currentPage) {
+        ArrayList<LocalNews> localNewsList = new ArrayList<>();
+        //获取服务器新闻信息
+        //noinspection unchecked
+        ArrayList<NewsTable> newsList = (ArrayList<NewsTable>) DataOperation.queryTable(NewsTable.TABLE_NAME, pageSize, currentPage, (Map<String,String>)null);
+        if (newsList != null) {
+            for (int i = 0; i < newsList.size(); i++) {
+                LocalNews localNews = new LocalNews();
+                String title = newsList.get(i).getField(NewsTable.FIELD_TITLE);
+                ArrayList<String> picUrlList = (ArrayList<String>) newsList.get(i).getAccessaryFileUrlList();
+                String picUrl = null;
+                if (picUrlList.size() != 0) {
+                    picUrl = picUrlList.get(0);
+                }
+                String contentID = newsList.get(i).getContentId();
+                String date = newsList.get(i).getField(NewsTable.FIELD_DATETIME);
+
+                //根据contentId获取新闻内容
+                //noinspection unchecked
+                ArrayList<ContentTable> contentTables = (ArrayList<ContentTable>) DataOperation.queryTable(ContentTable.TABLE_NAME, ContentTable.FIELD_NEWSID, contentID);
+//                System.out.println("测试新闻内容图片"+contentTables);
+                if (contentTables != null && contentTables.size() != 0) {
+                    String content = contentTables.get(0).getField(ContentTable.FIELD_SUBSTANCE);
+                    //将获取的新闻信息放入本地LocalNews
+                    localNews.setTitle(title);
+                    localNews.setPicUrl(picUrl);
+                    localNews.setDate(date);
+                    localNews.setContent(content);
+                    localNews.setId(i);
+                }
+                localNewsList.add(localNews);
+            }
+        }
+
+        return localNewsList;
+    }
+
+    /**
      * @param url 新闻地址
      * @return 新闻信息集合
      */
@@ -116,36 +157,11 @@ public class DataUtils {
         return newsList;
     }
 
-    /**
-     * 保存服务器新闻到本地数据库
-     */
-    public static void saveLocalNews() {
-        new LocalNewsTask().execute();
-    }
-
-    static class LocalNewsTask extends AsyncTask<String, Integer, Integer> {
-
-        @Override
-        protected Integer doInBackground(String... params) {
-
-            ArrayList<LocalNews> localNewsList = DataUtils.getLocalNewsList();
-            if (localNewsList != null) {
-                try {
-                    MyApplication.sDbUtils.deleteAll(LocalNews.class);
-                    MyApplication.sDbUtils.saveAll(localNewsList);
-                } catch (DbException e) {
-                    e.printStackTrace();//无本地数据
-                }
-            }
-            return null;
-        }
-    }
-
 
     /**
      * 保存网络新闻到本地数据库
      */
-    public static void  saveNetNews() {
+    public static void saveNetNews() {
         new NetNewsTask().execute();
     }
 
@@ -337,6 +353,61 @@ public class DataUtils {
     }
 
     /**
+     * 获取个人课程
+     * @return
+     */
+    public static ArrayList<CourseInfo> bindCourseInfo() {
+        ArrayList<CourseInfo> courseList = new ArrayList<>();
+        //noinspection unchecked
+        ArrayList<StudyInfoTable> StudyInfoTables = (ArrayList<StudyInfoTable>) DataOperation
+                .queryTable(StudyInfoTable.TABLE_NAME, StudyInfoTable.FIELD_USERNO
+                        , MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null));
+        if (StudyInfoTables != null) {
+            for (int i = 0; i < StudyInfoTables.size(); i++) {
+                String courseNo = StudyInfoTables.get(i).getField(StudyInfoTable.FIELD_COURSENO);
+                //noinspection unchecked
+                ArrayList<CourseTable> courseTables = (ArrayList<CourseTable>) DataOperation.queryTable(CourseTable.TABLE_NAME, CourseTable.CONTENTID, courseNo);
+                if (courseTables != null && courseTables.size() != 0) {
+                    CourseTable courseTable = courseTables.get(0);
+                    if (courseTable != null) {
+                        CourseInfo courseInfo = new CourseInfo();
+                        //课程名
+                        String title = courseTable.getField(CourseTable.FIELD_COURSENAME);
+                        //选修必修
+                        String type = courseTable.getField(CourseTable.FIELD_COURSETYPE);
+                        //课程简介
+                        String intro = courseTable.getField(CourseTable.FIELD_COURSEINTRO);
+                        //详细内容
+                        String detailed = courseTable.getField(CourseTable.FIELD_DETAILED);
+                        //积分
+                        String point = courseTable.getField(CourseTable.FIELD_POINT);
+                        //学习时长
+                        String time = courseTable.getField(CourseTable.FIELD_NEEDTIME);
+
+                        courseInfo.setId(i+1);
+                        courseInfo.setTitle(title);
+                        courseInfo.setType(type);
+                        courseInfo.setPoint(point);
+                        courseInfo.setIntro(intro);
+                        courseInfo.setTime(time);
+                        courseInfo.setDetailed(detailed);
+                        courseList.add(courseInfo);
+                    }
+                }
+            }
+        }
+        return courseList;
+    }
+    /**
+     * 获取发布的课程
+     */
+
+    public static ArrayList<CourseTable> getAllCourses(){
+        //noinspection unchecked
+        return (ArrayList<CourseTable>) DataOperation.queryTable(CourseTable.TABLE_NAME);
+    }
+
+    /**
      * 保存成绩信息
      */
     public static void saveGrade(String contentId) {
@@ -370,7 +441,7 @@ public class DataUtils {
     }
 
     //apk下载
-    public static void download(final String urlStr, final File dir, final SplashActivity splashActivity) {
+    public static void download(final String urlStr, final SplashActivity splashActivity) {
 
         new Thread(new Runnable() {
             @Override
@@ -387,12 +458,9 @@ public class DataUtils {
                     if (in == null) {
                         throw new Exception("获取下载文件失败！");
                     }
+                    String fileType = "apk";
                     String fileName = urlStr.substring(urlStr.lastIndexOf("/") + 1) + ".apk";
-                    File localFile = new File(dir, fileName);
-                    if (localFile.exists()) {
-                        localFile.delete();
-                    }
-                    localFile.createNewFile();
+                    File localFile = FileUtil.saveFile(fileType,fileName);
                     out = new FileOutputStream(localFile);
                     out.write(data);
                     out.flush();

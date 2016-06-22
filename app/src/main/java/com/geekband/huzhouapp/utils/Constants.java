@@ -8,6 +8,8 @@ public class Constants {
     public final static String NEWS_TABLE = "newsTable.db";
     public final static String AUTO_LOGIN = "autoLogin";
     public final static String AVATAR_IMAGE = "avatarImage";
-    public final static String LOCAL_NEWS = "localNews";
+    public final static String LOCAL_NEWS_CONTENT = "localNewsContent";
     public final static String COURSE_CONTENT = "courseContent";
+    public final static String LOCAL_NEWS = "localNewses";
+    public static final String AVATAR_URL = "avatarUrl";
 }

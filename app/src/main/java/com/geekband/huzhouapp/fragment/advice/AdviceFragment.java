@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.chat.activity.ExpertActivity;
 import com.chat.activity.OthersQuestionActivity;
@@ -42,7 +41,6 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
 
         mAdvice_class_gridView = (GridView) view.findViewById(R.id.advice_class_gridView);
         mAdvice_class_gridView.setOnItemClickListener(this);
-        mAdvice_class_gridView.setSelector(R.color.blue_background);
 
 //        QuestionMenuFragment qmf = new QuestionMenuFragment();
 //        getFragmentManager().beginTransaction().replace(R.id.container, qmf).commit();
@@ -83,7 +81,11 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         mAdvice_class_gridView.setSelector(R.color.blue_background);
-        Toast.makeText(getActivity(),"功能还未开放",Toast.LENGTH_SHORT).show();
+        //跳转设置
+        Intent intent = new Intent();
+        intent.putExtra("class",position);
+        intent.setClass(getActivity(),ExpertActivity.class);
+        startActivity(intent);
     }
 
 

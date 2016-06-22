@@ -2,6 +2,7 @@ package com.geekband.huzhouapp.nav;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -28,14 +29,13 @@ import android.widget.Toast;
 import com.database.dto.DataOperation;
 import com.database.pojo.AlbumTable;
 import com.database.pojo.Document;
-import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
-import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.SelectPicPopupWindow;
 import com.geekband.huzhouapp.utils.UriToPathUtils;
 import com.geekband.huzhouapp.vo.AlbumInfo;
@@ -86,12 +86,14 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     private final String IMAGE_TYPE = "image/*";
     private final int IMAGE_CODE = 0;   //这里的IMAGE_CODE是自己任意定义的
     private BitmapUtils mBitmapUtils;
+    private ProgressDialog mPd;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
+        isCreate = true;
         //控件信息
         getWidget();
         //加载本地数据
@@ -184,11 +186,9 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                         Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
                 break;
             case R.id.animation_imageView:
-                Toast.makeText(this, "新建相册功能还未开放", Toast.LENGTH_SHORT).show();
                 break;
 
             case R.id.up_btn:
-                Toast.makeText(this, "开始上传", Toast.LENGTH_SHORT).show();
                 new UpTask().execute();
                 break;
         }
@@ -379,6 +379,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         @Override
         protected void onPreExecute() {
             mGallery_progress.setVisibility(View.VISIBLE);
+            mPd = ProgressDialog.show(GalleryActivity.this, null, "正在上传...");
         }
 
         @Override
@@ -403,6 +404,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         protected void onPostExecute(Integer integer) {
             mGallery_progress.setVisibility(View.GONE);
             mSelected_layout.setVisibility(View.GONE);
+            mPd.dismiss();
             new NetTask().execute();
         }
     }
@@ -450,7 +452,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
             AlbumTable selectAlbum = null;
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
             //noinspection unchecked
-            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, UserTable.CONTENTID,contentId);
+            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID,contentId);
             if (albumTables != null) {
                 for (AlbumTable albumTable : albumTables) {
                     if (albumTable.getField(AlbumTable.FIELD_NAME).equals(params[0])) {

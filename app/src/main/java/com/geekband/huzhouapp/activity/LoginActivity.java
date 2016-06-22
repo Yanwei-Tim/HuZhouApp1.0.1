@@ -16,6 +16,7 @@ import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
+import com.geekband.huzhouapp.vo.LocalNews;
 
 import java.util.ArrayList;
 
@@ -23,7 +24,6 @@ import java.util.ArrayList;
  * Created by Administrator on 2016/5/12
  */
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
-
     private Button mLogin_btn;
     private EditText mLogin_user_et;
     private EditText mLogin_password_et;
@@ -81,6 +81,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
         class MyTask extends AsyncTask<String, Integer, Integer> {
+             private ArrayList<LocalNews> localNewses;
 
             @Override
             protected void onPreExecute() {
@@ -98,12 +99,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         editor.apply();
                         //缓存个人信息
                         DataUtils.saveUserBaseInfo(mUserTable.getContentId());
+                        saveAvatarUrl();
                         //缓存相册信息
                         DataUtils.saveAlbum(mUserTable.getContentId());
                         //缓存课程信息
                         DataUtils.saveCourse(mUserTable.getContentId());
                         //获取学分
                         DataUtils.saveGrade(mUserTable.getContentId());
+//                        //获取缓存的新闻信息
+//                        try {
+//                            localNewses = (ArrayList<LocalNews>) MyApplication.sDbUtils.findAll(LocalNews.class);
+//
+//                        } catch (DbException e) {
+//                            e.printStackTrace();
+//                        }
                         return 1; //登录成功
                     } else {
                         return 2;//用户或者密码错误
@@ -118,7 +127,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             protected void onPostExecute(Integer integer) {
                 mLogin_progress.setVisibility(View.GONE);
                 if (integer == 1) {
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    Intent loginIntent = new Intent();
+                    loginIntent.setClass(LoginActivity.this, MainActivity.class);
+                    startActivity(loginIntent);
                     LoginActivity.this.finish();
                 } else if (integer == 2) {
                     Toast.makeText(LoginActivity.this, "用户名或者密码错误", Toast.LENGTH_SHORT).show();
@@ -128,7 +139,22 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
             }
         }
 
-        @Override
+    private void saveAvatarUrl() {
+        String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null);
+        ArrayList<?> userTables = DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, contentId);
+        if (userTables!=null&&userTables.size()!=0) {
+            UserTable userTable = (UserTable) userTables.get(0);
+            ArrayList<String> imageUrls = (ArrayList<String>) userTable.getAccessaryFileUrlList();
+            if (imageUrls!=null&&imageUrls.size()!=0){
+                String imageUrl = imageUrls.get(0);
+                SharedPreferences.Editor editor = MyApplication.sSharedPreferences.edit();
+                editor.putString(Constants.AVATAR_URL,imageUrl);
+                editor.apply();
+            }
+        }
+    }
+
+    @Override
         protected void onPause () {
             super.onPause();
 

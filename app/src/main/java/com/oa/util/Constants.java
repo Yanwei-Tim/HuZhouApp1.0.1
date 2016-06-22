@@ -13,7 +13,8 @@ public class Constants {
 	//升级测试
 	public static String UPDATE_TEST_NOTIFY = "开发人员测试，请勿点击更新！";
 	
-	public static final String CONNIP = "192.168.0.14:9080";//lmc本地测试用服务器
+//	public static final String CONNIP = "192.168.0.44:9080";//lmc本地测试用服务器
+	public static final String CONNIP = "219.140.231.212:9080";//lmc外网测试用服务器
 	public static final String FILE_PATH = "/IDOC/service/file/";
 
 	public static final String PATH = "/IDOC/WebService";// 服务器路径

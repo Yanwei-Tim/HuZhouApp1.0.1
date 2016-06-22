@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="#0080FF" >
+        android:background="@color/blue_background" >
         <ImageButton
             android:id="@+id/btn_chat_back"
             android:src="@drawable/back_btn"
@@ -59,22 +59,43 @@
         
         	<LinearLayout
         		android:id="@+id/vg_chat_send"
-        		android:background="#F0F0F0"
+        		android:background="@color/blue_background"
         		android:layout_width="match_parent"
-        		android:layout_height="wrap_content"
+        		android:layout_height="50dp"
+                android:weightSum="8"
         		android:orientation="horizontal" >
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
         		<EditText
             		android:id="@+id/et_chat_content"
             		android:hint="输入文字"
             		android:layout_width="0dp"
+                    android:textColorHighlight="@android:color/darker_gray"
+                    android:textCursorDrawable="@null"
             		android:layout_height="wrap_content"
-            		android:layout_weight="1" />
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/edit_shape"
+            		android:layout_weight="5"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"/>
         		<Button
             		android:id="@+id/btn_chat_send"
-            		android:text="发送"
+                    android:text="发送"
             		android:textColor="#000"
-            		android:layout_width="wrap_content"
-            		android:layout_height="wrap_content" />
+            		android:layout_width="0dp"
+            		android:layout_height="40dp"
+                    android:gravity="center"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/app_radio_normal"
+                    android:layout_weight="1"/>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"/>
     		</LinearLayout>
     	</LinearLayout>
     	

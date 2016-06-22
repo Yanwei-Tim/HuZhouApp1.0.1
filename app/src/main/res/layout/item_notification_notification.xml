@@ -7,7 +7,7 @@
     <LinearLayout
         android:layout_width="60dp"
         android:layout_height="60dp" >
-        <ImageView
+        <com.geekband.huzhouapp.custom.CircleImage
         	android:id="@+id/iv_notification_userHead"
         	android:src="@drawable/head1"
         	android:layout_width="wrap_content"

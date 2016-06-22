@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.animation.LinearInterpolator;
@@ -21,9 +20,10 @@ import com.database.pojo.AppVersionTable;
 import com.database.pojo.BaseTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.LinkNet;
+import com.geekband.huzhouapp.vo.LocalNews;
 
 import java.io.File;
 import java.text.ParseException;
@@ -60,9 +60,7 @@ public class SplashActivity extends BaseActivity {
         builder.setPositiveButton("欣然接受", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                File dir = Environment.getExternalStorageDirectory();
-                DataUtils.download(versionTable.getAccessaryFileUrlList().get(0), dir, SplashActivity.this);
-                System.out.println("得到的url：" + versionTable.getAccessaryFileUrlList().get(0));
+                DataUtils.download(versionTable.getAccessaryFileUrlList().get(0), SplashActivity.this);
             }
         });
 
@@ -103,10 +101,10 @@ public class SplashActivity extends BaseActivity {
 
         } else {
             String isAuto = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            if (isAuto!=null){
-                startActivity(new Intent(this,MainActivity.class));
+            if (isAuto != null) {
+                startActivity(new Intent(this, MainActivity.class));
                 this.finish();
-            }else {
+            } else {
                 Toast.makeText(this, "当前网络不可用，部分功能无法运行", Toast.LENGTH_SHORT).show();
             }
         }
@@ -123,7 +121,7 @@ public class SplashActivity extends BaseActivity {
 
                 //noinspection unchecked
                 ArrayList<BaseTable> versionTables = (ArrayList<BaseTable>) DataOperation.queryTable(AppVersionTable.TABLE_NAME);
-                if (versionTables != null&&versionTables.size()!=0) {
+                if (versionTables != null && versionTables.size() != 0) {
                     int position = 0;
                     if (versionTables.size() > 1) {
                         for (int i = 0; i < versionTables.size() - 1; i++) {
@@ -200,6 +198,7 @@ public class SplashActivity extends BaseActivity {
 
     //登录
     class toLogin extends AsyncTask<String, Integer, Integer> {
+        ArrayList<LocalNews> localNewses;
 
 // 判断之前是否登录过，如果已经登录过就直接进入主界面，不再登录认证。如果退出登录过，那么进入登录界面登录进入
 
@@ -209,9 +208,14 @@ public class SplashActivity extends BaseActivity {
             //预加载新闻缓存信息
             //1.轮播新闻
             DataUtils.saveNetNews();
-            //2.服务器新闻
-            DataUtils.saveLocalNews();
-
+//            //2.服务器新闻
+//            localNewses = DataUtils.getLocalNewsList(10, 1);
+//            try {
+//                MyApplication.sDbUtils.deleteAll(LocalNews.class);
+//                MyApplication.sDbUtils.saveAll(localNewses);
+//            } catch (DbException e) {
+//                e.printStackTrace();
+//            }
             String isAuto = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
 
             if (isAuto != null) {
@@ -234,13 +238,15 @@ public class SplashActivity extends BaseActivity {
 
         @Override
         protected void onPostExecute(Integer integer) {
+            Intent intent = new Intent();
+
             if (integer == 1) {
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
-                SplashActivity.this.finish();
+                intent.setClass(SplashActivity.this, MainActivity.class);
             } else {
-                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-                SplashActivity.this.finish();
+                intent.setClass(SplashActivity.this, LoginActivity.class);
             }
+            startActivity(intent);
+            SplashActivity.this.finish();
         }
     }
 

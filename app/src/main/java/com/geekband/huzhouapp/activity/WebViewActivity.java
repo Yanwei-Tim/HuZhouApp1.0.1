@@ -18,15 +18,12 @@ public class WebViewActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
 
-        Intent intent = getIntent();
-        String html = intent.getStringExtra("html");
-
         WebView news_webView = (WebView) findViewById(R.id.news_webView);
         WebSettings webSettings = news_webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setBlockNetworkImage(false);
         webSettings.setDomStorageEnabled(true);
-        news_webView.setWebViewClient(new WebViewClient(){
+        news_webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
@@ -34,7 +31,10 @@ public class WebViewActivity extends BaseActivity {
             }
         });
 
+        Intent intent = getIntent();
+        String html = intent.getStringExtra("html");
         news_webView.loadUrl(html);
+
     }
 
     @Override

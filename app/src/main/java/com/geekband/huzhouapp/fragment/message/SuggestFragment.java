@@ -20,6 +20,7 @@ import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.activity.MainActivity;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.ViewUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,6 +56,7 @@ public class SuggestFragment extends Fragment {
         TextView text_suggest = (TextView) view.findViewById(R.id.text_suggest);
         text_suggest.setText(content);
         mSuggest_edit = (EditText) view.findViewById(R.id.suggest_edit);
+        mSuggest_edit.setOnFocusChangeListener(ViewUtils.getFocusChangeListener());
 
         Button suggest_submit = (Button) view.findViewById(R.id.suggest_submit);
 
@@ -99,7 +101,7 @@ public class SuggestFragment extends Fragment {
 
         @Override
         protected void onPreExecute() {
-            pd = ProgressDialog.show(mMainActivity,null,"正在提交相关信息");
+            pd = ProgressDialog.show(mMainActivity,null,"正在提交相关信息 ...");
         }
 
         @Override

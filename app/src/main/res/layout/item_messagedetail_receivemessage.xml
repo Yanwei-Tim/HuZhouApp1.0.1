@@ -24,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp">
 
-        <ImageView
+        <com.geekband.huzhouapp.custom.CircleImage
         	android:id="@+id/iv_receivemessage_userHead"
         	android:src="@drawable/head_icon"
         	android:layout_width="70dp"

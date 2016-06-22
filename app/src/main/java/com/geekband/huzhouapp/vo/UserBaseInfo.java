@@ -85,4 +85,6 @@ public class UserBaseInfo{
     public void setBirthday(String birthday) {
         this.birthday = birthday;
     }
+
+
 }

@@ -14,12 +14,13 @@ import java.util.ArrayList;
 public abstract class CommonAdapter<T> extends BaseAdapter {
 
     private Context mContext;
-    private LayoutInflater mLayoutInflater;
+    public LayoutInflater mLayoutInflater;
     private ArrayList<T> mArrayList;
-    private int mItemLayoutId ;
+//    private int[] mItemLayoutId;
+    private int mItemLayoutId;
 
 
-    public CommonAdapter(Context context, ArrayList<T> arrayList,int itemLayoutId) {
+    public CommonAdapter(Context context, ArrayList<T> arrayList, int itemLayoutId) {
 
         mContext = context;
         mArrayList = arrayList;
@@ -27,6 +28,8 @@ public abstract class CommonAdapter<T> extends BaseAdapter {
         mItemLayoutId = itemLayoutId;
     }
 
+    public CommonAdapter() {
+    }
 
     @Override
     public int getCount() {
@@ -43,6 +46,16 @@ public abstract class CommonAdapter<T> extends BaseAdapter {
         return position;
     }
 
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) {
+            return 0;
+        }
+        return 1;
+    }
+
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder = getViewHolder(position, convertView, parent);
@@ -51,9 +64,20 @@ public abstract class CommonAdapter<T> extends BaseAdapter {
         return viewHolder.getConvertView();
     }
 
-    public abstract void convert (ViewHolder viewHolder,T item);
+    public abstract void convert(ViewHolder viewHolder, T item);
 
-    private ViewHolder getViewHolder(int position, View convertView, ViewGroup parent){
+    public ViewHolder getViewHolder(int position, View convertView, ViewGroup parent) {
+
+//        int type = getItemViewType(position);
+//        int itemLayoutId = 0;
+//        switch (type) {
+//            case 0:
+//                itemLayoutId = mItemLayoutId[0];
+//                break;
+//            case 1:
+//                itemLayoutId = mItemLayoutId[1];
+//                break;
+//        }
         return ViewHolder.getViewHolder(mContext, convertView, parent, mItemLayoutId, position);
     }
 }

@@ -2,6 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:focusableInTouchMode="true"
+              android:focusable="true"
               android:orientation="vertical">
 
     <ScrollView
@@ -27,6 +29,8 @@
         android:gravity="top"
         android:hint="@string/text_suggest_hint"
         android:inputType="textMultiLine"
+        android:textColorHint="@android:color/darker_gray"
+        android:textCursorDrawable="@null"
         android:maxLines="10"
         android:minLines="8"
         android:paddingLeft="22dp"

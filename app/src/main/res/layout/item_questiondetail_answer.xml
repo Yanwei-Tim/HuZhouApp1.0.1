@@ -13,7 +13,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
-        <ImageView
+        <com.geekband.huzhouapp.custom.CircleImage
             android:id="@+id/iv_questiondetail_answer_replierIcon"
             android:src="@drawable/head1"
             android:layout_width="40dp"
@@ -70,7 +70,7 @@
 </LinearLayout>
 
 <View
-        android:background="@color/divider_clolor_2"
+        android:background="@color/divider_color_2"
         android:layout_width="match_parent"
         android:layout_height="1px" />
 </LinearLayout>

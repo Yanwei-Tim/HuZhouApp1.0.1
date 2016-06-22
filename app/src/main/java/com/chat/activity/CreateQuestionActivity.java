@@ -1,15 +1,15 @@
 package com.chat.activity;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.chat.adapter.pojo.Question;
@@ -19,6 +19,7 @@ import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.ViewUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,29 +29,58 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 	private ImageButton btn_back;
 	private EditText et_content;
 	private Button btn_submit;
-	private Button btn_category;
 	
 	private int selectedCategory;
 	private String[] categories = new String[]{"法律", "刑侦", "交警", "消防", "心理", "政工", "公文写作", "信息化"};
-	
+	private Spinner mSpinner;
+
 	@Override
 	protected void onCreate(Bundle saveInstanceState)
 	{
 		super.onCreate(saveInstanceState);
-		
 		setContentView(R.layout.activity_createquestion);
 		findView();
 		initVar();
 		initView();
 		initListener();
+
 	}
-	
+
+	private String getCategoryValue() {
+
+		final String[] category = new String[1];
+
+		mSpinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				category[0] = categories[position];
+				parent.setVisibility(View.VISIBLE);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+
+			}
+		});
+
+		return category[0];
+	}
+
 	private void findView()
 	{
 		btn_back = (ImageButton) findViewById(R.id.btn_createquestion_back);
-		et_content = (EditText) findViewById(R.id.et_createquestion_content);
+		et_content = (EditText) findViewById(R.id.et_createQuestion_content);
+		et_content.setOnFocusChangeListener(ViewUtils.getFocusChangeListener());
 		btn_submit = (Button) findViewById(R.id.btn_createquestion_submin);
-		btn_category = (Button) findViewById(R.id.btn_createquestion_category);
+		mSpinner = (Spinner) findViewById(R.id.spinner_question_type);
+		mSpinner.setBackgroundResource(R.drawable.abc_spinner_ab_pressed_holo_light);
+		//将可选内容与ArrayAdapter连接起来
+		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,
+				android.R.layout.simple_spinner_item,categories);
+		//设置下拉列表的风格
+		arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mSpinner.setAdapter(arrayAdapter);
 	}
 	
 	private void initView()
@@ -67,7 +97,6 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 	{
 		btn_back.setOnClickListener(this);
 		btn_submit.setOnClickListener(this);
-		btn_category.setOnClickListener(this);
 	}
 	
 	private void runAsyncTask(int task, Object... params)
@@ -88,6 +117,8 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 			case R.id.btn_createquestion_submin:
 			{
 				String content = et_content.getText().toString();
+				//spinner
+				String categoryStr = getCategoryValue();
 				if(content!=null && !"".equals(content))
 				{
 					/*//Question question = new Question(R.drawable.head10, "小不点儿", content, "50秒前", false, null);
@@ -96,7 +127,7 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 					//intent.putExtra(QuestionDetailActivity.ARGS_QUESTION, question);
 					startActivity(intent);
 					finish();*/
-					runAsyncTask(AsyncDataLoader.TASK_INIT, content);
+					runAsyncTask(AsyncDataLoader.TASK_INIT, content,categoryStr);
 				}
 				else
 				{
@@ -104,29 +135,6 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 				}
 			}break;
 
-			case R.id.btn_createquestion_category:
-			{
-				AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-				dialog.setCancelable(true);
-				dialog.setTitle("选择分类");
-				dialog.setSingleChoiceItems(categories, selectedCategory, new OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which)
-					{
-						selectedCategory = which;
-					}
-				});
-				dialog.setPositiveButton("确定", new OnClickListener()
-				{
-					@Override
-					public void onClick(DialogInterface dialog, int which)
-					{
-						dialog.dismiss();
-					}
-				});
-				dialog.show();
-			}break;
 		}
 	}
 	
@@ -168,6 +176,8 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 					{
 						//问题的内容
 						String content = (String) this.params[0];
+						//问题的分类
+						String categoryStr = (String) params[1];
 						
 						//当前用户
 						UserTable currentUser = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, "")).get(0);
@@ -177,7 +187,7 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 						enquiryData.putField(EnquiryTable.FIELD_USERNO, currentUser.getContentId());
 						enquiryData.putField(EnquiryTable.FIELD_CONTENT, content);
 						enquiryData.putField(EnquiryTable.FIELD_APPLYTIME, new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis())));
-						enquiryData.putField(EnquiryTable.FIELD_CATEGORYID, "");
+						enquiryData.putField(EnquiryTable.FIELD_CATEGORYID, categoryStr);
 						
 						//将新建的EnquiryTable数据上传到服务器
 						boolean result = DataOperation.insertOrUpdateTable(enquiryData, null);

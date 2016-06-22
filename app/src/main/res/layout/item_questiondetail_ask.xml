@@ -14,7 +14,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
-        <ImageView
+        <com.geekband.huzhouapp.custom.CircleImage
             android:id="@+id/iv_questiondetail_ask_askerIcon"
             android:src="@drawable/head1"
             android:layout_width="40dp"
@@ -86,7 +86,7 @@
 </LinearLayout>
 	
 	<View
-        android:background="@color/divider_clolor_2"
+        android:background="@color/divider_color_2"
         android:layout_width="match_parent"
         android:layout_height="1px" />
 	<LinearLayout
@@ -102,7 +102,7 @@
 	    	android:layout_height="10dp" />
 	
 		<View
-        	android:background="@color/divider_clolor_2"
+        	android:background="@color/divider_color_2"
         	android:layout_width="match_parent"
         	android:layout_height="1px" />
 	</LinearLayout>

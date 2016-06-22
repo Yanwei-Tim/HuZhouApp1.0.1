@@ -19,6 +19,7 @@ import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.ViewUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,6 +62,7 @@ public class ChatActivity extends BaseActivity implements View.OnClickListener
 		lv_messageListView = (ListView) findViewById(R.id.lv_chat_messageList);
 		btn_back = (ImageButton) findViewById(R.id.btn_chat_back);
 		et_content = (EditText) findViewById(R.id.et_chat_content);
+		et_content.setOnFocusChangeListener(ViewUtils.getFocusChangeListener());
 		btn_send = (Button) findViewById(R.id.btn_chat_send);
 		vg_messageList = (ViewGroup) findViewById(R.id.vg_chat_messageList);
 		vg_progress = (ViewGroup) findViewById(R.id.vg_chat_progress);

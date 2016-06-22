@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HuZhouApp</string>
+    <string name="app_name">湖州公安</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -13,4 +13,5 @@
     <string name="load_full">已加载全部</string>
     <string name="no_data">暂无数据</string>
     <string name="more">加载中</string>
+    <string name="hint_creat">请选择您需要咨询的问题的类型，如：法律。</string>
 </resources>

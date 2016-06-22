@@ -24,6 +24,9 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.database.dto.DataOperation;
+import com.database.pojo.Document;
+import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.custom.CircleImage;
@@ -34,6 +37,7 @@ import com.geekband.huzhouapp.nav.CameraActivity;
 import com.geekband.huzhouapp.nav.GalleryActivity;
 import com.geekband.huzhouapp.nav.ManageActivity;
 import com.geekband.huzhouapp.service.NotificationService;
+import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.FileUtil;
 import com.geekband.huzhouapp.utils.FileUtils;
@@ -42,9 +46,11 @@ import com.geekband.huzhouapp.utils.SelectPicPopupWindow;
 import com.geekband.huzhouapp.vo.AlbumInfo;
 import com.geekband.huzhouapp.vo.CourseInfo;
 import com.geekband.huzhouapp.vo.UserBaseInfo;
+import com.lidroid.xutils.BitmapUtils;
 import com.lidroid.xutils.exception.DbException;
 
 import java.io.File;
+import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -60,7 +66,6 @@ public class MainActivity extends BaseActivity
     private NavigationView mNavigationView;
     private CircleImage mAvatar_imageBtn;
     private SelectPicPopupWindow mPicPopupWindow;
-    private String imgUrl;
     private static final String IMAGE_FILE_NAME = "avatarImage.jpg";// 头像文件名称
     private String urlPath;            // 图片本地路径
     private String resultStr = "";    // 服务端返回结果集
@@ -134,6 +139,10 @@ public class MainActivity extends BaseActivity
         if (avatarPath != null) {
             mAvatar_imageBtn.setImageBitmap(GetLocalBitmap.convertToBitmap(
                     avatarPath, 100, 100));
+        }else {
+            String avatarUrl = MyApplication.sSharedPreferences.getString(Constants.AVATAR_URL,null);
+            BitmapUtils bitmapUtils = BitmapHelper.getBitmapUtils(MainActivity.this,null,0,0);
+            bitmapUtils.display(mAvatar_imageBtn,avatarUrl);
         }
 
     }
@@ -318,8 +327,8 @@ public class MainActivity extends BaseActivity
             mAvatar_imageBtn.setImageDrawable(drawable);
 
             //启动服务器上传
-            if (imgUrl != null || imgUrl != "") {
-                new MyTask().execute();
+            if (urlPath != null || urlPath != "") {
+                new UpAvatarImageTask().execute(urlPath);
             }
 
         }
@@ -422,7 +431,7 @@ public class MainActivity extends BaseActivity
     }
 
 
-    class MyTask extends AsyncTask<String, Integer, Integer> {
+    class UpAvatarImageTask extends AsyncTask<String, Integer, Integer> {
 
         @Override
         protected void onPreExecute() {
@@ -433,6 +442,14 @@ public class MainActivity extends BaseActivity
 
         @Override
         protected Integer doInBackground(String... params) {
+            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null);
+            ArrayList<?> userTables = DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, contentId);
+            if (userTables!=null&&userTables.size()!=0){
+                UserTable userTable = (UserTable) userTables.get(0);
+                if (userTable!=null) {
+                    DataOperation.insertOrUpdateTable(userTable, new Document(params[0]));
+                }
+            }
             return null;
         }
 

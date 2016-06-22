@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
-        <ImageView
+        <com.geekband.huzhouapp.custom.CircleImage
             android:id="@+id/iv_othersquestion_askerIcon"
             android:src="@drawable/head1"
             android:layout_width="40dp"

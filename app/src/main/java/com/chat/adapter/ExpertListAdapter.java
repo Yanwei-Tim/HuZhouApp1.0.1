@@ -38,11 +38,11 @@ public class ExpertListAdapter extends BaseAdapter {
     public ExpertListAdapter(Context context, ListView listView) {
         this.context = context;
         expertList = new ArrayList<>();
-        bitmapUtils = BitmapHelper.getBitmapUtils(context, listView, 0, 0);
+        bitmapUtils = BitmapHelper.getBitmapUtils(context, listView, R.mipmap.drawer_head_logo, R.mipmap.drawer_head_logo);
     }
 
     private void runAsyncTask(int task, Object... params) {
-        new AsyncDataLoader(task).execute(params);
+        new AsyncDataLoader(task,params).execute();
     }
 
     public List<Expert> getExpertList() {

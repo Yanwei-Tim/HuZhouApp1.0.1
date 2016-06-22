@@ -48,7 +48,8 @@ public class CourseFragment extends Fragment implements AdapterView.OnItemClickL
         courseList.add(new CourseClass(R.drawable.app_icon_org_contacts, "全部课程"));
         courseList.add(new CourseClass(R.drawable.app_icon_wddb, "已选课程"));
         courseList.add(new CourseClass(R.drawable.app_icon_t, "成绩表单"));
-        course_listView.setAdapter(new CommonAdapter<CourseClass>(getActivity(),courseList,R.layout.item_course) {
+
+        course_listView.setAdapter(new CommonAdapter<CourseClass>(getActivity(), courseList, R.layout.item_course) {
             @Override
             public void convert(ViewHolder viewHolder, CourseClass item) {
                 viewHolder.setImage(R.id.course_ico_item, item.getImageId());
@@ -60,10 +61,18 @@ public class CourseFragment extends Fragment implements AdapterView.OnItemClickL
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (position==0){
-            startActivity(new Intent(getActivity(), CourseListActivity.class));
-        }else if (position==2){
-            startActivity(new Intent(getActivity(),GradeActivity.class));
+        Intent intent = new Intent();
+        if (position == 0) {
+            intent.setAction("allCourse");
+            intent.setClass(getActivity(), CourseListActivity.class);
+            startActivity(intent);
+        } else if (position == 1) {
+            intent.setAction("myCourse");
+            intent.setClass(getActivity(), CourseListActivity.class);
+            startActivity(intent);
+        } else if (position == 2) {
+            intent.setClass(getActivity(), GradeActivity.class);
+            startActivity(intent);
         }
     }
 

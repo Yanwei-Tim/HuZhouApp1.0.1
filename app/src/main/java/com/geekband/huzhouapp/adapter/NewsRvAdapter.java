@@ -36,11 +36,13 @@ public class NewsRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         private final ImageView mItem_newsImage;
         private final TextView mItem_newsTitle;
+        private final TextView mItem_newsDate;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             mItem_newsImage = (ImageView) itemView.findViewById(R.id.item_newsImage);
             mItem_newsTitle = (TextView) itemView.findViewById(R.id.item_newsTitle);
+            mItem_newsDate = (TextView) itemView.findViewById(R.id.item_newsDate);
         }
     }
 
@@ -57,6 +59,7 @@ public class NewsRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
         mBitmapUtils.display(viewHolder.mItem_newsImage,mLocalNewses.get(position).getPicUrl());
         viewHolder.mItem_newsTitle.setText(mLocalNewses.get(position).getTitle());
+        viewHolder.mItem_newsDate.setText(mLocalNewses.get(position).getDate());
     }
 
 

@@ -1,8 +1,11 @@
 package com.chat.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageButton;
 
 import com.chat.adapter.ExpertPagerAdapter;
@@ -12,7 +15,7 @@ import com.viewpagerindicator.TabPageIndicator;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExpertActivity extends BaseActivity implements View.OnClickListener
+public class ExpertActivity extends FragmentActivity implements View.OnClickListener
 {
 	private ImageButton btn_back;
 	private TabPageIndicator tpi_categories;
@@ -25,12 +28,17 @@ public class ExpertActivity extends BaseActivity implements View.OnClickListener
 	protected void onCreate(Bundle saveInstanceState)
 	{
 		super.onCreate(saveInstanceState);
-		
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_expert);
 		findView();
 		initVar();
 		initView();
 		initListener();
+
+		Intent intent = getIntent();
+		int position = intent.getIntExtra("class",0);
+		vp_pager.setCurrentItem(position+1);
+
 	}
 	
 	private void findView()

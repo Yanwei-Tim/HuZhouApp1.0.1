@@ -131,7 +131,6 @@ public class QuestionDetailListAdapter extends BaseAdapter
 					headIconUrl = question.getAnswerInfoList().get(position-1).getReplierInfo().getAccessaryFileUrlList().get(0);
 				}
 				bitmapUtils.display(vh.iv_answer_replierIcon, headIconUrl);
-				
 				vh.tv_answer_replierName.setText(question.getAnswerInfoList().get(position-1).getReplierInfo().getField(UserTable.FIELD_USERNAME));
 				vh.tv_answer_content.setText(question.getAnswerInfoList().get(position-1).getAnswerInfo().getField(ReplyTable.FIELD_CONTENT));
 				vh.tv_answer_time.setText(question.getAnswerInfoList().get(position-1).getAnswerInfo().getField(ReplyTable.FIELD_T_TIME));

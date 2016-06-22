@@ -71,7 +71,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="25dp" />
         
-        <ImageView
+        <com.geekband.huzhouapp.custom.CircleImage
         	android:id="@+id/iv_sendmessage_userHead"
         	android:src="@drawable/head_icon"
         	android:layout_width="70dp"

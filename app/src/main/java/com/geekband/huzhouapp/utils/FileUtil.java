@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -15,7 +14,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
 
 public class FileUtil {
@@ -23,9 +21,8 @@ public class FileUtil {
 
     /**
      * 将Bitmap 图片保存到本地路径，并返回路径
-     *
+     *  mType    资源类型，参照  MultimediaContentType 枚举，根据此类型，保存时可自动归类
      * @param c
-     * @param mType    资源类型，参照  MultimediaContentType 枚举，根据此类型，保存时可自动归类
      * @param fileName 文件名称
      * @param bitmap   图片
      * @return
@@ -53,7 +50,7 @@ public class FileUtil {
         try {
             String suffix = "";
             if (filePath == null || filePath.trim().length() == 0) {
-                filePath = Environment.getExternalStorageDirectory() + "/JiaXT/" + dateFolder + "/";
+                filePath = Environment.getExternalStorageDirectory() + "/HZGA/" + dateFolder + "/";
             }
             File file = new File(filePath);
             if (!file.exists()) {
@@ -108,4 +105,19 @@ public class FileUtil {
         }
         return imagePathList;
     }
+
+    public static File saveFile(String typeFile,String fileName){
+        String  filePath = Environment.getExternalStorageDirectory()+"/HZGA/"+typeFile+"/";
+        File file = new File(filePath);
+        if (!file.exists()){
+            file.mkdirs();
+        }
+
+        File fullFile = new File(file,fileName);
+        if (fullFile.exists()){
+            fullFile.delete();
+        }
+        return fullFile;
+    }
+
 }
