@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.database.pojo.EnquiryTable;
-import com.database.pojo.ReplyTable;
 import com.database.pojo.UserTable;
 
 /**
@@ -17,9 +16,12 @@ public class Question implements Serializable
 {
 	private static final long serialVersionUID = 108060571825664663L;
 	
-	private UserTable askerInfo; //提问者信息
-	private EnquiryTable askInfo; //提问信息
-	private List<Answer> answerInfoList = new ArrayList<>(); //回答信息
+	//提问者信息
+	private UserTable askerInfo;
+	//提问信息
+	private EnquiryTable askInfo;
+	//回答信息列表
+	private List<Answer> answerInfoList = new ArrayList<>();
 	
 	public Question(UserTable askerInfo, EnquiryTable askInfo, List<Answer> answerInfoList)
 	{

@@ -9,7 +9,9 @@ public class Answer implements Serializable
 {
 	private static final long serialVersionUID = 5401325250201181328L;
 	
+	//回答者信息
 	private UserTable replierInfo;
+	//回答信息
 	private ReplyTable answerInfo;
 	
 	public Answer(UserTable replierInfo, ReplyTable answerInfo)
@@ -34,6 +36,4 @@ public class Answer implements Serializable
 	{
 		this.answerInfo = answerInfo;
 	}
-	
-	
 }

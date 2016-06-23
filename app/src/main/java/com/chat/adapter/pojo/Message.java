@@ -1,17 +1,20 @@
 package com.chat.adapter.pojo;
 
+import java.io.Serializable;
+
 import com.database.pojo.ReplyTable;
 import com.database.pojo.UserTable;
-
-import java.io.Serializable;
 
 
 public class Message implements Serializable
 {
 	private static final long serialVersionUID = 5922976569956649690L;
 	
+	//消息发送者信息
 	private UserTable messageSenderInfo;
+	//消息信息
 	private ReplyTable messageInfo;
+	//消息类型
 	private int messageType;
 	
 	public Message(UserTable messageSenderInfo, ReplyTable messageInfo, int messageType)

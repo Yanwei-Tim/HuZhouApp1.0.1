@@ -50,7 +50,6 @@
         <activity android:name=".fragment.news.CourseContentActivity"/>
         <activity android:name=".fragment.news.GradeActivity"/>
         <activity android:name="com.chat.activity.ChatActivity"/>
-        <activity android:name="com.chat.activity.PersonalQuestionActivity"/>
         <activity android:name="com.chat.activity.ExpertActivity"
             android:theme="@style/Theme.PageIndicatorDefaults"/>
         <activity android:name="com.chat.activity.QuestionDetailActivity"/>
@@ -58,6 +57,7 @@
             android:theme="@style/Theme.PageIndicatorDefaults"/>
         <activity android:name="com.chat.activity.CreateQuestionActivity"/>
         <activity android:name="com.chat.activity.MyQuestionActivity"/>
+        <activity android:name="com.chat.activity.QuestionChatActivity"/>
         <receiver android:name=".service.NotificationBroadCast">
             <intent-filter>
                 <action android:name="android.intent.action.NOTIFICATION_BROADCAST"/>

@@ -1,10 +1,7 @@
 package com.geekband.huzhouapp.fragment.message;
-
-import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +17,6 @@ import com.database.pojo.EnquiryTable;
 import com.database.pojo.ReplyTable;
 import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
-import com.geekband.huzhouapp.activity.MainActivity;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
 
@@ -33,23 +29,16 @@ public class SystemFragment extends Fragment {
 
     private View v_rootView;
     private ListView lv_notificationListView;
+
     private NotificationListAdapter notificationListAdapter;
 
-    MainActivity mMainActivity;
-
-    public static SystemFragment newInstance() {
+    public static SystemFragment newInstance(){
         return new SystemFragment();
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mMainActivity = (MainActivity) context;
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
         v_rootView = inflater.inflate(R.layout.fragment_notification, container, false);
 
         findView();
@@ -156,7 +145,6 @@ public class SystemFragment extends Fragment {
                         notificationListAdapter.getNotificationList().clear();
                         if(replyList1!=null)
                         {
-
                             for (ReplyTable replyTable : replyList1)
                             {
                                 notificationListAdapter.getNotificationList().add(new Message(
@@ -170,7 +158,6 @@ public class SystemFragment extends Fragment {
                         {
                             for (ReplyTable replyTable : replyList2)
                             {
-                                //判断该条回复的回复对象是否是 专家用户 或者 问题，如果回复对象不属于这些，那么就不列入消息列表(消息列表的每个item只存放一条聊天的消息头，而只有回复对象为专家用户、问题的的回复，才属于一条聊天的消息头)
                                 //判断该条回复的回复对象是否是 专家用户 或者 问题，如果回复对象不属于这些，那么就不列入消息列表(消息列表的每个item只存放一条聊天的消息头，而只有回复对象为专家用户、问题的的回复，才属于一条聊天的消息头)
                                 ArrayList<UserTable> result1 = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, replyTable.getField(ReplyTable.FIELD_REPLYTONO));
                                 ArrayList<EnquiryTable> result2 = (ArrayList<EnquiryTable>) DataOperation.queryTable(EnquiryTable.TABLE_NAME, EnquiryTable.CONTENTID, replyTable.getField(ReplyTable.FIELD_REPLYTONO));
@@ -232,6 +219,7 @@ public class SystemFragment extends Fragment {
 
                             String title_userName = currentUserContenId.equals(replyObjectContentId)?notificationListAdapter.getItem(position).getMessageSenderInfo().getField(UserTable.FIELD_USERNAME):replyObjectUserList.get(0).getField(UserTable.FIELD_USERNAME);
                             intent.putExtra(ChatActivity.ARGS_TITLE, "与"+title_userName+"的对话");
+                            intent.putExtra(ChatActivity.ARGS_CHATMODE, ChatActivity.CHATMODE_SINGLE);
                         }
                         else //如果回复对象是EnquiryTable
                         {
@@ -241,9 +229,10 @@ public class SystemFragment extends Fragment {
 
                             String title_userName = replyObjecUser.getField(UserTable.FIELD_USERNAME);
                             intent.putExtra(ChatActivity.ARGS_TITLE, title_userName+"的提问");
+                            intent.putExtra(ChatActivity.ARGS_CHATMODE, ChatActivity.CHATMODE_QUESTION);
                         }
 
-                        intent.putExtra(ChatActivity.ARGS_MESSAGE, notificationListAdapter.getItem(position));
+                        intent.putExtra(ChatActivity.ARGS_FIRSTMESSAGE, notificationListAdapter.getItem(position));
                         intent.putExtra(ChatActivity.ARGS_USERLIST, userList);
                         startActivity(intent);
 

@@ -97,6 +97,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         //标记自动登录,以用户contentId作为标记
                         SharedPreferences.Editor editor = MyApplication.sSharedPreferences.edit();
                         editor.putString(Constants.AUTO_LOGIN, mUserTable.getContentId());
+                        editor.putString(Constants.USER_REAL_NAME,mUserTable.getField(UserTable.FIELD_REALNAME));
                         editor.apply();
                         //缓存个人信息
                         DataUtils.saveUserBaseInfo(mUserTable.getContentId());

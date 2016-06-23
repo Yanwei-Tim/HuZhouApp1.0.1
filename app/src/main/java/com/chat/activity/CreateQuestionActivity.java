@@ -1,32 +1,31 @@
 package com.chat.activity;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chat.adapter.pojo.Question;
-import com.database.dto.DataOperation;
-import com.database.pojo.EnquiryTable;
-import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
-import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.utils.Constants;
-import com.geekband.huzhouapp.utils.ViewUtils;
+import com.geekband.huzhouapp.utils.DataOperationHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class CreateQuestionActivity extends BaseActivity implements View.OnClickListener
+public class CreateQuestionActivity extends Activity implements View.OnClickListener
 {
 	private ImageButton btn_back;
+	private TextView tv_title;
 	private EditText et_content;
 	private Button btn_submit;
 	
@@ -38,34 +37,30 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 	protected void onCreate(Bundle saveInstanceState)
 	{
 		super.onCreate(saveInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_createquestion);
 		findView();
 		initVar();
 		initView();
 		initListener();
-
 	}
-
-
+	
 	private void findView()
 	{
 		btn_back = (ImageButton) findViewById(R.id.btn_createquestion_back);
+		tv_title = (TextView) findViewById(R.id.tv_createquestion_title);
 		et_content = (EditText) findViewById(R.id.et_createQuestion_content);
-		et_content.setOnFocusChangeListener(ViewUtils.getFocusChangeListener());
 		btn_submit = (Button) findViewById(R.id.btn_createquestion_submin);
 		mSpinner = (Spinner) findViewById(R.id.spinner_question_type);
 		mSpinner.setBackgroundResource(R.drawable.abc_spinner_ab_pressed_holo_light);
-		//将可选内容与ArrayAdapter连接起来
-		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this,
-				android.R.layout.simple_spinner_item,categories);
-		//设置下拉列表的风格
+		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,categories);
 		arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mSpinner.setAdapter(arrayAdapter);
 	}
 	
 	private void initView()
 	{
-		
+		tv_title.setText("发布新问题");
 	}
 	
 	private void initVar()
@@ -96,19 +91,14 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 
 			case R.id.btn_createquestion_submin:
 			{
+				//问题内容
 				String content = et_content.getText().toString();
-				//spinner
-				String categoryStr = mSpinner.getSelectedItem().toString();
-				System.out.println("提交问题："+categoryStr);
+				//问题类型
+				String type = mSpinner.getSelectedItem().toString();
+
 				if(content!=null && !"".equals(content))
 				{
-					/*//Question question = new Question(R.drawable.head10, "小不点儿", content, "50秒前", false, null);
-					Intent intent = new Intent();
-					intent.setClass(this, QuestionDetailActivity.class);
-					//intent.putExtra(QuestionDetailActivity.ARGS_QUESTION, question);
-					startActivity(intent);
-					finish();*/
-					runAsyncTask(AsyncDataLoader.TASK_INIT, content,categoryStr);
+					runAsyncTask(AsyncDataLoader.TASK_CREATEQUESTION, content,type);
 				}
 				else
 				{
@@ -121,9 +111,9 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 	
 	private class AsyncDataLoader extends AsyncTask<Object, Integer, Integer>
 	{
-		private static final int TASK_INIT = 1;
-		private static final int TASK_INIT_RESULT_SUCCESS = 1;
-		private static final int TASK_INIT_RESULT_ERROR = -1;
+		private static final int TASK_CREATEQUESTION = 1;
+		private static final int TASK_CREATEQUESTION_RESULT_SUCCESS = 1;
+		private static final int TASK_CREATEQUESTION_RESULT_ERROR = -1;
 		
 		private int task;
 		private Object[] params;
@@ -134,62 +124,49 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 			this.task = task;
 			this.params = params;
 		}
-		
+
 		@Override
 		protected void onPreExecute()
 		{
 			switch (task)
 			{
-				case TASK_INIT:
+				case TASK_CREATEQUESTION: //显示问题发布进度条对话框，并执行问题发布任务
 				{
-					mPd = ProgressDialog.show(CreateQuestionActivity.this, null, "正在上传...");
+					mPd = ProgressDialog.show(CreateQuestionActivity.this, null, "正在上上传...");
+					
 				}break;
 			}
 		}
-
+		
+		Question question;
 		@Override
 		protected Integer doInBackground(Object... params)
 		{
 			switch (task)
 			{
-				case TASK_INIT:
+				case TASK_CREATEQUESTION:
 				{
 					try
 					{
 						//问题的内容
 						String content = (String) this.params[0];
-						//问题的分类
-						String categoryStr = (String) this.params[1];
+						//问题类型
+						String type = (String) this.params[1];
 						
-						//当前用户
-						UserTable currentUser = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, "")).get(0);
+						question = DataOperationHelper.uploadQuestion(
+								DataOperationHelper.queryCurrentUser(),
+								content,
+								new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis())),
+								type);
 						
-						//创建EnquiryTable(代表一个问题)
-						EnquiryTable enquiryData = new EnquiryTable();
-						enquiryData.putField(EnquiryTable.FIELD_USERNO, currentUser.getContentId());
-						enquiryData.putField(EnquiryTable.FIELD_CONTENT, content);
-						enquiryData.putField(EnquiryTable.FIELD_APPLYTIME, new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis())));
-						enquiryData.putField(EnquiryTable.FIELD_CATEGORYID, categoryStr);
-						
-						//将新建的EnquiryTable数据上传到服务器
-						boolean result = DataOperation.insertOrUpdateTable(enquiryData, null);
-						if(!result) return TASK_INIT_RESULT_ERROR; //若上传失败，则返回
-						
-						//问题创建成功后，关闭当前Activity，并跳转到新创建的问题的详情页面
-						Question question = new Question(currentUser, enquiryData, null);
-						Intent intent = new Intent();
-						intent.setClass(CreateQuestionActivity.this, QuestionDetailActivity.class);
-						intent.putExtra(QuestionDetailActivity.ARGS_QUESTION, question);
-						startActivity(intent);
-						finish();
-						
-						return TASK_INIT_RESULT_SUCCESS;
+						if(question!=null) return TASK_CREATEQUESTION_RESULT_SUCCESS;
 					}
 					catch (Exception e)
 					{
 						e.printStackTrace();
-						return TASK_INIT_RESULT_ERROR;
 					}
+					
+					return TASK_CREATEQUESTION_RESULT_ERROR;
 				}
 			}
 			
@@ -201,16 +178,23 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 		{
 			switch (taskResult)
 			{
-				case TASK_INIT_RESULT_SUCCESS:
+				case TASK_CREATEQUESTION_RESULT_SUCCESS:
 				{
+					mPd.setMessage("上传成功！");
 					mPd.dismiss();
 					et_content.setText(null);
+					//问题创建成功后，关闭当前Activity，并跳转到新创建的问题的详情页面
+					Intent intent = new Intent();
+					intent.setClass(CreateQuestionActivity.this, QuestionDetailActivity.class);
+					intent.putExtra(QuestionDetailActivity.ARGS_QUESTION, question);
+					startActivity(intent);
+					finish();
 				}break;
 				
-				case TASK_INIT_RESULT_ERROR:
+				case TASK_CREATEQUESTION_RESULT_ERROR:
 				{
+					mPd.setMessage("上传失败！");
 					mPd.dismiss();
-					Toast.makeText(CreateQuestionActivity.this,"上传失败",Toast.LENGTH_SHORT).show();
 				}break;
 			}
 		}

@@ -6,7 +6,9 @@ public class QuestionMenuItem implements Serializable
 {
 	private static final long serialVersionUID = 4469664178406974754L;
 	
+	//图标
 	private int iconId;
+	//标题
 	private String title;
 	
 	public QuestionMenuItem(int iconId, String title)

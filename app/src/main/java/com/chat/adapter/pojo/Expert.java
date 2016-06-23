@@ -10,8 +10,11 @@ public class Expert implements Serializable
 {
 	private static final long serialVersionUID = 3571271783225845399L;
 	
+	//专家信息
 	private ExpertTable expert;
+	//专家用户信息
 	private UserTable expertInfo;
+	//专家个人用户信息
 	private UserInfoTable expertUserInfo;
 	
 	public Expert(ExpertTable expert, UserTable expertInfo, UserInfoTable expertUserInfo)

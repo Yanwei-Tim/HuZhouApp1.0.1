@@ -1,33 +1,43 @@
 package com.chat.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.SparseArray;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.chat.adapter.QuestionDetailListAdapter;
 import com.chat.adapter.pojo.Answer;
 import com.chat.adapter.pojo.Message;
 import com.chat.adapter.pojo.Question;
 import com.database.dto.DataOperation;
+import com.database.pojo.EnquiryTable;
 import com.database.pojo.ReplyTable;
 import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
+import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.DataOperationHelper;
+import com.lidroid.xutils.BitmapUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuestionDetailActivity extends BaseActivity implements View.OnClickListener
+public class QuestionDetailActivity extends FragmentActivity implements View.OnClickListener
 {
 	private ImageButton btn_back;
 	private TextView tv_title;
@@ -43,7 +53,7 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 	protected void onCreate(Bundle saveInstanceState)
 	{
 		super.onCreate(saveInstanceState);
-		
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_questiondetail);
 		findView();
 		initVar();
@@ -72,10 +82,11 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 	
 	private void initView()
 	{
-		tv_title.setText(questionDetailListAdapter.getQuestion().getAskerInfo().getField(UserTable.FIELD_USERNAME)+"的提问"); //设置标题
+		tv_title.setText(questionDetailListAdapter.getQuestion().getAskerInfo().getField(UserTable.FIELD_REALNAME)+"的提问"); //设置标题
 		lv_questionDetailListView.setAdapter(questionDetailListAdapter); //设置问答列表
 		if(questionDetailListAdapter.getQuestion().getAskerInfo().getField(UserTable.FIELD_USERNAME).equals(MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, ""))) vg_answer.setVisibility(View.GONE); //判断用户名
 		else vg_answer.setVisibility(View.VISIBLE);
+		btn_answer.setText("我来回答");
 	}
 	
 	private void initVar()
@@ -108,9 +119,9 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 					
 					Intent intent = new Intent();
 					intent.setClass(QuestionDetailActivity.this, ChatActivity.class);
-					intent.putExtra(ChatActivity.ARGS_MESSAGE, message);
+					intent.putExtra(ChatActivity.ARGS_FIRSTMESSAGE, message);
 					intent.putExtra(ChatActivity.ARGS_USERLIST, (ArrayList<UserTable>)userList);
-					intent.putExtra(ChatActivity.ARGS_TITLE, questionDetailListAdapter.getQuestion().getAskerInfo().getField(UserTable.FIELD_USERNAME)+"的提问");
+					intent.putExtra(ChatActivity.ARGS_TITLE, answer.getReplierInfo().getField(UserTable.FIELD_REALNAME)+"的回答");
 					startActivity(intent);
 				}
 			}
@@ -136,6 +147,148 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 			{
 				runAsyncTask(AsyncDataLoader.TASK_ANSWER);
 			}break;
+		}
+	}
+	
+	private class QuestionDetailListAdapter extends BaseAdapter
+	{
+		private Context context;
+		private BitmapUtils bitmapUtils;
+		private Question question;
+		private SparseArray<View> convertViewList;
+		
+		public QuestionDetailListAdapter(Context context, ListView listView, Question question)
+		{
+			this.context = context;
+			bitmapUtils = BitmapHelper.getBitmapUtils(context, listView, R.drawable.head_default, R.drawable.head_default);
+			this.question = question;
+			convertViewList = new SparseArray<>();
+		}
+		
+		public Question getQuestion()
+		{
+			return question;
+		}
+		
+		@Override
+		public int getCount()
+		{
+			if(question==null) return 0;
+			else return question.getAnswerInfoList().size()+1;
+		}
+
+		@Override
+		public Object getItem(int position)
+		{
+			return null;
+		}
+		
+		@Override
+		public int getItemViewType(int position)
+		{
+			if(position==0) return 0;
+			else return 1;
+		}
+		
+		@Override
+		public int getViewTypeCount()
+		{
+			return 2;
+		}
+
+		@Override
+		public long getItemId(int position)
+		{
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent)
+		{
+			ViewHolder vh;
+			int type = getItemViewType(position);
+			
+			if(convertView == null)
+			{
+				vh = new ViewHolder();
+				switch(type)
+				{
+					case 0:
+					{
+						convertView = LayoutInflater.from(context).inflate(R.layout.item_questiondetail_ask, parent, false);
+						vh.iv_ask_askerIcon = (ImageView) convertView.findViewById(R.id.iv_questiondetail_ask_askerIcon);
+						vh.tv_ask_content = (TextView) convertView.findViewById(R.id.tv_questiondetail_ask_content);
+						vh.tv_ask_time = (TextView) convertView.findViewById(R.id.tv_questiondetail_ask_time);
+						vh.tv_ask_answerNum = (TextView) convertView.findViewById(R.id.tv_questiondetail_ask_answerNum);
+						vh.vg_ask_divider = (ViewGroup) convertView.findViewById(R.id.vg_questiondetail_ask_divider);
+					}break;
+					
+					case 1:
+					{
+						convertView = LayoutInflater.from(context).inflate(R.layout.item_questiondetail_answer, parent, false);
+						vh.iv_answer_replierIcon = (ImageView) convertView.findViewById(R.id.iv_questiondetail_answer_replierIcon);
+						vh.tv_answer_replierName = (TextView) convertView.findViewById(R.id.tv_questiondetail_answer_replierName);
+						vh.tv_answer_content = (TextView) convertView.findViewById(R.id.tv_questiondetail_answer_content);
+						vh.tv_answer_time = (TextView) convertView.findViewById(R.id.tv_questiondetail_answer_time);
+					}break;
+				}
+				convertViewList.append(position, convertView);
+				convertView.setTag(vh);
+			}
+			else
+			{
+				vh = (ViewHolder) convertView.getTag();
+			}
+			
+			switch(type)
+			{
+				case 0:
+				{
+					String headIconUrl = "";
+					if(question.getAskerInfo().getAccessaryFileUrlList()!=null && question.getAskerInfo().getAccessaryFileUrlList().size()!=0 )
+					{
+						headIconUrl = question.getAskerInfo().getAccessaryFileUrlList().get(0);
+					}
+					bitmapUtils.display(vh.iv_ask_askerIcon, headIconUrl);
+					
+					vh.tv_ask_content.setText(question.getAskInfo().getField(EnquiryTable.FIELD_CONTENT));
+					vh.tv_ask_time.setText(question.getAskInfo().getField(EnquiryTable.FIELD_APPLYTIME));
+					vh.tv_ask_answerNum.setText(""+question.getAnswerInfoList().size());
+					
+					if(getCount()>1) vh.vg_ask_divider.setVisibility(View.VISIBLE);
+					else vh.vg_ask_divider.setVisibility(View.GONE);
+				}break;
+				
+				case 1:
+				{
+					String headIconUrl = "";
+					if(question.getAnswerInfoList().get(position-1).getReplierInfo().getAccessaryFileUrlList()!=null && question.getAnswerInfoList().get(position-1).getReplierInfo().getAccessaryFileUrlList().size()!=0 )
+					{
+						headIconUrl = question.getAnswerInfoList().get(position-1).getReplierInfo().getAccessaryFileUrlList().get(0);
+					}
+					bitmapUtils.display(vh.iv_answer_replierIcon, headIconUrl);
+					
+					vh.tv_answer_replierName.setText(question.getAnswerInfoList().get(position-1).getReplierInfo().getField(UserTable.FIELD_REALNAME));
+					vh.tv_answer_content.setText(question.getAnswerInfoList().get(position-1).getAnswerInfo().getField(ReplyTable.FIELD_CONTENT));
+					vh.tv_answer_time.setText(question.getAnswerInfoList().get(position-1).getAnswerInfo().getField(ReplyTable.FIELD_T_TIME));
+				}break;
+			}
+			
+			return convertView;
+		}
+		
+		private class ViewHolder
+		{
+			private ImageView iv_ask_askerIcon;
+			private TextView tv_ask_content;
+			private TextView tv_ask_time;
+			private TextView tv_ask_answerNum;
+			private ViewGroup vg_ask_divider;
+			
+			private ImageView iv_answer_replierIcon;
+			private TextView tv_answer_replierName;
+			private TextView tv_answer_content;
+			private TextView tv_answer_time;
 		}
 	}
 	
@@ -175,7 +328,8 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 			}
 		}
 		
-		UserTable currentUser;
+		UserTable currentUser; //当前用户UserTable
+		ArrayList<Answer> answerList = new ArrayList<>();
 		@Override
 		protected Integer doInBackground(Object... params)
 		{
@@ -185,7 +339,7 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 				{
 					try
 					{
-						UserTable currentUser = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, "")).get(0);
+						UserTable currentUser = DataOperationHelper.queryCurrentUser();
 						
 						//找到当前用户对当前问题的第一条回答
 						//当前用户对当前问题的第一条回答
@@ -204,6 +358,14 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 								}
 							}
 						}
+						/*if(firstMessage==null)
+						{
+							firstMessage = DataOperationHelper.uploadMessage(
+									questionDetailListAdapter.getQuestion().getAskerInfo(), 
+									questionDetailListAdapter.getQuestion().getAskInfo().getContentId(), 
+									questionDetailListAdapter.getQuestion().getAskInfo().getField(EnquiryTable.FIELD_CONTENT), 
+									questionDetailListAdapter.getQuestion().getAskInfo().getField(EnquiryTable.FIELD_APPLYTIME));
+						}*/
 						
 						//参与聊天的用户列表
 						List<UserTable> userList = new ArrayList<>();
@@ -214,10 +376,11 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 						//启动ChatActivity
 						Intent intent = new Intent();
 						intent.setClass(QuestionDetailActivity.this, ChatActivity.class);
-						if(firstMessage!=null) intent.putExtra(ChatActivity.ARGS_MESSAGE, firstMessage);
+						if(firstMessage!=null) intent.putExtra(ChatActivity.ARGS_FIRSTMESSAGE, firstMessage);
 						else intent.putExtra(ChatActivity.ARGS_REPLYNO, questionDetailListAdapter.getQuestion().getAskInfo().getContentId());
 						intent.putExtra(ChatActivity.ARGS_USERLIST, (ArrayList<UserTable>)userList);
-						intent.putExtra(ChatActivity.ARGS_TITLE, questionDetailListAdapter.getQuestion().getAskerInfo().getField(UserTable.FIELD_USERNAME)+"的提问");
+						intent.putExtra(ChatActivity.ARGS_TITLE, questionDetailListAdapter.getQuestion().getAskerInfo().getField(UserTable.FIELD_REALNAME)+"的提问");
+						intent.putExtra(ChatActivity.ARGS_CHATMODE, ChatActivity.CHATMODE_QUESTION);
 						startActivity(intent);
 						
 						return TASK_ANSWER_RESULT_SUCCESS;
@@ -233,27 +396,17 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 				{
 					try
 					{
-						//当前用户UserTable
-						currentUser = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, "")).get(0);
-						//更新当前回答的 回答列表(重新从服务器上读取回答列表数据)
-						List<ReplyTable> replyList;
-						replyList = (List<ReplyTable>) DataOperation.queryTable(ReplyTable.TABLE_NAME, ReplyTable.FIELD_REPLYTONO, questionDetailListAdapter.getQuestion().getAskInfo().getContentId());
-						if(replyList!=null)
-						{
-							questionDetailListAdapter.getQuestion().getAnswerInfoList().clear();
-							for (ReplyTable replyTable : replyList) //问题的每一条回答
-							{
-								questionDetailListAdapter.getQuestion().getAnswerInfoList().add(new Answer((UserTable) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, replyTable.getField(ReplyTable.FIELD_USERNO)).get(0), replyTable));
-							}
-						}
+						currentUser = DataOperationHelper.queryCurrentUser();
+						answerList = DataOperationHelper.queryQuestionAnswerList(questionDetailListAdapter.getQuestion().getAskInfo().getContentId());
 						
 						return TASK_UPDATELISTVIEW_RESULT_SUCCESS;
 					}
 					catch (Exception e)
 					{
 						e.printStackTrace();
-						return TASK_UPDATELISTVIEW_RESULT_ERROR;
 					}
+					
+					return TASK_UPDATELISTVIEW_RESULT_ERROR;
 				}
 			}
 			
@@ -277,11 +430,51 @@ public class QuestionDetailActivity extends BaseActivity implements View.OnClick
 				
 				case TASK_UPDATELISTVIEW_RESULT_SUCCESS:
 				{
-					questionDetailListAdapter.notifyDataSetChanged();
 					vg_progress.setVisibility(View.GONE);
 					vg_detail.setVisibility(View.VISIBLE);
+					
+					questionDetailListAdapter.getQuestion().getAnswerInfoList().clear();
+					questionDetailListAdapter.getQuestion().getAnswerInfoList().addAll(answerList);
+					answerList.clear();
+					questionDetailListAdapter.notifyDataSetChanged();
+					
+					//判断当前问题是否是当前用户发布的
+					//自己不能回答自己发布的问题
+					//如果是自己发布的问题，则不显示回答按钮；否则显示回答按钮
 					if(currentUser!=null && !currentUser.equals(questionDetailListAdapter.getQuestion().getAskerInfo()) ) vg_answer.setVisibility(View.VISIBLE);
 					else vg_answer.setVisibility(View.GONE);
+					
+					//判断当前问题的回答列表中是否有自己的回答
+					//如果有，则做一些特殊设置
+					List<Answer> list = questionDetailListAdapter.getQuestion().getAnswerInfoList();
+					for (int i = 0; i < list.size(); i++)
+					{
+						if(list.get(i).getReplierInfo().equals(currentUser))
+						{
+							btn_answer.setText("继续回答"); //把回答按钮的文字从"我来回答"改为"继续回答"
+							
+							/*new Timer().schedule(new TimerTask()
+							{
+								@Override
+								public void run()
+								{
+									try
+									{
+										Thread.sleep(1000);
+										if(questionDetailListAdapter.convertViewList!=null) T.l(questionDetailListAdapter.convertViewList);
+										else cancel();
+									}
+									catch (InterruptedException e)
+									{
+										e.printStackTrace();
+									}
+								}
+							}, 0, 1);*/
+							
+							//questionDetailListAdapter.convertViewList.get(i+1).setBackgroundColor(0x000); //把自己回答的item的背景置为醒目色
+							break;
+						}
+					}
 				}break;
 				
 				case TASK_UPDATELISTVIEW_RESULT_ERROR:

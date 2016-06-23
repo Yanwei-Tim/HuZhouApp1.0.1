@@ -88,6 +88,7 @@ public class MessageListAdapter extends BaseAdapter
 				{
 					convertView = LayoutInflater.from(context).inflate(R.layout.item_messagedetail_sendmessage, parent, false);
 					vh.iv_sendMessage_userHead = (ImageView) convertView.findViewById(R.id.iv_sendmessage_userHead);
+					vh.iv_sendMessage_userName = (TextView) convertView.findViewById(R.id.tv_sendmessage_userName);
 					vh.tv_sendMessage_content = (TextView) convertView.findViewById(R.id.tv_sendmessage_content);
 					vh.tv_sendMessage_time = (TextView) convertView.findViewById(R.id.tv_sendmessage_time);
 					vh.pb_sendMessage_progress = (ProgressBar) convertView.findViewById(R.id.pb_sendmessage_progress);
@@ -120,6 +121,7 @@ public class MessageListAdapter extends BaseAdapter
 				}
 				bitmapUtils.display(vh.iv_sendMessage_userHead, headIconUrl);
 				
+				vh.iv_sendMessage_userName.setText(getItem(position).getMessageSenderInfo().getField(UserTable.FIELD_REALNAME));
 				vh.tv_sendMessage_content.setText(getItem(position).getMessageInfo().getField(ReplyTable.FIELD_CONTENT));
 				vh.tv_sendMessage_time.setText(getItem(position).getMessageInfo().getField(ReplyTable.FIELD_T_TIME));
 				vh.pb_sendMessage_progress.setOnClickListener(null);
@@ -134,7 +136,7 @@ public class MessageListAdapter extends BaseAdapter
 				}
 				bitmapUtils.display(vh.iv_receiveMessage_userHead, headIconUrl);
 				
-				vh.tv_receiveMessage_userName.setText(getItem(position).getMessageSenderInfo().getField(UserTable.FIELD_USERNAME));
+				vh.tv_receiveMessage_userName.setText(getItem(position).getMessageSenderInfo().getField(UserTable.FIELD_REALNAME));
 				vh.tv_receiveMessage_content.setText(getItem(position).getMessageInfo().getField(ReplyTable.FIELD_CONTENT));
 				vh.tv_receiveMessage_time.setText(getItem(position).getMessageInfo().getField(ReplyTable.FIELD_T_TIME));
 			}break;
@@ -148,6 +150,7 @@ public class MessageListAdapter extends BaseAdapter
 		private ImageView iv_sendMessage_userHead;
 		private TextView tv_sendMessage_content;
 		private TextView tv_sendMessage_time;
+		private TextView iv_sendMessage_userName;
 		private ProgressBar pb_sendMessage_progress;
 		
 		private ImageView iv_receiveMessage_userHead;

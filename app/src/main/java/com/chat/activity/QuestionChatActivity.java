@@ -1,8 +1,8 @@
 package com.chat.activity;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -20,11 +20,10 @@ import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.utils.DataOperationHelper;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ChatActivity extends Activity implements View.OnClickListener
+public class QuestionChatActivity extends FragmentActivity implements View.OnClickListener
 {
 	private TextView tv_title;
 	private ListView lv_messageListView;
@@ -39,7 +38,6 @@ public class ChatActivity extends Activity implements View.OnClickListener
 	private List<UserTable> userList;
 	private UserTable currentUser;
 	private String title;
-	private int currentChatMode;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -80,7 +78,6 @@ public class ChatActivity extends Activity implements View.OnClickListener
 		if(args!=null)
 		{
 			title = args.getString(ARGS_TITLE);
-			currentChatMode = args.getInt(ARGS_CHATMODE);
 		}
 	}
 	
@@ -172,8 +169,7 @@ public class ChatActivity extends Activity implements View.OnClickListener
 			}
 		}
 
-		List<Message> messageList = new ArrayList<>();
-		Message willSendMessage;
+		Message message;
 		@Override
 		protected Integer doInBackground(Object... params)
 		{
@@ -194,8 +190,8 @@ public class ChatActivity extends Activity implements View.OnClickListener
 							//ChatActivity的逻辑时，获取到聊天双方的第一条消息后，就可以参照第一条消息，链式搜索到其下的所有聊天消息
 							//所以外部只需传入首条Message参数，ChatActivity就可显示出聊天双方的所有聊天消息记录
 							 //找出该消息下的所有子回复
-							Message message = (Message) args.getSerializable(ARGS_FIRSTMESSAGE);
-							messageList.addAll(DataOperationHelper.queryChildMessageList(message));
+							Message message = (Message) args.getSerializable(ARGS_MESSAGE);
+							messageListAdapter.getMessageList().addAll(DataOperationHelper.queryChildMessageList(message));
 							
 							//外部传入的 参与聊天的用户列表 参数
 							userList = (List<UserTable>) args.getSerializable(ARGS_USERLIST);
@@ -206,9 +202,8 @@ public class ChatActivity extends Activity implements View.OnClickListener
 					catch (Exception e)
 					{
 						e.printStackTrace();
+						return TASK_RESULT_INITLISTVIEW_ERROR;
 					}
-					
-					return TASK_RESULT_INITLISTVIEW_ERROR;
 				}
 				
 				case TASK_SENDMSG: //发送消息(当前用户对当前聊天的其他人发送消息)
@@ -217,16 +212,18 @@ public class ChatActivity extends Activity implements View.OnClickListener
 					{
 						//要发送的消息内容
 						String content = (String) this.params[0];
+						//当前用户
+						String userNo = currentUser.getContentId();
 						//当前时间
 						String time = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis()));
 						//该消息回复的[对象]
 						//由于ChatActivity的消息数据录入逻辑，当当前聊天还没有产生首条聊天消息时，消息的回复对象则为UserTable或EnquiryTable
 						//只有当首条消息产生时，回复对象才是ReplyTable
 						String replyToNo = null;
-						if(messageListAdapter.getMessageList().size()>=1) replyToNo = messageListAdapter.getMessageList().get(messageListAdapter.getMessageList().size()-1).getMessageInfo().getContentId();
+						if(messageListAdapter.getMessageList().size()!=0) replyToNo = messageListAdapter.getMessageList().get(messageListAdapter.getMessageList().size()-1).getMessageInfo().getContentId();
 						if(replyToNo==null) replyToNo = getIntent().getExtras().getString(ARGS_REPLYNO);
 						
-						willSendMessage = DataOperationHelper.uploadMessage(currentUser, replyToNo, content, time);
+						message = DataOperationHelper.uploadMessage(currentUser, replyToNo, content, time);
 						
 						return TASK_RESULT_SENDMSG_SUCCES;
 					}
@@ -236,59 +233,6 @@ public class ChatActivity extends Activity implements View.OnClickListener
 					}
 					
 					return TASK_RESULT_SENDMSG_ERROR;
-					
-					/*switch(currentChatMode)
-					{
-						case CHATMODE_QUESTION:
-						{
-							try
-							{
-								String content = (String) this.params[0];
-								String time = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis()));
-								String replyToNo = null;
-								if(messageListAdapter.getMessageList().size()>=2) replyToNo = messageListAdapter.getMessageList().get(messageListAdapter.getMessageList().size()-1).getMessageInfo().getContentId();
-								if(replyToNo==null) replyToNo = getIntent().getExtras().getString(ARGS_REPLYNO);
-								
-								willSendMessage = DataOperationHelper.uploadMessage(currentUser, replyToNo, content, time);
-								
-								return TASK_RESULT_SENDMSG_SUCCES;
-							}
-							catch (Exception e)
-							{
-								e.printStackTrace();
-							}
-							
-							return TASK_RESULT_SENDMSG_ERROR;
-						}
-						
-						case CHATMODE_SINGLE:
-						{
-							try
-							{
-								//要发送的消息内容
-								String content = (String) this.params[0];
-								//当前时间
-								String time = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(System.currentTimeMillis()));
-								//该消息回复的[对象]
-								//由于ChatActivity的消息数据录入逻辑，当当前聊天还没有产生首条聊天消息时，消息的回复对象则为UserTable或EnquiryTable
-								//只有当首条消息产生时，回复对象才是ReplyTable
-								String replyToNo = null;
-								if(messageListAdapter.getMessageList().size()>=1) replyToNo = messageListAdapter.getMessageList().get(messageListAdapter.getMessageList().size()-1).getMessageInfo().getContentId();
-								if(replyToNo==null) replyToNo = getIntent().getExtras().getString(ARGS_REPLYNO);
-								
-								willSendMessage = DataOperationHelper.uploadMessage(currentUser, replyToNo, content, time);
-								
-								return TASK_RESULT_SENDMSG_SUCCES;
-							}
-							catch (Exception e)
-							{
-								e.printStackTrace();
-							}
-							
-							return TASK_RESULT_SENDMSG_ERROR;
-						}
-					}*/
-					
 				}
 			}
 			
@@ -302,10 +246,7 @@ public class ChatActivity extends Activity implements View.OnClickListener
 			{
 				case TASK_RESULT_INITLISTVIEW_SUCCES:
 				{
-					messageListAdapter.getMessageList().clear();
-					messageListAdapter.getMessageList().addAll(messageList);
 					messageListAdapter.notifyDataSetChanged();
-					messageList.clear();
 					if(isHasCurrentUser(currentUser, userList)) vg_send.setVisibility(View.VISIBLE); //若当前聊天 当前用户自己未参与，则不显示发送聊天消息的按钮
 					else vg_send.setVisibility(View.GONE);
 
@@ -315,14 +256,14 @@ public class ChatActivity extends Activity implements View.OnClickListener
 
 				case TASK_RESULT_INITLISTVIEW_ERROR:
 				{
-					Toast.makeText(ChatActivity.this, "服务器异常", Toast.LENGTH_SHORT).show();
+					Toast.makeText(QuestionChatActivity.this, "服务器异常", Toast.LENGTH_SHORT).show();
 					vg_progress.setVisibility(View.GONE);
 					vg_messageList.setVisibility(View.VISIBLE);
 				}break;
 				
 				case TASK_RESULT_SENDMSG_SUCCES:
 				{
-					messageListAdapter.getMessageList().add(willSendMessage);
+					messageListAdapter.getMessageList().add(message);
 					messageListAdapter.notifyDataSetChanged();
 					lv_messageListView.setSelection(messageListAdapter.getCount()-1);
 					et_content.setText("");
@@ -330,18 +271,14 @@ public class ChatActivity extends Activity implements View.OnClickListener
 				
 				case TASK_RESULT_SENDMSG_ERROR:
 				{
-					Toast.makeText(ChatActivity.this, "服务器异常", Toast.LENGTH_SHORT).show();
+					Toast.makeText(QuestionChatActivity.this, "服务器异常", Toast.LENGTH_SHORT).show();
 				}break;
 			}
 		}
 	}
 	
-	public static final String ARGS_FIRSTMESSAGE = "FIRSTMESSAGE";
+	public static final String ARGS_MESSAGE = "MESSAGE";
 	public static final String ARGS_REPLYNO = "REPLYNO";
 	public static final String ARGS_USERLIST = "USERLIST";
 	public static final String ARGS_TITLE = "TITLE";
-	public static final String ARGS_CHATMODE = "CHATMODE";
-	
-	public static final int CHATMODE_SINGLE = 0;
-	public static final int CHATMODE_QUESTION = 1;
 }

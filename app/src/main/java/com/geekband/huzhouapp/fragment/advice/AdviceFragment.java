@@ -83,7 +83,7 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
         mAdvice_class_gridView.setSelector(R.color.blue_background);
         //跳转设置
         Intent intent = new Intent();
-        intent.putExtra("class", position);
+        intent.putExtra("class", position+1);
         intent.setClass(getActivity(), ExpertActivity.class);
         startActivity(intent);
     }

@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -55,6 +56,8 @@ import java.util.ArrayList;
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
+    public static final String UP_IMAGE_NOW = "正在上传图片，请稍候...";
+    public static final String CLEAR_CACHE_NOW = "正在清理相关缓存，请稍等...";
     private ImageButton mNewsImageButton;
     private ImageButton mInformImageButton;
     private ImageButton mAdviceImageButton;
@@ -68,7 +71,6 @@ public class MainActivity extends BaseActivity
     private SelectPicPopupWindow mPicPopupWindow;
     private static final String IMAGE_FILE_NAME = "avatarImage.jpg";// 头像文件名称
     private String urlPath;            // 图片本地路径
-    private String resultStr = "";    // 服务端返回结果集
     private static ProgressDialog pd;// 等待进度圈
     private static final int REQUESTCODE_PICK = 0;        // 相册选图标记
     private static final int REQUESTCODE_TAKE = 1;        // 相机拍照标记
@@ -133,7 +135,9 @@ public class MainActivity extends BaseActivity
             }
         });
         TextView userName_text = (TextView) headerView.findViewById(R.id.userName_text);
-        userName_text.setText(MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null));
+        String nameStr = getString(R.string.welcome)+MyApplication.sSharedPreferences.getString(Constants.USER_REAL_NAME, null)+"!";
+        userName_text.setText(nameStr);
+        userName_text.setTextColor(Color.RED);
 
         String avatarPath = MyApplication.sSharedPreferences.getString(Constants.AVATAR_IMAGE, null);
         if (avatarPath != null) {
@@ -175,8 +179,10 @@ public class MainActivity extends BaseActivity
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getKeyCode()==KeyEvent.KEYCODE_BACK){
             Intent intent = new Intent();
-            intent.setAction("android.intent.action.MAIN");
-            intent.addCategory("android.intent.category.HOME");
+            //"android.intent.action.MAIN"
+            intent.setAction(Intent.ACTION_MAIN);
+            //"android.intent.category.HOME"
+            intent.addCategory(Intent.CATEGORY_HOME);
             startActivity(intent);
         }
         return false;
@@ -258,7 +264,7 @@ public class MainActivity extends BaseActivity
                 case R.id.pickPhotoBtn:
                     Intent pickIntent = new Intent(Intent.ACTION_PICK, null);
                     // 如果朋友们要限制上传到服务器的图片类型时可以直接写如："image/jpeg 、 image/png等的类型"
-                    pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                    pickIntent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, Constants.IMAGE_TYPE);
                     startActivityForResult(pickIntent, REQUESTCODE_PICK);
                     break;
                 default:
@@ -437,7 +443,7 @@ public class MainActivity extends BaseActivity
         protected void onPreExecute() {
             // 新线程后台上传服务端,这里会产生窗体泄露异常，在activity关闭之前先关闭dialog，
             // activity关闭会调用onPause所以在这里面关闭dialog方法为AlertDialog.dismiss()
-            pd = ProgressDialog.show(MainActivity.this, null, "正在上传图片，请稍候...");
+            pd = ProgressDialog.show(MainActivity.this, null, UP_IMAGE_NOW);
         }
 
         @Override
@@ -465,7 +471,7 @@ public class MainActivity extends BaseActivity
 
         @Override
         protected void onPreExecute() {
-            pd = ProgressDialog.show(MainActivity.this, null, "正在清理相关缓存，请稍等...");
+            pd = ProgressDialog.show(MainActivity.this, null, CLEAR_CACHE_NOW);
         }
 
         @Override
