@@ -36,7 +36,9 @@ import java.util.ArrayList;
 public class SplashActivity extends BaseActivity {
 
     private static final int NEED_UPDATE = 0;
-
+    /**
+     * 处理ui信息
+     */
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {

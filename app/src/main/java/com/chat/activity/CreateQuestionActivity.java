@@ -1,10 +1,10 @@
 package com.chat.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,26 +46,6 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 
 	}
 
-	private String getCategoryValue() {
-
-		final String[] category = new String[1];
-
-		mSpinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				category[0] = categories[position];
-				parent.setVisibility(View.VISIBLE);
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> parent) {
-
-			}
-		});
-
-		return category[0];
-	}
 
 	private void findView()
 	{
@@ -118,7 +98,8 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 			{
 				String content = et_content.getText().toString();
 				//spinner
-				String categoryStr = getCategoryValue();
+				String categoryStr = mSpinner.getSelectedItem().toString();
+				System.out.println("提交问题："+categoryStr);
 				if(content!=null && !"".equals(content))
 				{
 					/*//Question question = new Question(R.drawable.head10, "小不点儿", content, "50秒前", false, null);
@@ -146,7 +127,8 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 		
 		private int task;
 		private Object[] params;
-		
+		private ProgressDialog mPd;
+
 		public AsyncDataLoader(int task, Object...params)
 		{
 			this.task = task;
@@ -160,7 +142,7 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 			{
 				case TASK_INIT:
 				{
-					
+					mPd = ProgressDialog.show(CreateQuestionActivity.this, null, "正在上传...");
 				}break;
 			}
 		}
@@ -177,7 +159,7 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 						//问题的内容
 						String content = (String) this.params[0];
 						//问题的分类
-						String categoryStr = (String) params[1];
+						String categoryStr = (String) this.params[1];
 						
 						//当前用户
 						UserTable currentUser = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, "")).get(0);
@@ -221,12 +203,14 @@ public class CreateQuestionActivity extends BaseActivity implements View.OnClick
 			{
 				case TASK_INIT_RESULT_SUCCESS:
 				{
-					
+					mPd.dismiss();
+					et_content.setText(null);
 				}break;
 				
 				case TASK_INIT_RESULT_ERROR:
 				{
-					
+					mPd.dismiss();
+					Toast.makeText(CreateQuestionActivity.this,"上传失败",Toast.LENGTH_SHORT).show();
 				}break;
 			}
 		}

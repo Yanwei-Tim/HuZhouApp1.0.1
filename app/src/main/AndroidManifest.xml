@@ -57,6 +57,7 @@
         <activity android:name="com.chat.activity.OthersQuestionActivity"
             android:theme="@style/Theme.PageIndicatorDefaults"/>
         <activity android:name="com.chat.activity.CreateQuestionActivity"/>
+        <activity android:name="com.chat.activity.MyQuestionActivity"/>
         <receiver android:name=".service.NotificationBroadCast">
             <intent-filter>
                 <action android:name="android.intent.action.NOTIFICATION_BROADCAST"/>

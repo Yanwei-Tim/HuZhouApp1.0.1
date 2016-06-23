@@ -40,7 +40,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         mLogin_user_et = (EditText) findViewById(R.id.login_user_et);
         mLogin_password_et = (EditText) findViewById(R.id.login_password_et);
         mLogin_btn.setOnClickListener(this);
-
+//        //隐藏输入法
+//        ViewUtils.hideInputMethod(this,mLogin_password_et);
     }
 
     @Override

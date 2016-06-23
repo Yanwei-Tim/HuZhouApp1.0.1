@@ -1,7 +1,11 @@
 package com.geekband.huzhouapp.utils;
 
+import android.content.Context;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+
+import com.geekband.huzhouapp.application.MyApplication;
 
 /**
  * Created by Administrator on 2016/6/20.
@@ -29,4 +33,12 @@ public class ViewUtils {
         };
         return mFocusChangeListener;
     }
+
+     //隐藏输入法
+        public static void hideInputMethod(Context context,View view) {
+            InputMethodManager inputMethodManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (inputMethodManager.isActive()) {
+                inputMethodManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
 }

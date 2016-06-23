@@ -297,7 +297,7 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         protected Integer doInBackground(String... params) {
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
             mUserTable = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME,UserTable.CONTENTID,contentId).get(0);
-            mUserInfoTable = (UserInfoTable) DataOperation.queryTable(UserInfoTable.TABLE_NAME,UserTable.CONTENTID,contentId).get(0);
+            mUserInfoTable = (UserInfoTable) DataOperation.queryTable(UserInfoTable.TABLE_NAME,UserInfoTable.FIELD_USERID,contentId).get(0);
             return null;
         }
 
