@@ -16,13 +16,16 @@ import android.provider.MediaStore;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +38,6 @@ import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
 import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
-import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.SelectPicPopupWindow;
 import com.geekband.huzhouapp.utils.UriToPathUtils;
 import com.geekband.huzhouapp.vo.AlbumInfo;
@@ -43,10 +45,7 @@ import com.lidroid.xutils.BitmapUtils;
 import com.lidroid.xutils.db.sqlite.WhereBuilder;
 import com.lidroid.xutils.exception.DbException;
 
-import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by Administrator on 2016/5/16
@@ -59,7 +58,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     private RelativeLayout mGallery_layout;
     private ImageButton mLocal_gallery_imageView;
     private ImageButton mUp_photo_imageView;
-    private ImageButton mAnimation_imageView;
+    private ImageButton mCreate_imageView;
     private boolean isCreate;
     private ProgressBar mGallery_progress;
     private GridView mGallery_gridView;
@@ -73,20 +72,22 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
      * 使用相册中的图片
      */
     public static final int SELECT_PIC_BY_PICK_PHOTO = 2;
-    /**
-     * 获取到的图片路径
-     */
-    public String picPath = "";
-    private ImageView mSelected_pic;
-    private ScrollView mSelected_layout;
+    private LinearLayout mSelected_layout;
     private Button mUp_btn;
-    private ArrayList<AlbumInfo> mAlbumInfoList;
+    private ArrayList<AlbumTable> mAlbumInfoList;
     private ArrayList<String> mImageThumbUrls;
 
     private final String IMAGE_TYPE = "image/*";
     private final int IMAGE_CODE = 0;   //这里的IMAGE_CODE是自己任意定义的
     private BitmapUtils mBitmapUtils;
     private ProgressDialog mPd;
+    private Spinner mSpinner_select_gallery;
+    private ArrayList<String> mGalleryList;
+    private GridView mSelected_image;
+    private ArrayList<String> mPathList;
+    private CommonAdapter<String> mSelectViewAdapter;
+    private GridView mSelected_image_grid;
+    private final String IMAGE_TAG = "addMoreImage";
 
 
     @Override
@@ -94,30 +95,27 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gallery);
         isCreate = true;
+        mGalleryList = new ArrayList<>();
+        mGalleryList.add(0, "默认相册");
+        mPathList = new ArrayList<>();
+        mBitmapUtils = BitmapHelper.getBitmapUtils(this, null, 0, 0);
         //控件信息
         getWidget();
-        //加载本地数据
+        //加载相册
         new LocalTask().execute();
 
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //加载网络数据
-        new NetTask().execute();
     }
 
     private void initAlbum() {
-        mBitmapUtils = BitmapHelper.getBitmapUtils(this, mGallery_gridView, 0, 0);
-        mGallery_gridView.setAdapter(new CommonAdapter<AlbumInfo>(this,mAlbumInfoList,R.layout.item_album) {
+        mGallery_gridView.setAdapter(new CommonAdapter<AlbumTable>(this, mAlbumInfoList, R.layout.item_album) {
             @Override
-            public void convert(ViewHolder viewHolder, AlbumInfo item) {
-                viewHolder.setText(R.id.item_albumName, item.getAlbumName());
-                viewHolder.setText(R.id.item_albumCount, String.valueOf(item.getAlbumCount()));
+            public void convert(ViewHolder viewHolder, AlbumTable item) {
+                viewHolder.setText(R.id.item_albumName, item.getField(AlbumTable.FIELD_NAME));
+                viewHolder.setText(R.id.item_albumCount, String.valueOf(item.getAccessaryFileUrlList().size()));
                 ImageView imageView = viewHolder.getView(R.id.item_albumImage);
-                mBitmapUtils.display(imageView,item.getAlbumUrl());
+                if (item.getAccessaryFileUrlList() != null && item.getAccessaryFileUrlList().size() != 0) {
+                    mBitmapUtils.display(imageView, item.getAccessaryFileUrlList().get(0));
+                }
             }
         });
         mGallery_gridView.setOnItemClickListener(this);
@@ -130,20 +128,36 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         mGallery_layout = (RelativeLayout) findViewById(R.id.gallery_layout);
         mLocal_gallery_imageView = (ImageButton) findViewById(R.id.local_gallery_imageView);
         mUp_photo_imageView = (ImageButton) findViewById(R.id.up_photo_imageView);
-        mAnimation_imageView = (ImageButton) findViewById(R.id.animation_imageView);
+        mCreate_imageView = (ImageButton) findViewById(R.id.create_imageView);
 
         mGallery_progress = (ProgressBar) findViewById(R.id.gallery_progress);
         mGallery_gridView = (GridView) findViewById(R.id.gallery_gridView);
 
-        mSelected_layout = (ScrollView) findViewById(R.id.selected_layout);
-        mSelected_pic = (ImageView) findViewById(R.id.selected_pic);
+        mSelected_layout = (LinearLayout) findViewById(R.id.selected_layout);
+        mSpinner_select_gallery = (Spinner) findViewById(R.id.spinner_select_gallery);
+        mSpinner_select_gallery.setBackgroundResource(R.drawable.abc_spinner_ab_pressed_holo_light);
+        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mGalleryList);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mSpinner_select_gallery.setAdapter(arrayAdapter);
+//        mSelected_pic = (ImageView) findViewById(R.id.selected_pic);
         mUp_btn = (Button) findViewById(R.id.up_btn);
+        mSelected_image = (GridView) findViewById(R.id.selected_image_grid);
+        mSelected_image.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //给上传更多图片添加点击事件
+                if (position==mPathList.indexOf(IMAGE_TAG)){
+                    pickPhoto();
+                }
+            }
+        });
+
 
         mGallery_back_textBtn.setOnClickListener(this);
         mCreate_gallery_btn.setOnClickListener(this);
         mLocal_gallery_imageView.setOnClickListener(this);
         mUp_photo_imageView.setOnClickListener(this);
-        mAnimation_imageView.setOnClickListener(this);
+        mCreate_imageView.setOnClickListener(this);
         mUp_btn.setOnClickListener(this);
         mGallery_gridView.setOnItemClickListener(this);
         mGallery_gridView.setOnItemLongClickListener(this);
@@ -155,7 +169,6 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
             case R.id.gallery_back_textBtn:
                 //处理界面跳转
                 this.finish();
-
                 break;
             case R.id.create_gallery_btn:
                 if (isCreate) {
@@ -180,16 +193,33 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
                 mGallery_gridView.setVisibility(View.GONE);
                 mSelected_layout.setVisibility(View.VISIBLE);
-
+                initSelectView();
                 mPicPopupWindow = new SelectPicPopupWindow(GalleryActivity.this, itemsOnClick);
                 mPicPopupWindow.showAtLocation(findViewById(R.id.gallery_main),
                         Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
                 break;
-            case R.id.animation_imageView:
+            case R.id.create_imageView:
+                Toast.makeText(this, "我被点击了", Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("创建相册");
+                View view = LinearLayout.inflate(this, R.layout.view_create_gallery, null);
+                builder.setView(view);
+                final EditText galleryNameEdit = (EditText) view.findViewById(R.id.galleryNameEdit);
+                final EditText galleryDescriptionEdit = (EditText) view.findViewById(R.id.galleryDescriptionEdit);
+
+                builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String galleryName = galleryNameEdit.getText().toString().trim();
+                        String galleryDescription = galleryDescriptionEdit.getText().toString().trim();
+                        new CreateGallery().execute(galleryName, galleryDescription);
+                    }
+                }).show();
                 break;
 
             case R.id.up_btn:
-                new UpTask().execute();
+                String galleryClass = mSpinner_select_gallery.getSelectedItem().toString();
+                new UpTask().execute(galleryClass);
                 break;
         }
     }
@@ -282,9 +312,6 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
     /**
      * 选择图片后，获取图片的路径
-     *
-     * @param requestCode
-     * @param data
      */
     private void doPhoto(int requestCode, Intent data) {
 
@@ -295,39 +322,56 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         //此处的用于判断接收的Activity是不是你想要的那个
         if (requestCode == IMAGE_CODE) {
 
-            try {
-                Uri originalUri = data.getData();        //获得图片的uri
-                bitmap = MediaStore.Images.Media.getBitmap(resolver, originalUri);
-                //显得到bitmap图片
-                mSelected_pic.setImageBitmap(bitmap);
-                picPath = UriToPathUtils.getPath(this, originalUri);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            Uri originalUri = data.getData();        //获得图片的uri
+//                bitmap = MediaStore.Images.Media.getBitmap(resolver, originalUri);
+//                //显得到bitmap图片
+//                mSelected_pic.setImageBitmap(bitmap);
+//                mBitmapUtils.display(mSelected_pic,imagePath);
 
+            String picPath = UriToPathUtils.getPath(this, originalUri);
+            //上传更多按钮显示
+            mPathList.add(picPath);
+            if (mPathList.contains(IMAGE_TAG)) {
+                mPathList.remove(IMAGE_TAG);
+            }
+            mPathList.add(IMAGE_TAG);
+            mSelectViewAdapter.notifyDataSetChanged();
         }
 
     }
 
+
+    private void initSelectView() {
+        mSelected_image_grid = (GridView) findViewById(R.id.selected_image_grid);
+        mSelectViewAdapter = new CommonAdapter<String>(this, mPathList, R.layout.item_camera_list) {
+            @Override
+            public void convert(ViewHolder viewHolder, String item) {
+                if (item.equals(IMAGE_TAG)) {
+                    ImageView imageView = viewHolder.getView(R.id.imageView_camera);
+                    imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    viewHolder.setImage(R.id.imageView_camera, R.drawable.icon_add_nomal);
+                } else {
+                    mBitmapUtils.display(viewHolder.getView(R.id.imageView_camera), item);
+                }
+            }
+        };
+        mSelected_image_grid.setAdapter(mSelectViewAdapter);
+    }
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(this, AlbumActivity.class);
-        if (mImageThumbUrls != null) {
-            //将所点击的图片放到第一个位置，浏览时首先打开这个图片，然后依次浏览其他的图片
-            String tempStr = mImageThumbUrls.get(position);
-            mImageThumbUrls.remove(position);
-            mImageThumbUrls.add(0, tempStr);
-            intent.setAction("albumList");
-            intent.putStringArrayListExtra("albumList", mImageThumbUrls);
-            this.startActivity(intent);
-        }
+        Intent intent = new Intent(this, ImageActivity.class);
+        intent.putExtra(Constants.IMAGE_CONTENT_ID, mAlbumInfoList.get(position).getContentId());
+        this.startActivity(intent);
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         TextView textView = (TextView) view.findViewById(R.id.item_albumName);
         final String albumName = textView.getText().toString();
-        showDeleteDialog(albumName);
+        if (!albumName.equals("默认相册")) {
+            showDeleteDialog(albumName);
+        }
         return true;
     }
 
@@ -340,21 +384,22 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
         @Override
         protected Integer doInBackground(String... params) {
-            try {
-                //相册信息
-                mAlbumInfoList = (ArrayList<AlbumInfo>) MyApplication.sDbUtils.findAll(AlbumInfo.class);
-                if (mAlbumInfoList != null) {
-                    //封面图地址
-                    mImageThumbUrls = new ArrayList<>();
-                    for (AlbumInfo albumInfo : mAlbumInfoList) {
-                        String albumUrl = albumInfo.getAlbumUrl();
-                        mImageThumbUrls.add(albumUrl);
-                    }
 
-                    return 1;
+            //相册信息
+            String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
+            //noinspection unchecked
+            mAlbumInfoList = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, userId);
+            if (mAlbumInfoList != null && mAlbumInfoList.size() != 0) {
+                //封面图地址
+                mImageThumbUrls = new ArrayList<>();
+                for (AlbumTable albumTable : mAlbumInfoList) {
+                    ArrayList<String> urlList = (ArrayList<String>) albumTable.getAccessaryFileUrlList();
+                    if (urlList != null && urlList.size() != 0) {
+                        mImageThumbUrls.add(urlList.get(0));
+                    }
+                    mGalleryList.add(albumTable.getField(AlbumTable.FIELD_NAME));
                 }
-            } catch (DbException e) {
-                e.printStackTrace();
+                return 1;
             }
 
             return 2;
@@ -367,8 +412,8 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                 mGallery_gridView.setVisibility(View.VISIBLE);
                 //初始化相册GridView
                 initAlbum();
-            }else {
-                Toast.makeText(GalleryActivity.this,"暂无数据或者还未同步到服务器",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(GalleryActivity.this, "暂无数据或者还未同步到服务器", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -385,49 +430,90 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         @Override
         protected Integer doInBackground(String... params) {
 
-            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            AlbumTable albumTable = new AlbumTable();
-            Date date = new Date();
-            DateFormat df = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
-            String str = df.format(date);
+            //noinspection unchecked
+            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_NAME, params[0]);
+            if (albumTables != null && albumTables.size() != 0) {
+                if (!params[0].equals("默认相册")) {
+                    boolean isSuccess = insertPic(albumTables.get(0));
+                    System.out.println("插入是否成功1：" + isSuccess);
+                    if (isSuccess) {
+                        return 1;
+                    }
+                } else {
+                    for (AlbumTable albumTable : albumTables) {
+                        if (albumTable.getField(AlbumTable.FIELD_NAME).equals("默认相册")) {
+                            boolean isSuccess = insertPic(albumTables.get(0));
+                            System.out.println("插入是否成功2：" + isSuccess);
+                            if (isSuccess) {
+                                return 1;
+                            }
+                        } else {
+                            AlbumTable defaultTable = new AlbumTable();
+                            defaultTable.putField(AlbumTable.FIELD_NAME, params[0]);
+                            DataOperation.insertOrUpdateTable(defaultTable);
+                            //TODO 要做表是否插入成功的判断
+                            boolean isSuccess = insertPic(defaultTable);
+                            System.out.println("插入是否成功3：" + isSuccess);
+                            if (isSuccess) {
+                                return 1;
+                            }
+                        }
+                    }
+                }
+            } else {
+                AlbumTable defaultTable = new AlbumTable();
+                defaultTable.putField(AlbumTable.FIELD_NAME, params[0]);
+                DataOperation.insertOrUpdateTable(defaultTable);
+                //TODO 要做表是否插入成功的判断
+                boolean isSuccess = insertPic(defaultTable);
+                System.out.println("插入是否成功：" + isSuccess);
+                if (isSuccess) {
+                    return 1;
+                }
+            }
 
-            albumTable.putField(AlbumTable.FIELD_NAME, str);
-            albumTable.putField(AlbumTable.FIELD_USERID, contentId);
-            DataOperation.insertOrUpdateTable(albumTable, new Document(picPath));
 
-            DataUtils.saveAlbum(contentId);
-
-            return null;
+            return 2;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
+            mPd.dismiss();
+
             mGallery_progress.setVisibility(View.GONE);
             mSelected_layout.setVisibility(View.GONE);
-            mPd.dismiss();
-            new NetTask().execute();
+            mGallery_gridView.setVisibility(View.VISIBLE);
+            mPathList.clear();
+            new LocalTask().execute();
+
         }
     }
 
-
-    class NetTask extends AsyncTask<String, Integer, Integer> {
-
-        @Override
-        protected Integer doInBackground(String... params) {
-            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            DataUtils.saveAlbum(contentId);
-            return null;
+    private boolean insertPic(AlbumTable albumTable) {
+        ArrayList<String> olderPaths = (ArrayList<String>) albumTable.getAccessaryFileUrlList();
+        System.out.println("olderPath:" + olderPaths);
+        if (olderPaths != null && olderPaths.size() != 0) {
+            mPathList.addAll(olderPaths);
         }
+        if (mPathList != null && mPathList.size() != 0) {
+            Document[] documents = new Document[mPathList.size()];
+            for (int i = 0; i < mPathList.size(); i++) {
+                documents[i] = new Document(mPathList.get(i));
+            }
+            return DataOperation.insertOrUpdateTable(albumTable, documents);
+        }
+        return false;
     }
+
 
     public void showDeleteDialog(final String name) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("删除图片");
+        builder.setTitle("删除相册");
         builder.setMessage("删除的图片不可恢复，您确认删除？");
         builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        new DeleteAlbumTask().execute(name);
+                        new DeleteGalleryTask().execute(name);
                     }
                 }
 
@@ -444,7 +530,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         builder.create().show();
     }
 
-    class DeleteAlbumTask extends AsyncTask<String, Integer, Integer> {
+    class DeleteGalleryTask extends AsyncTask<String, Integer, Integer> {
 
         @Override
         protected Integer doInBackground(String... params) {
@@ -452,7 +538,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
             AlbumTable selectAlbum = null;
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
             //noinspection unchecked
-            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID,contentId);
+            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, contentId);
             if (albumTables != null) {
                 for (AlbumTable albumTable : albumTables) {
                     if (albumTable.getField(AlbumTable.FIELD_NAME).equals(params[0])) {
@@ -478,4 +564,43 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
     }
 
+    private class CreateGallery extends AsyncTask<String, Integer, Integer> {
+
+        private ProgressDialog mPd;
+
+        @Override
+        protected void onPreExecute() {
+            mPd = ProgressDialog.show(GalleryActivity.this, null, "正在创建相册...");
+        }
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            String galleryName = params[0];
+            //判断是否有同名相册，有则不允许创建
+            String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
+            //noinspection unchecked
+            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, userId);
+            if (albumTables != null && albumTables.size() != 0) {
+                for (AlbumTable albumTable : albumTables) {
+                    String albumName = albumTable.getField(AlbumTable.FIELD_NAME);
+                    if (albumName.equals(galleryName)) {
+                        Toast.makeText(GalleryActivity.this, "相册已存在", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+            String galleryDescription = params[1];
+            AlbumTable albumTable = new AlbumTable();
+            albumTable.putField(AlbumTable.FIELD_USERID, userId);
+            albumTable.putField(AlbumTable.FIELD_NAME, galleryName);
+            albumTable.putField(AlbumTable.FIELD_DESCRIPTION, galleryDescription);
+            DataOperation.insertOrUpdateTable(albumTable, new Document[]{});
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            mPd.dismiss();
+            new LocalTask().execute();
+        }
+    }
 }

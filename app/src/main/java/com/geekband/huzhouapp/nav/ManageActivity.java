@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.database.dto.DataOperation;
+import com.database.pojo.Document;
 import com.database.pojo.UserInfoTable;
 import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
@@ -134,7 +135,7 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
                 break;
             case R.id.update_manage_btn:
                 if (isUpdate) {
-                    if (mUserBaseInfo!=null) {
+                    if (mUserBaseInfo != null) {
                         //加载编辑布局
                         mManage_listView.setVisibility(View.GONE);
                         mScrollView.setVisibility(View.VISIBLE);
@@ -149,13 +150,13 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
                         mManage_back_textBtn.setText("取消");
                         mUpdate_manage_btn.setText("保存");
                         isUpdate = false;
-                    }else {
-                        Toast.makeText(this,"请登录官网补充相关资料",Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(this, "请登录官网补充相关资料", Toast.LENGTH_SHORT).show();
                     }
 
                 } else {
                     //保存修改后的信息
-                   new saveInfo().execute();
+                    new saveInfo().execute();
                     //标记
                     isUpdate = true;
 
@@ -177,7 +178,7 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         @Override
         protected Integer doInBackground(String... params) {
             try {
-                mUserBaseInfo =  MyApplication.sDbUtils.findFirst(UserBaseInfo.class);
+                mUserBaseInfo = MyApplication.sDbUtils.findFirst(UserBaseInfo.class);
 
             } catch (DbException e) {
                 e.printStackTrace();
@@ -188,7 +189,7 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         @Override
         protected void onPostExecute(Integer integer) {
             mManage_progress.setVisibility(View.GONE);
-            if (mUserBaseInfo!=null) {
+            if (mUserBaseInfo != null) {
                 mManage_listView.setVisibility(View.VISIBLE);
                 //初始化用户信息
                 mUserName = mUserBaseInfo.getUserName();
@@ -213,18 +214,17 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
                 mCommonAdapter = new CommonAdapter<ManageInfo>(ManageActivity.this, mManageList, R.layout.item_manage_text) {
                     @Override
                     public void convert(ViewHolder viewHolder, ManageInfo item) {
-                        viewHolder.setText(R.id.manage_class,item.getTitle());
-                        viewHolder.setText(R.id.manage_content,item.getContent());
-                        viewHolder.setImage(R.id.manage_image,item.getImageId());
+                        viewHolder.setText(R.id.manage_class, item.getTitle());
+                        viewHolder.setText(R.id.manage_content, item.getContent());
+                        viewHolder.setImage(R.id.manage_image, item.getImageId());
                     }
                 };
 
                 mManage_listView.setAdapter(mCommonAdapter);
                 isUpdate = true;
-            }else {
+            } else {
                 mManage_hint.setVisibility(View.VISIBLE);
             }
-
 
 
         }
@@ -241,8 +241,8 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
 
         @Override
         protected Integer doInBackground(String... params) {
-            DataOperation.insertOrUpdateTable(mUserTable, null);
-            DataOperation.insertOrUpdateTable(mUserInfoTable, null);
+            DataOperation.insertOrUpdateTable(mUserTable, (Document) null);
+            DataOperation.insertOrUpdateTable(mUserInfoTable, (Document) null);
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
             DataUtils.saveUserBaseInfo(contentId);
             return null;
@@ -296,26 +296,26 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         @Override
         protected Integer doInBackground(String... params) {
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            mUserTable = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME,UserTable.CONTENTID,contentId).get(0);
-            mUserInfoTable = (UserInfoTable) DataOperation.queryTable(UserInfoTable.TABLE_NAME,UserInfoTable.FIELD_USERID,contentId).get(0);
+            mUserTable = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, contentId).get(0);
+            mUserInfoTable = (UserInfoTable) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, contentId).get(0);
             return null;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             //编辑信息
-            if (mUserTable!=null&&mUserInfoTable!=null) {
+            if (mUserTable != null && mUserInfoTable != null) {
                 updateInfo();
                 //更新信息
                 new UpdateTask().execute();
-            }else {
-                Toast.makeText(ManageActivity.this,"链接服务器失败",Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(ManageActivity.this, "链接服务器失败", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
 
-    class NetTask extends AsyncTask<String,Integer,Integer>{
+    class NetTask extends AsyncTask<String, Integer, Integer> {
 
         @Override
         protected void onPreExecute() {
@@ -324,7 +324,7 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
 
         @Override
         protected Integer doInBackground(String... params) {
-            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null);
+            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
             DataUtils.saveUserBaseInfo(contentId);
             return null;
         }

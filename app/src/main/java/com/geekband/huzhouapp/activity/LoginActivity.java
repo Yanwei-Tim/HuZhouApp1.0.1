@@ -16,7 +16,7 @@ import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
-import com.geekband.huzhouapp.vo.LocalNews;
+import com.geekband.huzhouapp.vo.DynamicNews;
 
 import java.util.ArrayList;
 
@@ -82,7 +82,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
         class MyTask extends AsyncTask<String, Integer, Integer> {
-             private ArrayList<LocalNews> localNewses;
+             private ArrayList<DynamicNews> localNewses;
 
             @Override
             protected void onPreExecute() {
@@ -110,7 +110,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                         DataUtils.saveGrade(mUserTable.getContentId());
 //                        //获取缓存的新闻信息
 //                        try {
-//                            localNewses = (ArrayList<LocalNews>) MyApplication.sDbUtils.findAll(LocalNews.class);
+//                            localNewses = (ArrayList<DynamicNews>) MyApplication.sDbUtils.findAll(DynamicNews.class);
 //
 //                        } catch (DbException e) {
 //                            e.printStackTrace();

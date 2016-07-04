@@ -8,34 +8,38 @@ import java.io.Serializable;
 /**
  * Created by Administrator on 2016/5/25
  */
-public class LocalNews implements Serializable,Parcelable{
+public class DynamicNews implements Serializable,Parcelable{
     private static final long serialVersionUID = 5116622373292499331L;
     private int id;
     private String title;
+    private String date;
+    private String writerId;
+    private String auditorId;
     private String picUrl;
     private String content;
-    private String date;
 
-    protected LocalNews(Parcel in) {
+    public DynamicNews() {
+    }
+
+    protected DynamicNews(Parcel in) {
         id = in.readInt();
         title = in.readString();
+        date = in.readString();
+        writerId = in.readString();
+        auditorId = in.readString();
         picUrl = in.readString();
         content = in.readString();
-        date = in.readString();
     }
 
-    public LocalNews() {
-    }
-
-    public static final Creator<LocalNews> CREATOR = new Creator<LocalNews>() {
+    public static final Creator<DynamicNews> CREATOR = new Creator<DynamicNews>() {
         @Override
-        public LocalNews createFromParcel(Parcel in) {
-            return new LocalNews(in);
+        public DynamicNews createFromParcel(Parcel in) {
+            return new DynamicNews(in);
         }
 
         @Override
-        public LocalNews[] newArray(int size) {
-            return new LocalNews[size];
+        public DynamicNews[] newArray(int size) {
+            return new DynamicNews[size];
         }
     };
 
@@ -55,6 +59,30 @@ public class LocalNews implements Serializable,Parcelable{
         this.title = title;
     }
 
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getWriterId() {
+        return writerId;
+    }
+
+    public void setWriterId(String writerId) {
+        this.writerId = writerId;
+    }
+
+    public String getAuditorId() {
+        return auditorId;
+    }
+
+    public void setAuditorId(String auditorId) {
+        this.auditorId = auditorId;
+    }
+
     public String getPicUrl() {
         return picUrl;
     }
@@ -71,25 +99,6 @@ public class LocalNews implements Serializable,Parcelable{
         this.content = content;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    @Override
-    public String toString() {
-        return "LocalNews{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", picUrl='" + picUrl + '\'' +
-                ", content='" + content + '\'' +
-                ", date='" + date + '\'' +
-                '}';
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -99,8 +108,10 @@ public class LocalNews implements Serializable,Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
         dest.writeString(title);
+        dest.writeString(date);
+        dest.writeString(writerId);
+        dest.writeString(auditorId);
         dest.writeString(picUrl);
         dest.writeString(content);
-        dest.writeString(date);
     }
 }

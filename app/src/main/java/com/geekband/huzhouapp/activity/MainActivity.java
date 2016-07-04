@@ -36,6 +36,7 @@ import com.geekband.huzhouapp.fragment.message.MessageFragment;
 import com.geekband.huzhouapp.fragment.news.NewsFragment;
 import com.geekband.huzhouapp.nav.CameraActivity;
 import com.geekband.huzhouapp.nav.GalleryActivity;
+import com.geekband.huzhouapp.nav.InteractiveActivity;
 import com.geekband.huzhouapp.nav.ManageActivity;
 import com.geekband.huzhouapp.service.NotificationService;
 import com.geekband.huzhouapp.utils.BitmapHelper;
@@ -213,29 +214,34 @@ public class MainActivity extends BaseActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        Intent intent = new Intent();
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
-            startActivity(new Intent(this, CameraActivity.class));
+            intent.setClass(this, CameraActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_gallery) {
-            startActivity(new Intent(this, GalleryActivity.class));
-
+            intent.setClass(this, GalleryActivity.class);
+            startActivity(intent);
         } else if (id == R.id.login_up) {
             //取消自动登录
             SharedPreferences.Editor editor = MyApplication.sSharedPreferences.edit();
             editor.putString(Constants.AUTO_LOGIN, null);
             editor.apply();
             new ClearDataTask().execute();
-            startActivity(new Intent(this, LoginActivity.class));
+            intent.setClass(this, LoginActivity.class);
+            startActivity(intent);
             this.finish();
         } else if (id == R.id.nav_manage) {
-            startActivity(new Intent(this, ManageActivity.class));
+            intent.setClass(this, ManageActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
-
+            intent.setClass(this, InteractiveActivity.class);
+            startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -453,7 +459,7 @@ public class MainActivity extends BaseActivity
             if (userTables!=null&&userTables.size()!=0){
                 UserTable userTable = (UserTable) userTables.get(0);
                 if (userTable!=null) {
-                    DataOperation.insertOrUpdateTable(userTable, new Document(params[0]));
+                    DataOperation.insertOrUpdateTable(userTable, new Document[]{new Document(params[0])});
                 }
             }
             return null;

@@ -30,8 +30,14 @@ public class NotificationBroadCast extends BroadcastReceiver {
         mContext = context;
         initService();
         initNotify();
-        String msg = intent.getStringExtra("msg");
-        showIntentActivityNotify(msg);
+
+        if (intent.getAction().equals("gradeMessage")) {
+            String msg = intent.getStringExtra("gradeMessage");
+            showIntentActivityNotify(msg);
+        } else if (intent.getAction().equals("birthdayMessage")) {
+            String msg = intent.getStringExtra("birthdayMessage");
+            showIntentActivityNotify(msg);
+        }
     }
 
     /**
@@ -73,7 +79,7 @@ public class NotificationBroadCast extends BroadcastReceiver {
         return pendingIntent;
     }
 
-        /**
+    /**
      * 显示通知栏点击跳转到指定Activity
      */
     public void showIntentActivityNotify(String msg) {

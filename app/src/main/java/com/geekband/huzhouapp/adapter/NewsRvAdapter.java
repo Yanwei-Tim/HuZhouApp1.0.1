@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.utils.BitmapHelper;
-import com.geekband.huzhouapp.vo.LocalNews;
+import com.geekband.huzhouapp.vo.DynamicNews;
 import com.lidroid.xutils.BitmapUtils;
 
 import java.util.ArrayList;
@@ -21,11 +21,11 @@ import java.util.ArrayList;
 public class NewsRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context mContext;
-    private ArrayList<LocalNews> mLocalNewses;
+    private ArrayList<DynamicNews> mLocalNewses;
     private LayoutInflater mLayoutInflater ;
     private BitmapUtils mBitmapUtils;
 
-    public NewsRvAdapter(ArrayList<LocalNews> localNewses, Context context) {
+    public NewsRvAdapter(ArrayList<DynamicNews> localNewses, Context context) {
         mLocalNewses = localNewses;
         mContext = context;
         mLayoutInflater = LayoutInflater.from(mContext);

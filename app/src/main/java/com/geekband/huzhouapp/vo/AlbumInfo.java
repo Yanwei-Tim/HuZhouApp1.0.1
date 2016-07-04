@@ -8,6 +8,15 @@ public class AlbumInfo {
     private String albumName;
     private int albumCount;//每个相册包含的照片数量
     private String albumUrl;
+    private String contentId;
+
+    public String getContentId() {
+        return contentId;
+    }
+
+    public void setContentId(String contentId) {
+        this.contentId = contentId;
+    }
 
     public int getId() {
         return id;

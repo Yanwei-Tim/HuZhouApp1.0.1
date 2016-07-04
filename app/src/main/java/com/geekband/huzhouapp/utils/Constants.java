@@ -22,5 +22,11 @@ public class Constants {
     public static final String AVATAR_URL = "avatarUrl";
     //图片类型
     public static final String IMAGE_TYPE = "image/*";
-
+    public static final String IMAGE_CONTENT_ID = "imageContentId";
+    //新闻是否滚动
+    public static final String ROLLING = "1";
+    public static final String UNROLLING = "0";
+    public static final String SERVICE = "http://192.168.0.14:9080";//lmc本地测试用服务器;;
+    // 请求返回成功码
+    public static String REQUEST_RESULT_SUCCESS = "SUCCESS";
 }

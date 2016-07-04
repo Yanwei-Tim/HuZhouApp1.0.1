@@ -9,7 +9,7 @@ import com.database.pojo.CourseTable;
 import com.database.pojo.DataSetList;
 import com.database.pojo.EnquiryTable;
 import com.database.pojo.ExpertTable;
-import com.database.pojo.NewsTable;
+import com.database.pojo.CommonTable;
 import com.database.pojo.OpinionTable;
 import com.database.pojo.ReplyTable;
 import com.database.pojo.StudyInfoTable;
@@ -31,41 +31,38 @@ public final class DataParser
 	
 	public static ArrayList<BaseTable> getTable(DataSetList dataList, String tableName)
 	{
-		ArrayList<BaseTable> tableDataList = new ArrayList<BaseTable>();
-		String type = dataList.type; //表名
-		ArrayList<String> contentIdList = (ArrayList<String>) dataList.CONTENTID; //contentId
-		List<List<String>> documentIdList = (List<List<String>>) dataList.DOCUMENTIDLIST; //附件目录
-		ArrayList<String> nameList = (ArrayList<String>) dataList.nameList; //字段名
-		ArrayList<String> valueList = (ArrayList<String>) dataList.valueList; //字段值
-		
-		if(contentIdList.size()==0) return tableDataList; //若相匹配的结果数为0，则直接返回
-		
-		//将数据库表记录数据从DataSetList中解析出来
-		BaseTable tableData = null;
-		int recordNum = nameList.size()/contentIdList.size(); //记录的总数
-		int recordIndex = 0; //当前解析到第几条记录
-		for (int i = 0; i < nameList.size(); i++) //循环解析所有的记录
-		{
-			if(i%recordNum==0)
+		ArrayList<BaseTable> tableDataList = new ArrayList<>();
+		if (dataList!=null) {
+			String type = dataList.type; //表名
+			ArrayList<String> contentIdList = (ArrayList<String>) dataList.CONTENTID; //contentId
+			List<List<String>> documentIdList = (List<List<String>>) dataList.DOCUMENTIDLIST; //附件目录
+			ArrayList<String> nameList = (ArrayList<String>) dataList.nameList; //字段名
+			ArrayList<String> valueList = (ArrayList<String>) dataList.valueList; //字段值
+
+			if (contentIdList.size() == 0) return tableDataList; //若相匹配的结果数为0，则直接返回
+
+			//将数据库表记录数据从DataSetList中解析出来
+			BaseTable tableData = null;
+			int recordNum = nameList.size() / contentIdList.size(); //记录的总数
+			int recordIndex = 0; //当前解析到第几条记录
+			for (int i = 0; i < nameList.size(); i++) //循环解析所有的记录
 			{
-				tableData = newTableInstance(tableName);
-				tableData.setTableName(type);
-				tableData.setContentId(contentIdList.get(recordIndex));
-				
-				for (String documentId : documentIdList.get(recordIndex))
-				{
-					String fileUrl = "http://" + Constants.CONNIP + Constants.FILE_PATH + documentId + "/" + "file";
-					tableData.getAccessaryFileUrlList().add(fileUrl);
-				}
-			}
-			else
-			{
-				tableData.putField(nameList.get(i), valueList.get(i));
-				
-				if(i%recordNum == recordNum-1)
-				{
-					tableDataList.add(tableData);
-					recordIndex++;
+				if (i % recordNum == 0) {
+					tableData = newTableInstance(tableName);
+					tableData.setTableName(type);
+					tableData.setContentId(contentIdList.get(recordIndex));
+
+					for (String documentId : documentIdList.get(recordIndex)) {
+						String fileUrl = "http://" + Constants.CONNIP + Constants.FILE_PATH + documentId + "/" + "file";
+						tableData.getAccessaryFileUrlList().add(fileUrl);
+					}
+				} else {
+					tableData.putField(nameList.get(i), valueList.get(i));
+
+					if (i % recordNum == recordNum - 1) {
+						tableDataList.add(tableData);
+						recordIndex++;
+					}
 				}
 			}
 		}
@@ -90,7 +87,7 @@ public final class DataParser
 			case CourseTable.TABLE_NAME: tableData = new CourseTable(); break;
 			case EnquiryTable.TABLE_NAME: tableData = new EnquiryTable(); break;
 			case ExpertTable.TABLE_NAME: tableData = new ExpertTable(); break;
-			case NewsTable.TABLE_NAME: tableData = new NewsTable(); break;
+			case CommonTable.TABLE_NAME: tableData = new CommonTable(); break;
 			case OpinionTable.TABLE_NAME: tableData = new OpinionTable(); break;
 			case ReplyTable.TABLE_NAME: tableData = new ReplyTable(); break;
 			case StudyInfoTable.TABLE_NAME: tableData = new StudyInfoTable(); break;

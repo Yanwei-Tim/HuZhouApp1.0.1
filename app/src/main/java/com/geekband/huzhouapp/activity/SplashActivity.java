@@ -23,7 +23,6 @@ import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.LinkNet;
-import com.geekband.huzhouapp.vo.LocalNews;
 
 import java.io.File;
 import java.text.ParseException;
@@ -200,24 +199,12 @@ public class SplashActivity extends BaseActivity {
 
     //登录
     class toLogin extends AsyncTask<String, Integer, Integer> {
-        ArrayList<LocalNews> localNewses;
 
 // 判断之前是否登录过，如果已经登录过就直接进入主界面，不再登录认证。如果退出登录过，那么进入登录界面登录进入
 
         @Override
         protected Integer doInBackground(String... params) {
 
-            //预加载新闻缓存信息
-            //1.轮播新闻
-            DataUtils.saveNetNews();
-//            //2.服务器新闻
-//            localNewses = DataUtils.getLocalNewsList(10, 1);
-//            try {
-//                MyApplication.sDbUtils.deleteAll(LocalNews.class);
-//                MyApplication.sDbUtils.saveAll(localNewses);
-//            } catch (DbException e) {
-//                e.printStackTrace();
-//            }
             String isAuto = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
 
             if (isAuto != null) {

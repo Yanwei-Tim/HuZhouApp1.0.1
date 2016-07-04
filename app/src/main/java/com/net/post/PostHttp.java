@@ -46,7 +46,7 @@ public class PostHttp {
         httpurlconnection.getOutputStream().close();
         InputStream stream = httpurlconnection.getInputStream();
         String str = convertStreamToString(stream);
-
+//        System.out.println("********** request str:"+str);
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         XMLReader reader = saxParserFactory.newSAXParser().getXMLReader();
 

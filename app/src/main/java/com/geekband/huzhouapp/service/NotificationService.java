@@ -10,11 +10,13 @@ import android.support.annotation.Nullable;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.vo.BirthdayInfo;
 import com.geekband.huzhouapp.vo.GradeInfo;
 import com.lidroid.xutils.exception.DbException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,6 +28,7 @@ public class NotificationService extends Service {
 
 
     private static final int GRADE_TIMER = 1;
+    private Intent mIntent;
 
     @Nullable
     @Override
@@ -36,7 +39,7 @@ public class NotificationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
+        mIntent = new Intent("android.intent.action.NOTIFICATION_BROADCAST");
         startTimer();
 
     }
@@ -60,30 +63,44 @@ public class NotificationService extends Service {
 
     public void sendNotification() {
 
-        new Thread(new Runnable() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
+                    DataUtils.saveGrade(contentId);
+                    try {
+                        GradeInfo gradeInfo = MyApplication.sDbUtils.findFirst(GradeInfo.class);
+                        if (gradeInfo != null) {
+                            String needGrade = gradeInfo.getNeedGrade();
+                            String alreadyGrade = gradeInfo.getAlreadyGrade();
+                            if ((Integer.parseInt(alreadyGrade) < Integer.parseInt(needGrade))) {
+                                mIntent.setAction("gradeMessage");
+                                mIntent.putExtra("gradeMessage", "您目前学分未达标(点击可查看具体信息)");
+                                sendBroadcast(mIntent);
+                            }
+                        }
+                    } catch (DbException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+            }).start();
+
+    }
+
+    public void birthdayNotification(){
+        new Thread(){
             @Override
             public void run() {
-                String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-                DataUtils.saveGrade(contentId);
-                try {
-                    GradeInfo gradeInfo = MyApplication.sDbUtils.findFirst(GradeInfo.class);
-                    if (gradeInfo != null) {
-                        String needGrade = gradeInfo.getNeedGrade();
-                        String alreadyGrade = gradeInfo.getAlreadyGrade();
-                        if ((Integer.parseInt(alreadyGrade) < Integer.parseInt(needGrade))) {
-                            Intent intent = new Intent("android.intent.action.NOTIFICATION_BROADCAST");
-                            intent.putExtra("msg", "您目前学分未达标(点击可查看具体信息)");
-                            sendBroadcast(intent);
-                        }
-                    }
-                } catch (DbException e) {
-                    e.printStackTrace();
+                ArrayList<BirthdayInfo> birthdayInfos = DataUtils.getBirthdayInfo(10,1);
+                if (birthdayInfos!=null&&birthdayInfos.size()!=0){
+                    mIntent.setAction("birthdayMessage");
+                    mIntent.putExtra("birthdayMessage", "有朋友今天生日，赶快送上祝福吧！(点击可查看名单)");
+                    sendBroadcast(mIntent);
                 }
-
-
             }
-        }).start();
-
+        }.start();
     }
 
     private Handler notificationHandler = new Handler(new Handler.Callback() {

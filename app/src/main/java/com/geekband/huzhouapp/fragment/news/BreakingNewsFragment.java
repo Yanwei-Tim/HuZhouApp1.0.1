@@ -25,14 +25,10 @@ import com.chanven.lib.cptr.recyclerview.RecyclerAdapterWithHF;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.activity.MainActivity;
 import com.geekband.huzhouapp.activity.NewsContentActivity;
-import com.geekband.huzhouapp.activity.WebViewActivity;
 import com.geekband.huzhouapp.adapter.NewsRvAdapter;
-import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
-import com.geekband.huzhouapp.vo.LocalNews;
-import com.geekband.huzhouapp.vo.NetNewsInfo;
-import com.lidroid.xutils.exception.DbException;
+import com.geekband.huzhouapp.vo.DynamicNews;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -53,11 +49,11 @@ public class BreakingNewsFragment extends Fragment implements
     public static final int UPDATE_BANNER = 0;//更新轮播图片
     public static final int LOAD_LOCAL_NEWS = 1;//加载本地数据库新闻
     private ConvenientBanner convenientBanner;//顶部广告栏控件
-    //服务器新闻列表
+    //轮播新闻列表
     private ArrayList<String> mImageList;
-    private ArrayList<String> mHtmlList;
-    //数据库新闻列表
-    private ArrayList<LocalNews> mLocalNewsList;
+    private ArrayList<DynamicNews> mRollingNewses;
+    //动态新闻列表
+    private ArrayList<DynamicNews> mLocalNewsList;
 
     //标记第一次启动程序
     boolean isFirstEnter = true;
@@ -65,11 +61,10 @@ public class BreakingNewsFragment extends Fragment implements
     private PtrClassicFrameLayout mPtrClassicFrameLayout;
     private RecyclerAdapterWithHF mAdapterWithHF;
     //当前页是第一页
-    private int currentPage = 1;
+    private int currentPage = 0;
     //每页新闻数量
     private int pageSize = 10;
     private View mView;
-
 
     public static BreakingNewsFragment newInstance() {
         return new BreakingNewsFragment();
@@ -148,22 +143,17 @@ public class BreakingNewsFragment extends Fragment implements
     public void onPause() {
         super.onPause();
         //停止翻页
-        try {
-            MyApplication.sDbUtils.deleteAll(LocalNews.class);
-            MyApplication.sDbUtils.saveAll(mLocalNewsList);
-        } catch (DbException e) {
-            e.printStackTrace();
-        }
         convenientBanner.stopTurning();
-//        //加载网络数据
-//        new ReLoadTask().execute();
     }
 
 
     @Override
     public void onItemClick(int position) {
-        Intent intent = new Intent(getActivity(), WebViewActivity.class);
-        intent.putExtra("html", mHtmlList.get(position));
+        Intent intent = new Intent(getActivity(), NewsContentActivity.class);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(Constants.ROLLING, mRollingNewses.get(position));
+        intent.setAction(Constants.ROLLING);
+        intent.putExtras(bundle);
         startActivity(intent);
     }
 
@@ -174,57 +164,19 @@ public class BreakingNewsFragment extends Fragment implements
         @Override
         protected Integer doInBackground(String... params) {
             mLocalNewsList.clear();
-            mLocalNewsList.addAll(DataUtils.getLocalNewsList(pageSize, currentPage));
-            try {
-                MyApplication.sDbUtils.deleteAll(LocalNews.class);
-                MyApplication.sDbUtils.saveAll(mLocalNewsList);
-            } catch (DbException e) {
-                e.printStackTrace();
-            }
+            mLocalNewsList.addAll(DataUtils.getNewsList(Constants.UNROLLING, pageSize, currentPage));
+//            System.out.println("加载的动态新闻：" + mLocalNewsList);
             return null;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
-            currentPage = 1;
             mAdapterWithHF.notifyDataSetChanged();
             mPtrClassicFrameLayout.refreshComplete();
             mPtrClassicFrameLayout.setLoadMoreEnable(true);
-
-            new DbNewsThread().start();
         }
     }
 
-    //保存本地数据库新闻到本地数据库
-    class DbNewsThread extends Thread {
-        @Override
-        public void run() {
-            try {
-                MyApplication.sDbUtils.saveAll(mLocalNewsList);
-            } catch (DbException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    //获取本地数据库新闻
-    public void loadLocalNews() {
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    ArrayList<LocalNews> list = (ArrayList<LocalNews>) MyApplication.sDbUtils.findAll(LocalNews.class);
-                    Message message = mHandler.obtainMessage();
-                    message.what = LOAD_LOCAL_NEWS;
-                    message.obj = list;
-                    mHandler.sendMessage(message);
-                } catch (DbException e) {
-                    e.printStackTrace();
-                }
-            }
-        }.start();
-
-    }
 
 
     //加载更多新闻
@@ -232,7 +184,7 @@ public class BreakingNewsFragment extends Fragment implements
 
         @Override
         protected Integer doInBackground(String... params) {
-            mLocalNewsList.addAll(DataUtils.getLocalNewsList(pageSize, currentPage));
+            mLocalNewsList.addAll(DataUtils.getNewsList(Constants.UNROLLING, pageSize, currentPage));
             return null;
         }
 
@@ -247,19 +199,12 @@ public class BreakingNewsFragment extends Fragment implements
     class BannerThread extends Thread {
         @Override
         public void run() {
-            try {
-                ArrayList<NetNewsInfo> netNewsInfoList = (ArrayList<NetNewsInfo>)
-                        MyApplication.sDbUtils.findAll(NetNewsInfo.class);
-
-                //发送更新界面的请求
-                Message message = Message.obtain();
-                message.what = UPDATE_BANNER;
-                message.obj = netNewsInfoList;
-                mHandler.sendMessage(message);
-
-            } catch (DbException e) {
-                e.printStackTrace();
-            }
+            ArrayList<DynamicNews> dynamicNewses = DataUtils.getNewsList(Constants.ROLLING, pageSize, currentPage);
+            //发送更新界面的请求
+            Message message = Message.obtain();
+            message.what = UPDATE_BANNER;
+            message.obj = dynamicNewses;
+            mHandler.sendMessage(message);
         }
     }
 
@@ -272,14 +217,12 @@ public class BreakingNewsFragment extends Fragment implements
             switch (msg.what) {
                 case UPDATE_BANNER:
                     //noinspection unchecked
-                    ArrayList<NetNewsInfo> netNewsInfoList = (ArrayList<NetNewsInfo>) msg.obj;
-                    //加载轮播新闻
+                    mRollingNewses = (ArrayList<DynamicNews>) msg.obj;
                     mImageList = new ArrayList<>();
-                    mHtmlList = new ArrayList<>();
-                    if (netNewsInfoList != null) {
-                        for (NetNewsInfo netNewsInfo : netNewsInfoList) {
-                            mImageList.add(netNewsInfo.getNewsPic());
-                            mHtmlList.add(netNewsInfo.getNewsHTML());
+                    //加载轮播新闻
+                    if (mRollingNewses != null) {
+                        for (DynamicNews dynamicNews : mRollingNewses) {
+                            mImageList.add(dynamicNews.getPicUrl());
                         }
                         //更新轮播新闻界面
                         initBannerView();
@@ -287,13 +230,11 @@ public class BreakingNewsFragment extends Fragment implements
                     break;
                 case LOAD_LOCAL_NEWS:
                     //noinspection unchecked
-                    mLocalNewsList = (ArrayList<LocalNews>) msg.obj;
+                    mLocalNewsList = (ArrayList<DynamicNews>) msg.obj;
                     mAdapterWithHF.notifyDataSetChanged();
                     mPtrClassicFrameLayout.refreshComplete();
                     mPtrClassicFrameLayout.setLoadMoreEnable(true);
                     isFirstEnter = false;
-//                    System.out.println("加载handler数据："+mLocalNewsList);
-//                    System.out.println("加载本地DB数据："+msg.obj);
                     break;
                 default:
                     break;
@@ -343,13 +284,8 @@ public class BreakingNewsFragment extends Fragment implements
                     @Override
                     public void onRefreshBegin(PtrFrameLayout frame) {
                         //重载数据
-//                        if (isFirstEnter) {
-//                            loadLocalNews();
-////                            new refreshDataTask().execute();
-//
-//                        } else {
-                            new ReLoadTask().execute();
-//                        }
+                        currentPage = 0;
+                        new ReLoadTask().execute();
                     }
                 });
 
@@ -372,36 +308,16 @@ public class BreakingNewsFragment extends Fragment implements
     //点击进入服务器信息详情内容界面
     @Override
     public void onItemClick(RecyclerAdapterWithHF adapter, RecyclerView.ViewHolder vh, int position) {
-        LocalNews localNews = mLocalNewsList.get(position);
+        DynamicNews localNews = mLocalNewsList.get(position);
         if (localNews == null) {
             mLocalNewsList.remove(position);
         }
         Intent intent = new Intent(getActivity(), NewsContentActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putSerializable(Constants.LOCAL_NEWS_CONTENT, localNews);
+        bundle.putParcelable(Constants.UNROLLING, localNews);
         intent.putExtras(bundle);
+        intent.setAction(Constants.UNROLLING);
         startActivity(intent);
     }
 
-    class refreshDataTask extends AsyncTask<String, Integer, Integer> {
-        ArrayList<LocalNews> list;
-
-        @Override
-        protected Integer doInBackground(String... params) {
-            try {
-                list = (ArrayList<LocalNews>) MyApplication.sDbUtils.findAll(LocalNews.class);
-            } catch (DbException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Integer integer) {
-            mLocalNewsList = list;
-            isFirstEnter = false;
-            mAdapterWithHF.notifyDataSetChanged();
-            mPtrClassicFrameLayout.loadMoreComplete(true);
-        }
-    }
 }

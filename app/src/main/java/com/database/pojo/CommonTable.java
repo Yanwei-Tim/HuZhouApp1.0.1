@@ -2,10 +2,10 @@ package com.database.pojo;
 
 /**
  * 
- * 新闻表(信息类通用表)
+ * (信息类通用表)
  * 
  */
-public class NewsTable extends BaseTable
+public class CommonTable extends BaseTable
 {
 	private static final long serialVersionUID = -553290983353241736L;
 	
@@ -43,7 +43,7 @@ public class NewsTable extends BaseTable
 	/** 未通过原因 */
 	public static final String FIELD_REASON = "REASON";
 	
-	public NewsTable()
+	public CommonTable()
 	{
 		initTable();
 	}

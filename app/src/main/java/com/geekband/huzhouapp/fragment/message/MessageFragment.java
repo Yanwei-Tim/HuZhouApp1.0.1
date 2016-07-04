@@ -20,7 +20,7 @@ import com.geekband.huzhouapp.custom.PagerSlidingTabStrip;
 public class MessageFragment extends Fragment {
     private SuggestFragment sf;
     private SystemFragment ssf;
-    private ReplyFragment rf;
+    private ContactsFragment rf;
     private PagerSlidingTabStrip mTabs;
     private ViewPager mViewPager;
     private MyPagerAdapter mMyPagerAdapter;
@@ -42,7 +42,7 @@ public class MessageFragment extends Fragment {
 
     public class MyPagerAdapter extends FragmentPagerAdapter {
 
-        String[] titles = {"系统通知", "联系人", "意见信箱"};
+        String[] titles = {"消息通知", "联系人", "意见信箱"};
 
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -63,7 +63,7 @@ public class MessageFragment extends Fragment {
 
             } else if (position == 1) {
                 if (rf == null) {
-                    rf = ReplyFragment.newInstance();
+                    rf = ContactsFragment.newInstance();
                 }
                 return rf;
             } else if (position == 2) {

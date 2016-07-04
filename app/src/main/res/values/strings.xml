@@ -15,4 +15,5 @@
     <string name="more">加载中</string>
     <string name="hint_create">请选择您需要咨询的问题的类型，如：法律。</string>
     <string name="welcome">欢迎您，</string>
+    <string name="gallery_description">说点什么吧...</string>
 </resources>

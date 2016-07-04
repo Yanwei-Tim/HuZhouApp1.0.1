@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.database.dto.DataOperation;
 import com.database.pojo.ContentTable;
+import com.database.pojo.Document;
 import com.database.pojo.OpinionTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.activity.MainActivity;
@@ -119,12 +120,12 @@ public class SuggestFragment extends Fragment {
             OpinionTable opinionTable = new OpinionTable();
             opinionTable.putField(OpinionTable.FIELD_USERID, contentId);
             opinionTable.putField(OpinionTable.FIELD_POSTTIME, postTime);
-            if (DataOperation.insertOrUpdateTable(opinionTable, null)){
+            if (DataOperation.insertOrUpdateTable(opinionTable,(Document) null)){
                 //获取通用表并插入数据
                 ContentTable contentTable = new ContentTable();
                 contentTable.putField(ContentTable.FIELD_SUBSTANCE, params[0]);
                 contentTable.putField(ContentTable.FIELD_NEWSID, opinionTable.getContentId());
-                DataOperation.insertOrUpdateTable(contentTable, null);
+                DataOperation.insertOrUpdateTable(contentTable,(Document) null);
             }
             return null;
         }

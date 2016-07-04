@@ -7,10 +7,10 @@ import com.database.pojo.DataSetList;
 import com.database.pojo.Document;
 import com.database.pojo.StudyInfoTable;
 import com.database.pojo.StudyScoreTable;
+import com.geekband.huzhouapp.utils.Constants;
 import com.net.post.DocInfor;
 import com.net.post.PostHttp;
 import com.net.post.XmlPackage;
-import com.oa.util.Constants;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,15 +22,16 @@ import java.util.Map;
 
 public final class DataOperation {
     private DataOperation() {
-
     }
 
     /**
      * 获取用户已修学分
+     *
+     * @return
+     * @throws Exception
      */
     public static int queryUserCurrentScore(String contentId) {
         int score = -1;
-        //noinspection unchecked
         List<StudyInfoTable> studyInfoTableList = (List<StudyInfoTable>) queryTable(StudyInfoTable.TABLE_NAME, StudyInfoTable.FIELD_USERNO, contentId);
         if (studyInfoTableList != null) {
             for (StudyInfoTable studyInfoTable : studyInfoTableList) {
@@ -48,11 +49,15 @@ public final class DataOperation {
 
     /**
      * 获取用户当前需修学分
+     *
+     * @param userNo
+     * @return
+     * @throws Exception
      */
     public static int queryUserNeedScore(String userNo) {
         int needScore = -1;
         long currentTime = System.currentTimeMillis();
-        //noinspection unchecked
+
         ArrayList<StudyScoreTable> studyScoreDataList = (ArrayList<StudyScoreTable>) queryTable(StudyScoreTable.TABLE_NAME, StudyScoreTable.FIELD_USERNO, userNo);
         if (studyScoreDataList != null) {
             for (StudyScoreTable studyScoreTable : studyScoreDataList) {
@@ -90,7 +95,6 @@ public final class DataOperation {
             int newestVersionCode = -1; //服务器当前最新版本的版本码
 
             //获取服务器当前最新版本码
-            //noinspection unchecked
             ArrayList<AppVersionTable> versionList = (ArrayList<AppVersionTable>) queryTable(AppVersionTable.TABLE_NAME);
             int newestVersionIndex = 0;
             try {
@@ -126,25 +130,51 @@ public final class DataOperation {
 
     /**
      * 根据表名，获取所有表记录；用于无需查询条件的查询
+     *
+     * @param tableName
+     * @return
+     * @throws Exception
      */
     public static ArrayList<?> queryTable(String tableName) {
-        return queryTable(tableName, (HashMap<String, String>) null);
+        return queryTable(tableName, -1, -1);
+    }
+
+    public static ArrayList<?> queryTable(String tableName, int currentPage, int pageSize) {
+        return queryTable(tableName, currentPage, pageSize, (HashMap<String, String>) null);
     }
 
     /**
      * 根据表名，获取符合条件的表记录；用于以单个字段为查询条件的简单查询
+     *
+     * @param tableName
+     * @param fieldName
+     * @param fieldValue
+     * @return
+     * @throws Exception
      */
     public static ArrayList<?> queryTable(String tableName, String fieldName, String fieldValue) {
+        return queryTable(tableName, fieldName, -1, -1, fieldValue);
+    }
+
+    public static ArrayList<?> queryTable(String tableName, String fieldName, int currentPage, int pageSize, String fieldValue) {
         HashMap<String, String> fieldList = new HashMap<>();
         fieldList.put(fieldName, fieldValue);
-        ArrayList<?> list = queryTable(tableName, fieldList);
-        return queryTable(tableName, fieldList);
+        return queryTable(tableName, currentPage, pageSize, fieldList);
     }
 
     /**
      * 根据表名，获取符合条件的表记录；用于以多个字段为查询条件的简单查询
+     *
+     * @param tableName
+     * @param fieldList
+     * @return
+     * @throws Exception
      */
     public static ArrayList<?> queryTable(String tableName, Map<String, String> fieldList) {
+        return queryTable(tableName, -1, -1, fieldList);
+    }
+
+    public static ArrayList<?> queryTable(String tableName, int currentPage, int pageSize, Map<String, String> fieldList) {
         StringBuilder sqlStr = new StringBuilder();
 
         sqlStr.append("from (select * from " + tableName);
@@ -164,14 +194,32 @@ public final class DataOperation {
         }
         sqlStr.append(" ) " + tableName);
 
-        return queryTable(tableName, sqlStr.toString());
+        return queryTable(tableName, sqlStr.toString(), currentPage, pageSize);
     }
 
     /**
      * 根据表名，执行sql语句查询表记录；
+     *
+     * @param tableName
+     * @param sqlStr
+     * @return
+     * @throws Exception
      */
     public static ArrayList<?> queryTable(String tableName, String sqlStr) {
-        return queryTable(sqlStr, "", "", "", "SEARCHYOUNGCONTENT", new DocInfor("", tableName), true, false, "");
+        return queryTable(tableName, sqlStr, -1, -1);
+    }
+
+    public static ArrayList<?> queryTable(String tableName, String sqlStr, int currentPage, int pageSize) {
+        return queryTable(
+                sqlStr,
+                pageSize == -1 ? "" : String.valueOf(pageSize),
+                "",
+                "",
+                "SEARCHYOUNGCONTENT",
+                new DocInfor("", tableName),
+                true,
+                false,
+                currentPage*pageSize == -1 ? "" : String.valueOf(currentPage*pageSize));
     }
 
     /**
@@ -199,82 +247,31 @@ public final class DataOperation {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (resultData != null) {
-            tableDataList = DataParser.getTable(resultData, docInfor.getContentName());
-        }
+        tableDataList = DataParser.getTable(resultData, docInfor.getContentName());
+
         return tableDataList;
     }
 
-    /**
-     * 分页查询
-     *
-     * @param sql         查询的条件语句
-     * @param pageSize    每页显示的数量
-     * @param currentPage 当前页码
-     * @param docInfor    表对象
-     * @return 查询结果的集合
-     */
 
-    public static ArrayList<?> queryTable(String sql, int pageSize, int currentPage, DocInfor docInfor) {
-        String size = String.valueOf(pageSize);
-        String orderBy = "";
-        String columnList = "";
-        String command = "SEARCHYOUNGCONTENT";
-        // DocInfor docInfor = new DocInfor(null, NewsTable.TABLE_NAME);
-        String offset = String.valueOf(pageSize * currentPage);
-        return queryTable(sql, size, orderBy, columnList, command, docInfor, false, false, offset);
-    }
-
-    public static ArrayList<?> queryTable(String tableName, int pageSize, int currentPage, Map<String, String> fieldList) {
-        StringBuilder sqlStr = new StringBuilder();
-
-        sqlStr.append("from (select * from ").append(tableName);
-        if (fieldList != null) {
-            Iterator<String> iterator = fieldList.keySet().iterator();
-            List<String> keyList = new ArrayList<>();
-            while (iterator.hasNext()) {
-                keyList.add(iterator.next());
-            }
-            for (int i = 0; i < keyList.size(); i++) {
-                if (i == 0) sqlStr.append(" where ");
-                String key = keyList.get(i);
-                String value = fieldList.get(key);
-                sqlStr.append(key).append("='").append(value).append("'");
-                if (keyList.size() >= 2 && i != keyList.size() - 1) sqlStr.append(" AND ");
-            }
-        }
-        sqlStr.append(" ) ").append(tableName);
-        DocInfor docInfor = new DocInfor("", tableName);
-        return queryTable(String.valueOf(sqlStr), pageSize, currentPage, docInfor);
-    }
 
     /**
      * 向服务器端 插入一条表记录/更新现有的一条记录
      *
      * @param tableData 要 插入/更新 的表记录
-     * @param file      附件(为null时，表示不包含附件)
      * @return 插入成功的表记录的contentId
      * @throws Exception
      */
-    public static boolean insertOrUpdateTable(BaseTable tableData, Document file) {
+
+    public static boolean insertOrUpdateTable(BaseTable tableData)
+    {
         boolean result = false;
 
         String xmlStr = "";
-        if (file == null) //若无附件
-        {
-            xmlStr = XmlPackage.packageForSaveOrUpdate(
-                    (HashMap<?, ?>) tableData.getFieldList(),
-                    new DocInfor(tableData.getContentId(), tableData.getTableName()),  //当该表记录的contentId对应数据库中的一条已有的表记录时，更新该条记录；不对应已有记录时，添加新记录
-                    false);
-        } else //若有附件
-        {
-            xmlStr = XmlPackage.packageForInsertFileData(
-                    (HashMap<?, ?>) tableData.getFieldList(),
-                    new DocInfor(tableData.getContentId(), tableData.getTableName()),
-                    true,
-                    file.getPath(),
-                    file.getFileType());
-        }
+
+        xmlStr = XmlPackage.packageForSaveOrUpdate(
+                (HashMap<?, ?>) tableData.getFieldList(),
+                new DocInfor(tableData.getContentId(), tableData.getTableName()),  //当该表记录的contentId对应数据库中的一条已有的表记录时，更新该条记录；不对应已有记录时，添加新记录
+                false);
 
         DataSetList resultData = null;
         try {
@@ -282,12 +279,61 @@ public final class DataOperation {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (resultData != null && Constants.REQUEST_RESULT_SUCCESS.equals(resultData.SUCCESS)) {
-
-            if (resultData.CONTENTID != null && resultData.CONTENTID.size() != 0) {
+        if(Constants.REQUEST_RESULT_SUCCESS.equals(resultData.SUCCESS))
+        {
+            if(resultData.CONTENTID!=null && resultData.CONTENTID.size()!=0)
+            {
                 tableData.setContentId(resultData.CONTENTID.get(0));
-                result = true;
+            }
+            result = true;
+        }
 
+        return result;
+    }
+
+    /**
+     * 向服务器端 插入一条表记录/更新现有的一条记录
+     * @param tableData 要 插入/更新 的表记录
+     * @param file 附件
+     * @return 插入成功的表记录的contentId
+     * @throws Exception
+     */
+    public static boolean insertOrUpdateTable(BaseTable tableData, Document file)
+    {
+        return insertOrUpdateTable(tableData, new Document[]{file});
+    }
+
+
+    public static boolean insertOrUpdateTable(BaseTable tableData, Document[] file) {
+        boolean result = false;
+
+        String xmlStr = "";
+
+        String[] filePath = new String[file.length];
+        String[] fileType = new String[file.length];
+        for (int i = 0; i < file.length; i++) {
+            filePath[i] = file[i] == null ? "" : file[i].getPath();
+            fileType[i] = file[i] == null ? "" : file[i].getFileType();
+        }
+
+        xmlStr = XmlPackage.packageForInsertFileData(
+                (HashMap<?, ?>) tableData.getFieldList(),
+                new DocInfor(tableData.getContentId(), tableData.getTableName()),
+                true,
+                filePath,
+                fileType);
+        DataSetList resultData = null;
+        try {
+            resultData = PostHttp.PostXML(xmlStr);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (resultData!=null) {
+            if (Constants.REQUEST_RESULT_SUCCESS.equals(resultData.SUCCESS)) {
+                if (resultData.CONTENTID != null && resultData.CONTENTID.size() != 0) {
+                    tableData.setContentId(resultData.CONTENTID.get(0));
+                }
+                result = true;
             }
         }
 

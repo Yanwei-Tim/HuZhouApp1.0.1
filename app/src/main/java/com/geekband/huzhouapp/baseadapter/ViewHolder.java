@@ -13,7 +13,7 @@ import android.widget.TextView;
  * 自定义通用的viewHolder
  * Created by Administrator on 2016/6/14
  */
-public class ViewHolder {
+public class ViewHolder  {
     private final SparseArray<View> mViews;
     private View mConvertView;
 

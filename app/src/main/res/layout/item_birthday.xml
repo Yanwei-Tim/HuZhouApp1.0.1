@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:weightSum="5">
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:layout_weight="1">
+        <com.geekband.huzhouapp.custom.CircleImage
+            android:id="@+id/avatar_birthday"
+            android:src="@drawable/head_default"
+            android:layout_width="72dp"
+            android:layout_height="72dp"/>
+        <TextView
+            android:id="@+id/name_birthday"
+            android:text="韩正"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="10dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_weight="4">
+
+        <TextView
+            android:id="@+id/content_birthday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="距离生日还有三天"/>
+        <TextView
+            android:id="@+id/send_birthday"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="快送上您的祝福吧"/>
+    </LinearLayout>
+
+
+</LinearLayout>

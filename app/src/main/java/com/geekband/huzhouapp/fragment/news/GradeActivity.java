@@ -10,8 +10,8 @@ import android.widget.TextView;
 
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.vo.GradeInfo;
 import com.lidroid.xutils.exception.DbException;
 

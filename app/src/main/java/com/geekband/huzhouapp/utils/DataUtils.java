@@ -4,18 +4,21 @@ import android.os.AsyncTask;
 
 import com.database.dto.DataOperation;
 import com.database.pojo.AlbumTable;
+import com.database.pojo.CategoriesTable;
 import com.database.pojo.ContentTable;
 import com.database.pojo.CourseTable;
-import com.database.pojo.NewsTable;
+import com.database.pojo.CommonTable;
+import com.database.pojo.DepartmentsTable;
 import com.database.pojo.StudyInfoTable;
 import com.database.pojo.UserInfoTable;
 import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.activity.SplashActivity;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.vo.AlbumInfo;
+import com.geekband.huzhouapp.vo.BirthdayInfo;
 import com.geekband.huzhouapp.vo.CourseInfo;
+import com.geekband.huzhouapp.vo.DynamicNews;
 import com.geekband.huzhouapp.vo.GradeInfo;
-import com.geekband.huzhouapp.vo.LocalNews;
 import com.geekband.huzhouapp.vo.NetNewsInfo;
 import com.geekband.huzhouapp.vo.UserBaseInfo;
 import com.lidroid.xutils.exception.DbException;
@@ -32,6 +35,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,86 +43,72 @@ import java.util.Map;
  * Created by Administrator on 2016/5/25
  */
 public class DataUtils {
-
-    /**
-     * @return 本地新闻信息
-     */
-
-    public static ArrayList<LocalNews> getLocalNewsList() {
-        ArrayList<LocalNews> localNewsList = new ArrayList<>();
-        //获取服务器新闻信息
-        //noinspection unchecked
-        ArrayList<NewsTable> newsList = (ArrayList<NewsTable>) DataOperation.queryTable(NewsTable.TABLE_NAME);
-        if (newsList != null) {
-            for (int i = 0; i < newsList.size(); i++) {
-                LocalNews localNews = new LocalNews();
-                String title = newsList.get(i).getField(NewsTable.FIELD_TITLE);
-//
-                ArrayList<String> picUrlList = (ArrayList<String>) newsList.get(i).getAccessaryFileUrlList();
-//                System.out.println("新闻picUrlList内容测试："+picUrlList);
-                String picUrl = null;
-                if (picUrlList.size() != 0) {
-                    picUrl = picUrlList.get(0);
-                }
-                String contentID = newsList.get(i).getContentId();
-                String date = newsList.get(i).getField(NewsTable.FIELD_DATETIME);
-
-                //根据contentId获取新闻内容
-                //noinspection unchecked
-                ArrayList<ContentTable> contentTables = (ArrayList<ContentTable>) DataOperation.queryTable(ContentTable.TABLE_NAME, ContentTable.FIELD_NEWSID, contentID);
-                if (contentTables != null && contentTables.size() != 0) {
-                    ContentTable contentTable = contentTables.get(0);
-                    if (contentTable != null) {
-                        String content = contentTable.getField(ContentTable.FIELD_SUBSTANCE);
-                        //将获取的新闻信息放入本地LocalNews
-                        localNews.setTitle(title);
-                        localNews.setPicUrl(picUrl);
-                        localNews.setDate(date);
-                        localNews.setContent(content);
-                        localNews.setId(i);
-                    }
-                }
-                localNewsList.add(localNews);
-            }
-        }
-
-        return localNewsList;
-    }
-
     /**
      * @return 分页获取本地新闻信息
      */
-    public static ArrayList<LocalNews> getLocalNewsList(int pageSize, int currentPage) {
-        ArrayList<LocalNews> localNewsList = new ArrayList<>();
-        //获取服务器新闻信息
+    public static ArrayList<DynamicNews> getNewsList(String isRolling, int pageSize, int currentPage) {
+        ArrayList<DynamicNews> localNewsList = new ArrayList<>();
+        //查询分类表
         //noinspection unchecked
-        ArrayList<NewsTable> newsList = (ArrayList<NewsTable>) DataOperation.queryTable(NewsTable.TABLE_NAME, pageSize, currentPage, (Map<String,String>)null);
-        if (newsList != null) {
-            for (int i = 0; i < newsList.size(); i++) {
-                LocalNews localNews = new LocalNews();
-                String title = newsList.get(i).getField(NewsTable.FIELD_TITLE);
-                ArrayList<String> picUrlList = (ArrayList<String>) newsList.get(i).getAccessaryFileUrlList();
-                String picUrl = null;
-                if (picUrlList.size() != 0) {
-                    picUrl = picUrlList.get(0);
-                }
-                String contentID = newsList.get(i).getContentId();
-                String date = newsList.get(i).getField(NewsTable.FIELD_DATETIME);
+        ArrayList<CategoriesTable> categoriesTables = (ArrayList<CategoriesTable>) DataOperation.
+                queryTable(CategoriesTable.TABLE_NAME, CategoriesTable.FIELD_PARENTID, "A0100020166071445164939060");
+        if (categoriesTables != null && categoriesTables.size() != 0) {
+            String newsId = categoriesTables.get(0).getContentId();
+            //在通用信息表里面匹配新闻
+            Map<String, String> newsCategory = new HashMap<>();
+            newsCategory.put(CommonTable.FIELD_CATEGORYID, newsId);
+            newsCategory.put(CommonTable.FIELD_ISROLLING, isRolling);
+            //noinspection unchecked
+            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, currentPage, pageSize, newsCategory);
+            if (commonTables != null) {
+                for (int i = 0; i < commonTables.size(); i++) {
+                    DynamicNews localNews = new DynamicNews();
+                    String title = commonTables.get(i).getField(CommonTable.FIELD_TITLE);
+                    String writer = commonTables.get(i).getField(CommonTable.FIELD_WRITERID);
+                    //noinspection unchecked
+                    ArrayList<UserTable> writerTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, writer);
+                    String writerId = null;
+                    if (writerTables != null && writerTables.size() != 0) {
+                        writerId = writerTables.get(0).getField(UserTable.FIELD_REALNAME);
+                    }
+                    String auditor = commonTables.get(i).getField(CommonTable.FIELD_AUDITOR);
+                    String auditorId = null;
+                    //noinspection unchecked
+                    ArrayList<DepartmentsTable> departmentsTables = (ArrayList<DepartmentsTable>) DataOperation.queryTable(DepartmentsTable.TABLE_NAME, DepartmentsTable.CONTENTID, auditor);
+                    if (departmentsTables != null && departmentsTables.size() != 0) {
+                        auditorId = departmentsTables.get(0).getField(DepartmentsTable.FIELD_DEPARTMENTNAME);
+                    }
 
-                //根据contentId获取新闻内容
-                //noinspection unchecked
-                ArrayList<ContentTable> contentTables = (ArrayList<ContentTable>) DataOperation.queryTable(ContentTable.TABLE_NAME, ContentTable.FIELD_NEWSID, contentID);
+                    String date = commonTables.get(i).getField(CommonTable.FIELD_DATETIME);
+                    String picUrl = null;
+                    if (isRolling.equals("0")) {
+                        ArrayList<String> picUrls = (ArrayList<String>) commonTables.get(i).getAccessaryFileUrlList();
+                        if (picUrls.size() != 0) {
+                            picUrl = picUrls.get(0);
+                        }
+                    } else if (isRolling.equals("1")) {
+                        picUrl = "http://" + com.oa.util.Constants.CONNIP + commonTables.get(i).getField(CommonTable.FIELD_PICURL);
+                    }
+                    String contentID = commonTables.get(i).getContentId();
+
+                    //根据contentId获取新闻内容
+                    String content = null;
+                    //noinspection unchecked
+                    ArrayList<ContentTable> contentTables = (ArrayList<ContentTable>) DataOperation.queryTable(ContentTable.TABLE_NAME, ContentTable.FIELD_NEWSID, contentID);
 //                System.out.println("测试新闻内容图片"+contentTables);
-                if (contentTables != null && contentTables.size() != 0) {
-                    String content = contentTables.get(0).getField(ContentTable.FIELD_SUBSTANCE);
-                    //将获取的新闻信息放入本地LocalNews
+                    if (contentTables != null && contentTables.size() != 0) {
+                        content = contentTables.get(0).getField(ContentTable.FIELD_SUBSTANCE);
+                        //将获取的新闻信息放入本地LocalNews
+                    }
                     localNews.setTitle(title);
+                    localNews.setWriterId(writerId);
+                    localNews.setAuditorId(auditorId);
                     localNews.setPicUrl(picUrl);
                     localNews.setDate(date);
                     localNews.setContent(content);
                     localNews.setId(i);
+                    localNewsList.add(localNews);
                 }
-                localNewsList.add(localNews);
             }
         }
 
@@ -263,6 +253,7 @@ public class DataUtils {
                     //获取单个相册及其名称和所包含的相册数量
                     AlbumTable albumTable = mAlbumTableList.get(i);
                     String albumName = albumTable.getField(AlbumTable.FIELD_NAME);
+                    String contentId = albumTable.getContentId();
                     List<String> phoUrlList = albumTable.getAccessaryFileUrlList();
                     int albumCount = phoUrlList.size();
                     AlbumInfo albumInfo = new AlbumInfo();
@@ -271,6 +262,7 @@ public class DataUtils {
                         albumInfo.setAlbumUrl(phoUrlList.get(0));
                         albumInfo.setAlbumName(albumName);
                         albumInfo.setAlbumCount(albumCount);
+                        albumInfo.setContentId(contentId);
                         albumInfo.setId(i);
                         mAlbumInfoList.add(albumInfo);
                     }
@@ -354,6 +346,7 @@ public class DataUtils {
 
     /**
      * 获取个人课程
+     *
      * @return
      */
     public static ArrayList<CourseInfo> bindCourseInfo() {
@@ -361,7 +354,7 @@ public class DataUtils {
         //noinspection unchecked
         ArrayList<StudyInfoTable> StudyInfoTables = (ArrayList<StudyInfoTable>) DataOperation
                 .queryTable(StudyInfoTable.TABLE_NAME, StudyInfoTable.FIELD_USERNO
-                        , MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null));
+                        , MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null));
         if (StudyInfoTables != null) {
             for (int i = 0; i < StudyInfoTables.size(); i++) {
                 String courseNo = StudyInfoTables.get(i).getField(StudyInfoTable.FIELD_COURSENO);
@@ -384,7 +377,7 @@ public class DataUtils {
                         //学习时长
                         String time = courseTable.getField(CourseTable.FIELD_NEEDTIME);
 
-                        courseInfo.setId(i+1);
+                        courseInfo.setId(i + 1);
                         courseInfo.setTitle(title);
                         courseInfo.setType(type);
                         courseInfo.setPoint(point);
@@ -398,13 +391,56 @@ public class DataUtils {
         }
         return courseList;
     }
+
     /**
      * 获取发布的课程
      */
 
-    public static ArrayList<CourseTable> getAllCourses(){
+    public static ArrayList<CourseTable> getAllCourses() {
         //noinspection unchecked
         return (ArrayList<CourseTable>) DataOperation.queryTable(CourseTable.TABLE_NAME);
+    }
+
+
+    /**
+     * 获取生日在当前日期内的所有用户真实姓名及其生日
+     */
+
+    public static ArrayList<BirthdayInfo> getBirthdayInfo(int pageSize, int currentPage) {
+        ArrayList<BirthdayInfo> arrayList = new ArrayList<>();
+        //noinspection unchecked
+        ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, currentPage, pageSize, (Map<String, String>) null);
+        if (userTables != null && userTables.size() != 0) {
+            for (UserTable userTable : userTables) {
+                String userId = userTable.getContentId();
+                //noinspection unchecked
+                ArrayList<UserInfoTable> userInfoTables = (ArrayList<UserInfoTable>) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, userId);
+                if (userInfoTables != null && userInfoTables.size() != 0) {
+                    //真实姓名
+                    String realName = userTable.getField(UserTable.FIELD_REALNAME);
+                    //生日
+                    String idCardNum = userInfoTables.get(0).getField(UserInfoTable.FIELD_IDCARDNO);
+                    String birthdayStr;
+                    if (idCardNum != null && idCardNum.length() == 18) {
+                        birthdayStr = idCardNum.substring(11, 15);
+                    } else {
+                        birthdayStr = "";
+                    }
+                    //头像地址
+                    ArrayList<String> avatarUrls = (ArrayList<String>) userTable.getAccessaryFileUrlList();
+                    String avatarUrl = avatarUrls.get(0);
+
+                    BirthdayInfo birthdayInfo = new BirthdayInfo();
+                    birthdayInfo.setRealName(realName);
+                    birthdayInfo.setDate(birthdayStr);
+                    birthdayInfo.setAvatarImage(avatarUrl);
+
+                    arrayList.add(birthdayInfo);
+                }
+
+            }
+        }
+        return arrayList;
     }
 
     /**
@@ -460,7 +496,7 @@ public class DataUtils {
                     }
                     String fileType = "apk";
                     String fileName = urlStr.substring(urlStr.lastIndexOf("/") + 1) + ".apk";
-                    File localFile = FileUtil.saveFile(fileType,fileName);
+                    File localFile = FileUtil.saveFile(fileType, fileName);
                     out = new FileOutputStream(localFile);
                     out.write(data);
                     out.flush();

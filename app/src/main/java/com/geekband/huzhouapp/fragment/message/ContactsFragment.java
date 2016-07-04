@@ -12,13 +12,13 @@ import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.activity.MainActivity;
 
 /**
- * Created by Administrator on 2016/5/12.
+ * Created by Administrator on 2016/5/12
  */
-public class ReplyFragment extends Fragment {
+public class ContactsFragment extends Fragment {
     MainActivity mMainActivity;
 
-    public static ReplyFragment newInstance(){
-        return new ReplyFragment();
+    public static ContactsFragment newInstance(){
+        return new ContactsFragment();
     }
 
     @Override
