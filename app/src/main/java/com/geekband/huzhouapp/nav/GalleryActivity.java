@@ -146,7 +146,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //给上传更多图片添加点击事件
-                if (position==mPathList.indexOf(IMAGE_TAG)){
+                if (position == mPathList.indexOf(IMAGE_TAG)) {
                     pickPhoto();
                 }
             }
@@ -429,51 +429,31 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
         @Override
         protected Integer doInBackground(String... params) {
-
+            String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
             //noinspection unchecked
-            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_NAME, params[0]);
+            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, userId);
             if (albumTables != null && albumTables.size() != 0) {
-                if (!params[0].equals("默认相册")) {
-                    boolean isSuccess = insertPic(albumTables.get(0));
-                    System.out.println("插入是否成功1：" + isSuccess);
-                    if (isSuccess) {
-                        return 1;
-                    }
-                } else {
-                    for (AlbumTable albumTable : albumTables) {
-                        if (albumTable.getField(AlbumTable.FIELD_NAME).equals("默认相册")) {
-                            boolean isSuccess = insertPic(albumTables.get(0));
-                            System.out.println("插入是否成功2：" + isSuccess);
-                            if (isSuccess) {
-                                return 1;
-                            }
-                        } else {
-                            AlbumTable defaultTable = new AlbumTable();
-                            defaultTable.putField(AlbumTable.FIELD_NAME, params[0]);
-                            DataOperation.insertOrUpdateTable(defaultTable);
-                            //TODO 要做表是否插入成功的判断
-                            boolean isSuccess = insertPic(defaultTable);
-                            System.out.println("插入是否成功3：" + isSuccess);
-                            if (isSuccess) {
-                                return 1;
-                            }
-                        }
+                //检测默认相册是否存在，不存在则自动创建
+                boolean isExist = false;
+                for (AlbumTable albumTable : albumTables) {
+                    if (albumTable.getField(AlbumTable.FIELD_NAME).equals("默认相册")) {
+                        isExist = true;
                     }
                 }
-            } else {
-                AlbumTable defaultTable = new AlbumTable();
-                defaultTable.putField(AlbumTable.FIELD_NAME, params[0]);
-                DataOperation.insertOrUpdateTable(defaultTable);
-                //TODO 要做表是否插入成功的判断
-                boolean isSuccess = insertPic(defaultTable);
-                System.out.println("插入是否成功：" + isSuccess);
-                if (isSuccess) {
-                    return 1;
+                if (!isExist) {
+                    AlbumTable albumTable = new AlbumTable();
+                    albumTable.putField(AlbumTable.FIELD_NAME, "默认相册");
+                    albumTable.putField(AlbumTable.FIELD_USERID, userId);
+                    DataOperation.insertOrUpdateTable(albumTable,(Document)null);
+                }
+                //上传照片
+                //noinspection unchecked
+                ArrayList<AlbumTable> albums = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME,AlbumTable.FIELD_NAME, params[0]);
+                if (albums!=null&&albums.size()!=0){
+                    insertPic(albums.get(0));
                 }
             }
-
-
-            return 2;
+            return null;
         }
 
         @Override
@@ -490,14 +470,10 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     }
 
     private boolean insertPic(AlbumTable albumTable) {
-        ArrayList<String> olderPaths = (ArrayList<String>) albumTable.getAccessaryFileUrlList();
-        System.out.println("olderPath:" + olderPaths);
-        if (olderPaths != null && olderPaths.size() != 0) {
-            mPathList.addAll(olderPaths);
-        }
         if (mPathList != null && mPathList.size() != 0) {
             Document[] documents = new Document[mPathList.size()];
             for (int i = 0; i < mPathList.size(); i++) {
+//                Log.i("新添加的照片mPathList:", mPathList.get(i));
                 documents[i] = new Document(mPathList.get(i));
             }
             return DataOperation.insertOrUpdateTable(albumTable, documents);

@@ -66,6 +66,7 @@ public class BreakingNewsFragment extends Fragment implements
     private int pageSize = 10;
     private View mView;
 
+
     public static BreakingNewsFragment newInstance() {
         return new BreakingNewsFragment();
     }
@@ -81,6 +82,8 @@ public class BreakingNewsFragment extends Fragment implements
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_breaking_news, null);
         convenientBanner = (ConvenientBanner) mView.findViewById(R.id.convenientBanner);
+
+
         //加载本地数据
         configPtr();
         //加载轮播新闻
@@ -178,7 +181,6 @@ public class BreakingNewsFragment extends Fragment implements
     }
 
 
-
     //加载更多新闻
     class LoadMoreNewsTask extends AsyncTask<String, Integer, Integer> {
 
@@ -271,6 +273,7 @@ public class BreakingNewsFragment extends Fragment implements
                 mPtrClassicFrameLayout.setPullToRefresh(false);
                 // default is true
                 mPtrClassicFrameLayout.setKeepHeaderWhenRefresh(true);
+
                 //进入activity自动下拉刷新
                 mPtrClassicFrameLayout.postDelayed(new Runnable() {
                     @Override
@@ -307,7 +310,8 @@ public class BreakingNewsFragment extends Fragment implements
 
     //点击进入服务器信息详情内容界面
     @Override
-    public void onItemClick(RecyclerAdapterWithHF adapter, RecyclerView.ViewHolder vh, int position) {
+    public void onItemClick(RecyclerAdapterWithHF adapter, RecyclerView.ViewHolder vh,
+                            int position) {
         DynamicNews localNews = mLocalNewsList.get(position);
         if (localNews == null) {
             mLocalNewsList.remove(position);

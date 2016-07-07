@@ -202,7 +202,7 @@ public class SystemFragment extends Fragment {
                     try
                     {
                         int position = (int) this.params[0];
-                        String currentUserContenId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, "");
+                        String currentUserContentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, "");
                         Intent intent = new Intent(getActivity(), ChatActivity.class);
 
                         //该通知对应的聊天包含的用户列表
@@ -217,7 +217,7 @@ public class SystemFragment extends Fragment {
                         {
                             userList.add(replyObjectUserList.get(0));
 
-                            String title_userName = currentUserContenId.equals(replyObjectContentId)?notificationListAdapter.getItem(position).getMessageSenderInfo().getField(UserTable.FIELD_USERNAME):replyObjectUserList.get(0).getField(UserTable.FIELD_USERNAME);
+                            String title_userName = currentUserContentId.equals(replyObjectContentId)?notificationListAdapter.getItem(position).getMessageSenderInfo().getField(UserTable.FIELD_USERNAME):replyObjectUserList.get(0).getField(UserTable.FIELD_USERNAME);
                             intent.putExtra(ChatActivity.ARGS_TITLE, "与"+title_userName+"的对话");
                             intent.putExtra(ChatActivity.ARGS_CHATMODE, ChatActivity.CHATMODE_SINGLE);
                         }

@@ -198,29 +198,32 @@ public class DataUtils {
                     String realName = userTable.getField(UserTable.FIELD_REALNAME);
                     String phoneNum = userTable.getField(UserTable.FIELD_TELEPHONE);
                     String emailAddress = userTable.getField(UserTable.FIELD_EMAIL);
+                    //noinspection unchecked
+                    ArrayList<UserInfoTable> userInfoTables = (ArrayList<UserInfoTable>) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, contentId);
+                    if (userInfoTables != null && userInfoTables.size() != 0) {
+                        UserInfoTable userInfoTable = userInfoTables.get(0);
+                        if (userInfoTable != null) {
+                            String sex = userInfoTable.getField(UserInfoTable.FIELD_SEX);
+                            String address = userInfoTable.getField(UserInfoTable.FIELD_ADDRESS);
+                            String birthday = userInfoTable.getField(UserInfoTable.FIELD_BIRTHDAY);
 
-                    UserInfoTable userInfoTable = (UserInfoTable) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, contentId).get(0);
-                    if (userInfoTable != null) {
-                        String sex = userInfoTable.getField(UserInfoTable.FIELD_SEX);
-                        String address = userInfoTable.getField(UserInfoTable.FIELD_ADDRESS);
-                        String birthday = userInfoTable.getField(UserInfoTable.FIELD_BIRTHDAY);
+                            userBaseInfo.setId(id);
+                            userBaseInfo.setUserName(userName);
+                            userBaseInfo.setContentId(contentId);
+                            userBaseInfo.setRealName(realName);
+                            userBaseInfo.setPhoneNum(phoneNum);
+                            userBaseInfo.setEmailAddress(emailAddress);
+                            userBaseInfo.setSex(sex);
+                            userBaseInfo.setAddress(address);
+                            userBaseInfo.setBirthday(birthday);
 
-                        userBaseInfo.setId(id);
-                        userBaseInfo.setUserName(userName);
-                        userBaseInfo.setContentId(contentId);
-                        userBaseInfo.setRealName(realName);
-                        userBaseInfo.setPhoneNum(phoneNum);
-                        userBaseInfo.setEmailAddress(emailAddress);
-                        userBaseInfo.setSex(sex);
-                        userBaseInfo.setAddress(address);
-                        userBaseInfo.setBirthday(birthday);
+                            try {
+                                MyApplication.sDbUtils.deleteAll(UserBaseInfo.class);
+                                MyApplication.sDbUtils.save(userBaseInfo);
 
-                        try {
-                            MyApplication.sDbUtils.deleteAll(UserBaseInfo.class);
-                            MyApplication.sDbUtils.save(userBaseInfo);
-
-                        } catch (DbException e) {
-                            e.printStackTrace();
+                            } catch (DbException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                 }

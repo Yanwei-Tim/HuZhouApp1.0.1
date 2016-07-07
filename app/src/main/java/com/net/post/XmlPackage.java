@@ -125,7 +125,7 @@ public class XmlPackage {
         if (filePath.length() != 0) {
             InputStream is = null;
             try {
-                System.out.println("ImageStream----Path--->" + filePath);
+//                System.out.println("ImageStream----Path--->" + filePath);
                 is = new FileInputStream(filePath);// 获取文件输入流
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

@@ -96,7 +96,6 @@ public class MainActivity extends BaseActivity
         //启动通知栏服务
         startService();
 
-
     }
 
     @Override
