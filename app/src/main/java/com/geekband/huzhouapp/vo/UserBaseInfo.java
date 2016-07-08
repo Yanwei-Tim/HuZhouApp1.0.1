@@ -13,6 +13,15 @@ public class UserBaseInfo{
     private String sex;
     private String address;
     private String birthday;
+    private String avatarUrl;
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
 
     public int getId() {
         return id;
@@ -87,4 +96,19 @@ public class UserBaseInfo{
     }
 
 
+    @Override
+    public String toString() {
+        return "UserBaseInfo{" +
+                "id=" + id +
+                ", userName='" + userName + '\'' +
+                ", contentId='" + contentId + '\'' +
+                ", realName='" + realName + '\'' +
+                ", phoneNum='" + phoneNum + '\'' +
+                ", emailAddress='" + emailAddress + '\'' +
+                ", sex='" + sex + '\'' +
+                ", address='" + address + '\'' +
+                ", birthday='" + birthday + '\'' +
+                ", avatarUrl='" + avatarUrl + '\'' +
+                '}';
+    }
 }

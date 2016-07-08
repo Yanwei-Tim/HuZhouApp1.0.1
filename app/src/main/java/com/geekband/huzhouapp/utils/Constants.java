@@ -27,6 +27,12 @@ public class Constants {
     public static final String ROLLING = "1";
     public static final String UNROLLING = "0";
     public static final String SERVICE = "http://192.168.0.14:9080";//lmc本地测试用服务器;;
+
     // 请求返回成功码
     public static String REQUEST_RESULT_SUCCESS = "SUCCESS";
+    //通知公告父类id以及序号
+    public static final String INFORMATION_PARENT_ID = "A0100020166071447205284156";
+    public static final String INFORMATION_SORT = "3";
+    public static final String INFORMATION_CONTENT = "information_content";
+
 }

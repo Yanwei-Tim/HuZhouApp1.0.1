@@ -3,7 +3,7 @@ package com.geekband.huzhouapp.vo;
 /**
  * Created by Administrator on 2016/5/18
  */
-public class CourseClass extends G {
+public class CourseClass {
     private int imageId;
     private String title;
 

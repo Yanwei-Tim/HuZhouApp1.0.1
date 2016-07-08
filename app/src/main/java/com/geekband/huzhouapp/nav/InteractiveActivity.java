@@ -31,7 +31,7 @@ public class InteractiveActivity extends Activity {
     private static final int PULL_TO_REFRESH = 1;//下拉刷新
     private static final int PULL_TO_LOAD = 2;//上拉加载
     int pageSize = 10;
-    int currentPage =1;
+    int currentPage = 0;
     private ArrayList<BirthdayInfo> mList;
     private PtrClassicFrameLayout mPtr;
     private RecyclerAdapterWithHF mAdapterWithHF;
@@ -45,23 +45,25 @@ public class InteractiveActivity extends Activity {
     }
 
     private void initView() {
-        final BitmapUtils bitmapUtils = BitmapHelper.getBitmapUtils(this,null,R.drawable.head_default,R.drawable.head_default);
+        final BitmapUtils bitmapUtils = BitmapHelper.getBitmapUtils(this, null, R.drawable.head_default, R.drawable.head_default);
         mPtr = (PtrClassicFrameLayout) findViewById(R.id.ptrLayout_birthday);
         RecyclerView rv = (RecyclerView) findViewById(R.id.recyclerView_birthday);
-        final LinearLayoutManager manager = new LinearLayoutManager(this);
+        LinearLayoutManager manager = new LinearLayoutManager(this);
         manager.setOrientation(LinearLayoutManager.VERTICAL);
         rv.setLayoutManager(manager);
-        CommonRecyclerAdapter adapter = new CommonRecyclerAdapter<BirthdayInfo>(this, R.layout.item_birthday,mList) {
+        CommonRecyclerAdapter adapter = new CommonRecyclerAdapter<BirthdayInfo>(this, R.layout.item_birthday, mList) {
 
             @Override
             public void convertView(CommonRecyclerViewHolder holder, BirthdayInfo birthdayInfo) {
+
                 ImageView imageView = holder.getView(R.id.avatar_birthday);
-                bitmapUtils.display(imageView,birthdayInfo.getAvatarImage());
+                bitmapUtils.display(imageView, birthdayInfo.getAvatarImage());
                 holder.setText(R.id.name_birthday, birthdayInfo.getRealName());
-                holder.setText(R.id.content_birthday,"距离生日还有"+birthdayInfo.getDate()+"天");
+                holder.setText(R.id.content_birthday, "距离生日还有" + birthdayInfo.getDate() + "天");
+
             }
         };
-
+        //noinspection unchecked
         mAdapterWithHF = new RecyclerAdapterWithHF(adapter);
         rv.setAdapter(mAdapterWithHF);
         mPtr.setLastUpdateTimeRelateObject(this);
@@ -82,12 +84,21 @@ public class InteractiveActivity extends Activity {
                 new Thread() {
                     @Override
                     public void run() {
-                        currentPage = 1;
+                        currentPage = 0;
                         mList.clear();
-                        mList.addAll(DataUtils.getBirthdayInfo(pageSize, currentPage));
-                        Message message = mHandler.obtainMessage();
-                        message.what = PULL_TO_REFRESH;
-                        mHandler.sendMessage(message);
+                        ArrayList<BirthdayInfo> birthdays = DataUtils.getBirthdayInfo(pageSize, currentPage);
+                        if (birthdays != null) {
+                            for (int i = 0; i < birthdays.size(); i++) {
+                                if (birthdays.get(i).getDate() == null || birthdays.get(i).getDate().equals("")) {
+                                    birthdays.remove(i);
+                                }
+                            }
+                            mList.addAll(birthdays);
+                            Message message = mHandler.obtainMessage();
+                            message.what = PULL_TO_REFRESH;
+                            mHandler.sendMessage(message);
+                        }
+
                     }
                 }.start();
             }
@@ -96,11 +107,24 @@ public class InteractiveActivity extends Activity {
         mPtr.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void loadMore() {
-                currentPage += 1;
-                mList.addAll(DataUtils.getBirthdayInfo(pageSize, currentPage));
-                Message message = mHandler.obtainMessage();
-                message.what = PULL_TO_LOAD;
-                mHandler.sendMessage(message);
+                new Thread(){
+                    @Override
+                    public void run() {
+                        currentPage += 1;
+                        ArrayList<BirthdayInfo> birthdays = DataUtils.getBirthdayInfo(pageSize, currentPage);
+                        if (birthdays != null) {
+                            for (int i = 0; i < birthdays.size(); i++) {
+                                if (birthdays.get(i).getDate() == null || birthdays.get(i).getDate().equals("")) {
+                                    birthdays.remove(i);
+                                }
+                            }
+                            mList.addAll(birthdays);
+                            Message message = mHandler.obtainMessage();
+                            message.what = PULL_TO_LOAD;
+                            mHandler.sendMessage(message);
+                        }
+                    }
+                }.start();
             }
         });
 
@@ -109,7 +133,7 @@ public class InteractiveActivity extends Activity {
     Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
-            switch (msg.what){
+            switch (msg.what) {
                 case PULL_TO_REFRESH:
                     mAdapterWithHF.notifyDataSetChanged();
                     mPtr.refreshComplete();

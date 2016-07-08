@@ -21,7 +21,7 @@ import com.geekband.huzhouapp.custom.PagerSlidingTabStrip;
 public class NewsFragment extends Fragment {
     private BreakingNewsFragment bnf;
     private CourseFragment lf;
-    private AttendanceFragment af;
+    private InformationFragment af;
     private PagerSlidingTabStrip mTabs;
     private ViewPager mViewPager;
     private MyPagerAdapter mMyPagerAdapter;
@@ -43,7 +43,7 @@ public class NewsFragment extends Fragment {
 
     public class MyPagerAdapter extends FragmentPagerAdapter {
 
-        String[] titles = {"新闻推送", "课程中心", "日志考勤"};
+        String[] titles = {"新闻推送", "课程中心", "通知公告"};
 
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -69,7 +69,7 @@ public class NewsFragment extends Fragment {
                 return lf;
             } else if (position == 2) {
                 if (af == null) {
-                    af = AttendanceFragment.newInstance();
+                    af = InformationFragment.newInstance();
                 }
                 return af;
             }

@@ -114,4 +114,17 @@ public class DynamicNews implements Serializable,Parcelable{
         dest.writeString(picUrl);
         dest.writeString(content);
     }
+
+    @Override
+    public String toString() {
+        return "DynamicNews{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", date='" + date + '\'' +
+                ", writerId='" + writerId + '\'' +
+                ", auditorId='" + auditorId + '\'' +
+                ", picUrl='" + picUrl + '\'' +
+                ", content='" + content + '\'' +
+                '}';
+    }
 }

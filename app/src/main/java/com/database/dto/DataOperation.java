@@ -173,7 +173,7 @@ public final class DataOperation {
     public static ArrayList<?> queryTable(String tableName, Map<String, String> fieldList) {
         return queryTable(tableName, -1, -1, fieldList);
     }
-
+//new
     public static ArrayList<?> queryTable(String tableName, int currentPage, int pageSize, Map<String, String> fieldList) {
         StringBuilder sqlStr = new StringBuilder();
 

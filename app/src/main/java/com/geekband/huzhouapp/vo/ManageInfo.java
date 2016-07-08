@@ -3,7 +3,7 @@ package com.geekband.huzhouapp.vo;
 /**
  * Created by Administrator on 2016/5/19
  */
-public class ManageInfo extends L {
+public class ManageInfo  {
 
     private String title;
     private String content;

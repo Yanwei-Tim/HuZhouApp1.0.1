@@ -31,4 +31,13 @@ public class BirthdayInfo {
     public void setDate(String date) {
         this.date = date;
     }
+
+    @Override
+    public String toString() {
+        return "BirthdayInfo{" +
+                "avatarImage='" + avatarImage + '\'' +
+                ", realName='" + realName + '\'' +
+                ", date='" + date + '\'' +
+                '}';
+    }
 }

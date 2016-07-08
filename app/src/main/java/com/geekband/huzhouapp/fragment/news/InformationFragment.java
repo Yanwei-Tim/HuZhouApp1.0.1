@@ -1,6 +1,7 @@
-package com.geekband.huzhouapp.fragment.message;
+package com.geekband.huzhouapp.fragment.news;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,31 +20,31 @@ import com.chanven.lib.cptr.loadmore.OnLoadMoreListener;
 import com.chanven.lib.cptr.recyclerview.RecyclerAdapterWithHF;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.activity.MainActivity;
+import com.geekband.huzhouapp.activity.NewsContentActivity;
 import com.geekband.huzhouapp.baseadapter.CommonRecyclerAdapter;
 import com.geekband.huzhouapp.baseadapter.CommonRecyclerViewHolder;
-import com.geekband.huzhouapp.utils.BitmapHelper;
+import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
-import com.geekband.huzhouapp.vo.UserBaseInfo;
-import com.lidroid.xutils.BitmapUtils;
+import com.geekband.huzhouapp.vo.DynamicNews;
 
 import java.util.ArrayList;
 
 /**
  * Created by Administrator on 2016/5/12
+ * 考勤模块
  */
-public class ContactsFragment extends Fragment {
+public class InformationFragment extends Fragment implements RecyclerAdapterWithHF.OnItemClickListener {
     MainActivity mMainActivity;
-    private ArrayList<UserBaseInfo> mUserBaseInfos;
-    private PtrClassicFrameLayout mPtr;
-    private static final int PULL_TO_REFRESH = 1;//下拉刷新
-    private static final int PULL_TO_LOAD = 2;//上拉加载
+    private static final int PULL_TO_REFRESH = 1;
+    private static final int PULL_TO_LOAD = 2;
     private int currentPage = 0;
     private int pageSize = 15;
+    private ArrayList<DynamicNews> mDynamicNewses;
+    private PtrClassicFrameLayout mPtr;
     private RecyclerAdapterWithHF mAdapterWithHF;
-    private BitmapUtils mBitmapUtils;
 
-    public static ContactsFragment newInstance() {
-        return new ContactsFragment();
+    public static InformationFragment newInstance() {
+        return new InformationFragment();
     }
 
     @Override
@@ -55,67 +56,62 @@ public class ContactsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_contacts, null);
-        mBitmapUtils = BitmapHelper.getBitmapUtils(mMainActivity, null, R.drawable.head_default, R.drawable.head_default);
-        mUserBaseInfos = new ArrayList<>();
+        View view = inflater.inflate(R.layout.fragment_attendance, null);
+        mDynamicNewses = new ArrayList<>();
         initView(view);
         return view;
     }
 
     private void initView(View view) {
-        mPtr = (PtrClassicFrameLayout) view.findViewById(R.id.contacts_ptr);
-        RecyclerView rv = (RecyclerView) view.findViewById(R.id.contacts_recycler_view);
+        mPtr = (PtrClassicFrameLayout) view.findViewById(R.id.ptr_frameLayout_information);
+        RecyclerView rv = (RecyclerView) view.findViewById(R.id.recycler_view_information);
         LinearLayoutManager manager = new LinearLayoutManager(mMainActivity);
         manager.setOrientation(LinearLayoutManager.VERTICAL);
         rv.setLayoutManager(manager);
-        CommonRecyclerAdapter adapter = new CommonRecyclerAdapter<UserBaseInfo>(mMainActivity, R.layout.contacts_item, mUserBaseInfos) {
-
+        CommonRecyclerAdapter commonRecyclerAdapter = new CommonRecyclerAdapter<DynamicNews>(getActivity(), R.layout.information_item, mDynamicNewses) {
             @Override
-            public void convertView(CommonRecyclerViewHolder holder, UserBaseInfo userBaseInfo) {
-                mBitmapUtils.display(holder.getView(R.id.contacts_image_item),userBaseInfo.getAvatarUrl());
-                holder.setText(R.id.contacts_name_item, userBaseInfo.getRealName());
-                holder.setText(R.id.contacts_sex_item, userBaseInfo.getSex());
-                holder.setText(R.id.contacts_phone_item,userBaseInfo.getPhoneNum());
+            public void convertView(CommonRecyclerViewHolder holder, DynamicNews dynamicNews) {
+                holder.getView(R.id.information_title_item).setSelected(true);
+                holder.setText(R.id.information_title_item, dynamicNews.getTitle());
+                holder.setText(R.id.information_date_item, dynamicNews.getDate());
             }
         };
         //noinspection unchecked
-        mAdapterWithHF = new RecyclerAdapterWithHF(adapter);
+        mAdapterWithHF = new RecyclerAdapterWithHF(commonRecyclerAdapter);
         rv.setAdapter(mAdapterWithHF);
-
+        mAdapterWithHF.setOnItemClickListener(this);
         mPtr.setLastUpdateTimeRelateObject(this);
         mPtr.setResistance(1.7f);
         mPtr.setRatioOfHeaderHeightToRefresh(1.2f);
         mPtr.setDurationToClose(200);
         mPtr.setDurationToCloseHeader(1000);
-
         mPtr.postDelayed(new Runnable() {
             @Override
             public void run() {
                 mPtr.autoRefresh();
             }
         }, 100);
-
         mPtr.setPtrHandler(new PtrDefaultHandler() {
             @Override
             public void onRefreshBegin(PtrFrameLayout frame) {
-
                 new Thread() {
                     @Override
                     public void run() {
                         currentPage = 0;
-                        mUserBaseInfos.clear();
-                        ArrayList<UserBaseInfo> userBaseInfos = DataUtils.getUserInfo(currentPage, pageSize);
-                        if (userBaseInfos != null) {
-                            mUserBaseInfos.addAll(userBaseInfos);
+                        mDynamicNewses.clear();
+                        ArrayList<DynamicNews> dynamicNewses = DataUtils.getInformationInfo(currentPage, pageSize);
+                        if (dynamicNewses != null) {
+                            mDynamicNewses.addAll(dynamicNewses);
+                            // System.out.println("view数据:"+mDynamicNewses);
+                            Message message = mHandler.obtainMessage();
+                            message.what = PULL_TO_REFRESH;
+                            mHandler.sendMessage(message);
                         }
-                        Message message = mHandler.obtainMessage();
-                        message.what = PULL_TO_REFRESH;
-                        mHandler.sendMessage(message);
+
                     }
                 }.start();
             }
         });
-
         mPtr.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void loadMore() {
@@ -123,13 +119,13 @@ public class ContactsFragment extends Fragment {
                     @Override
                     public void run() {
                         currentPage += 1;
-                        ArrayList<UserBaseInfo> moreList = DataUtils.getUserInfo(currentPage, pageSize);
+                        ArrayList<DynamicNews> moreList = DataUtils.getInformationInfo(currentPage, pageSize);
                         if (moreList != null) {
-                            mUserBaseInfos.addAll(moreList);
+                            mDynamicNewses.addAll(moreList);
+                            Message message = mHandler.obtainMessage();
+                            message.what = PULL_TO_LOAD;
+                            mHandler.sendMessage(message);
                         }
-                        Message message = mHandler.obtainMessage();
-                        message.what = PULL_TO_LOAD;
-                        mHandler.sendMessage(message);
                     }
                 }.start();
             }
@@ -153,4 +149,16 @@ public class ContactsFragment extends Fragment {
             return false;
         }
     });
+
+    @Override
+    public void onItemClick(RecyclerAdapterWithHF adapter, RecyclerView.ViewHolder vh, int position) {
+        DynamicNews dynamicNews = mDynamicNewses.get(position);
+        Intent intent = new Intent();
+        intent.setClass(mMainActivity, NewsContentActivity.class);
+        intent.setAction(Constants.INFORMATION_CONTENT);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(Constants.INFORMATION_CONTENT, dynamicNews);
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
 }

@@ -29,6 +29,9 @@ public class NewsContentActivity extends BaseActivity {
             case Constants.UNROLLING:
                 dynamicNews = intent.getParcelableExtra(Constants.UNROLLING);
                 break;
+            case Constants.INFORMATION_CONTENT:
+                dynamicNews = intent.getParcelableExtra(Constants.INFORMATION_CONTENT);
+                break;
         }
         TextView content_title = (TextView) findViewById(R.id.content_title);
         TextView content_date = (TextView) findViewById(R.id.content_date);
@@ -47,7 +50,16 @@ public class NewsContentActivity extends BaseActivity {
         content_writer.setText(writer);
 
         WebView webView = (WebView) findViewById(R.id.newsContentWebView);
+        // 获取webView的相关配置
         WebSettings webSettings = webView.getSettings();
+        //webView的缓存模式
+        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        //自动加载图片
+        webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setBuiltInZoomControls(true);
+        //自动缩放
+        webSettings.setSupportZoom(true);
+        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
         webSettings.setJavaScriptEnabled(true);
         webSettings.setBlockNetworkImage(false);
         webSettings.setDomStorageEnabled(true);
@@ -62,7 +74,7 @@ public class NewsContentActivity extends BaseActivity {
                 return true;
             }
         });
-        String htmlStr = "<html>" + "<body>" + dynamicNews.getContent() + "</body>" + "</html>";
+        String htmlStr = "<html><head><style>img{width:100%;height:auto; !important;}</style></head>" + "<body>" + dynamicNews.getContent() + "</body>" + "</html>";
         webView.loadDataWithBaseURL(null, htmlStr, "text/html", "utf-8", null);
 
         webView.setVisibility(View.VISIBLE);
