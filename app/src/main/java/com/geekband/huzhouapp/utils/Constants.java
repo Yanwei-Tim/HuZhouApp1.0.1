@@ -27,6 +27,7 @@ public class Constants {
     public static final String ROLLING = "1";
     public static final String UNROLLING = "0";
     public static final String SERVICE = "http://192.168.0.14:9080";//lmc本地测试用服务器;;
+    public static final String BIRTHDAY_GIFT = "birthday_gift";
 
     // 请求返回成功码
     public static String REQUEST_RESULT_SUCCESS = "SUCCESS";

@@ -51,6 +51,7 @@
         <activity android:name=".fragment.news.GradeActivity"/>
         <activity android:name=".nav.ImageActivity"/>
         <activity android:name=".nav.InteractiveActivity"/>
+        <activity android:name=".nav.GiftActivity"/>
         <activity android:name="com.chat.activity.ChatActivity"/>
         <activity android:name="com.chat.activity.ExpertActivity"
             android:theme="@style/Theme.PageIndicatorDefaults"/>

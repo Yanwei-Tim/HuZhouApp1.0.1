@@ -428,11 +428,9 @@ public class DataUtils {
                     String realName = userTable.getField(UserTable.FIELD_REALNAME);
                     //生日
                     String idCardNum = userInfoTables.get(0).getField(UserInfoTable.FIELD_IDCARDNO);
-                    String birthdayStr;
+                    String birthdayStr = null;
                     if (idCardNum != null && idCardNum.length() == 18) {
                         birthdayStr = idCardNum.substring(10, 14);
-                    } else {
-                        birthdayStr = "";
                     }
                     //头像地址
                     ArrayList<String> avatarUrls = (ArrayList<String>) userTable.getAccessaryFileUrlList();
@@ -441,10 +439,12 @@ public class DataUtils {
                         avatarUrl = avatarUrls.get(0);
                     }
                     BirthdayInfo birthdayInfo = new BirthdayInfo();
+                    birthdayInfo.setUserId(userId);
                     birthdayInfo.setRealName(realName);
                     birthdayInfo.setDate(birthdayStr);
                     birthdayInfo.setAvatarImage(avatarUrl);
                     arrayList.add(birthdayInfo);
+
 
                 }
 

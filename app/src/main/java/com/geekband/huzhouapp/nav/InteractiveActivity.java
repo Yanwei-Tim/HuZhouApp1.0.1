@@ -1,6 +1,7 @@
 package com.geekband.huzhouapp.nav;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,6 +18,7 @@ import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.baseadapter.CommonRecyclerAdapter;
 import com.geekband.huzhouapp.baseadapter.CommonRecyclerViewHolder;
 import com.geekband.huzhouapp.utils.BitmapHelper;
+import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.vo.BirthdayInfo;
 import com.lidroid.xutils.BitmapUtils;
@@ -26,7 +28,7 @@ import java.util.ArrayList;
 /**
  * Created by Administrator on 2016/6/29
  */
-public class InteractiveActivity extends Activity {
+public class InteractiveActivity extends Activity implements RecyclerAdapterWithHF.OnItemClickListener{
 
     private static final int PULL_TO_REFRESH = 1;//下拉刷新
     private static final int PULL_TO_LOAD = 2;//上拉加载
@@ -66,6 +68,7 @@ public class InteractiveActivity extends Activity {
         //noinspection unchecked
         mAdapterWithHF = new RecyclerAdapterWithHF(adapter);
         rv.setAdapter(mAdapterWithHF);
+        mAdapterWithHF.setOnItemClickListener(this);
         mPtr.setLastUpdateTimeRelateObject(this);
         mPtr.setResistance(1.7f);
         mPtr.setRatioOfHeaderHeightToRefresh(1.2f);
@@ -89,10 +92,11 @@ public class InteractiveActivity extends Activity {
                         ArrayList<BirthdayInfo> birthdays = DataUtils.getBirthdayInfo(pageSize, currentPage);
                         if (birthdays != null) {
                             for (int i = 0; i < birthdays.size(); i++) {
-                                if (birthdays.get(i).getDate() == null || birthdays.get(i).getDate().equals("")) {
+                                if (birthdays.get(i).getDate() == null) {
                                     birthdays.remove(i);
                                 }
                             }
+                            System.out.println("过生日了1:"+birthdays);
                             mList.addAll(birthdays);
                             Message message = mHandler.obtainMessage();
                             message.what = PULL_TO_REFRESH;
@@ -114,10 +118,11 @@ public class InteractiveActivity extends Activity {
                         ArrayList<BirthdayInfo> birthdays = DataUtils.getBirthdayInfo(pageSize, currentPage);
                         if (birthdays != null) {
                             for (int i = 0; i < birthdays.size(); i++) {
-                                if (birthdays.get(i).getDate() == null || birthdays.get(i).getDate().equals("")) {
+                                if (birthdays.get(i).getDate() == null) {
                                     birthdays.remove(i);
                                 }
                             }
+                            System.out.println("过生日了2:"+birthdays);
                             mList.addAll(birthdays);
                             Message message = mHandler.obtainMessage();
                             message.what = PULL_TO_LOAD;
@@ -148,4 +153,14 @@ public class InteractiveActivity extends Activity {
             return false;
         }
     });
+
+    @Override
+    public void onItemClick(RecyclerAdapterWithHF adapter, RecyclerView.ViewHolder vh, int position) {
+        BirthdayInfo birthdayInfo = mList.get(position);
+        String userId = birthdayInfo.getUserId();
+        Intent intent =  new Intent();
+        intent.putExtra(Constants.BIRTHDAY_GIFT,userId);
+        intent.setClass(this,GiftActivity.class);
+        this.startActivity(intent);
+    }
 }

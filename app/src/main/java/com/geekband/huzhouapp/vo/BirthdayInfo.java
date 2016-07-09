@@ -7,6 +7,15 @@ public class BirthdayInfo {
     private String avatarImage ;
     private String realName;
     private String date;
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getAvatarImage() {
         return avatarImage;
@@ -38,6 +47,7 @@ public class BirthdayInfo {
                 "avatarImage='" + avatarImage + '\'' +
                 ", realName='" + realName + '\'' +
                 ", date='" + date + '\'' +
+                ", userId='" + userId + '\'' +
                 '}';
     }
 }
