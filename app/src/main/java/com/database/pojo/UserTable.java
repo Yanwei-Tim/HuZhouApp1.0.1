@@ -29,7 +29,32 @@ public class UserTable extends BaseTable
 	public static final String FIELD_GROUPNO = "GROUPNO";
 	/** 用户编号 */ 
 	public static final String FIELD_USERNUM = "USERNUM";
-	
+	/** 警号 */
+	public static final String FIELD_POLICENUM = "POLICENUM";
+	/** 文化程度 */
+	public static final String FIELD_EDUCATION = "EDUCATION";
+	/** 参加工作时间 */
+	public static final String FIELD_TOWORKTIME = "TOWORKTIME";
+	/** 参加公安时间 */
+	public static final String FIELD_TOPOLICETIME = "TOPOLICETIME";
+	/** 警衔 */
+	public static final String FIELD_RANK = "RANK";
+	/** 警务 */
+	public static final String FIELD_POLICEPOST = "POLICEPOST";
+	/** 备注 */
+	public static final String FIELD_REMARK = "REMARK";
+	/** 手机号 */
+	public static final String FIELD_CELLPHONE = "CELLPHONE";
+	/** 身份证号 */
+	public static final String FIELD_IDCARDNO = "IDCARDNO";
+	/** 性别 */
+	public static final String FIELD_SEX = "SEX";
+	/** 图片地址 */
+	public static final String FIELD_PICURL = "PICURL";
+	/** 平台秘钥 */
+	public static final String FIELD_TOKEN = "TOKEN";
+
+
 	public UserTable()
 	{
 		initTable();

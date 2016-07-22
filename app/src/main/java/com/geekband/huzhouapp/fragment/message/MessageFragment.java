@@ -42,7 +42,7 @@ public class MessageFragment extends Fragment {
 
     public class MyPagerAdapter extends FragmentPagerAdapter {
 
-        String[] titles = {"消息通知", "联系人", "意见信箱"};
+        String[] titles = {"消息通知", "意见信箱"};
 
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -61,12 +61,14 @@ public class MessageFragment extends Fragment {
                 }
                 return ssf;
 
-            } else if (position == 1) {
+            }
+            /**else if (position == 1) {
                 if (rf == null) {
                     rf = ContactsFragment.newInstance();
                 }
                 return rf;
-            } else if (position == 2) {
+            } */
+            else if (position == 1) {
                 if (sf == null) {
                     sf = SuggestFragment.newInstance();
                 }

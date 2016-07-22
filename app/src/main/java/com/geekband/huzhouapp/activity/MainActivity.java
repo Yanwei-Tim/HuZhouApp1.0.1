@@ -230,9 +230,6 @@ public class MainActivity extends BaseActivity
             editor.putString(Constants.AUTO_LOGIN, null);
             editor.apply();
             new ClearDataTask().execute();
-            intent.setClass(this, LoginActivity.class);
-            startActivity(intent);
-            this.finish();
         } else if (id == R.id.nav_manage) {
             intent.setClass(this, ManageActivity.class);
             startActivity(intent);
@@ -494,6 +491,10 @@ public class MainActivity extends BaseActivity
         @Override
         protected void onPostExecute(Integer integer) {
             pd.dismiss();
+            Intent intent = new Intent();
+            intent.setClass(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            MainActivity.this.finish();
         }
     }
 

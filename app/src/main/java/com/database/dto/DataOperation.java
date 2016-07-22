@@ -193,6 +193,33 @@ public final class DataOperation {
             }
         }
         sqlStr.append(" ) " + tableName);
+        //System.out.println("最原始的sql："+sqlStr.toString());
+        return queryTable(tableName, sqlStr.toString(), currentPage, pageSize);
+    }
+
+    //升序排序
+    public static ArrayList<?> queryTable(String tableName, int currentPage, int pageSize, Map<String, String> fieldList,String orderStr) {
+        StringBuilder sqlStr = new StringBuilder();
+
+        sqlStr.append("from (select * from " + tableName);
+        if (fieldList != null && fieldList.keySet() != null) {
+            Iterator<String> iterator = fieldList.keySet().iterator();
+            List<String> keyList = new ArrayList<>();
+            while (iterator.hasNext()) {
+                keyList.add(iterator.next());
+            }
+            for (int i = 0; i < keyList.size(); i++) {
+                if (i == 0) sqlStr.append(" where ");
+                String key = keyList.get(i);
+                String value = fieldList.get(key);
+                sqlStr.append(key + "='" + value + "'");
+                if (keyList.size() >= 2 && i != keyList.size() - 1) sqlStr.append(" AND ");
+            }
+        }
+        if (orderStr!=null){
+            sqlStr.append( "order by "+orderStr+" "+"DESC");
+        }
+        sqlStr.append(" ) " + tableName);
 
         return queryTable(tableName, sqlStr.toString(), currentPage, pageSize);
     }
@@ -219,7 +246,7 @@ public final class DataOperation {
                 new DocInfor("", tableName),
                 true,
                 false,
-                currentPage*pageSize == -1 ? "" : String.valueOf(currentPage*pageSize));
+                currentPage*pageSize == -1 ? "" : String.valueOf((currentPage-1)*pageSize)+1);
     }
 
     /**

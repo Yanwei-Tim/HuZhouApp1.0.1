@@ -61,7 +61,7 @@ public class BreakingNewsFragment extends Fragment implements
     private PtrClassicFrameLayout mPtrClassicFrameLayout;
     private RecyclerAdapterWithHF mAdapterWithHF;
     //当前页是第一页
-    private int currentPage = 0;
+    private int currentPage = 1;
     //每页新闻数量
     private int pageSize = 10;
     private View mView;
@@ -168,7 +168,6 @@ public class BreakingNewsFragment extends Fragment implements
         protected Integer doInBackground(String... params) {
             mLocalNewsList.clear();
             mLocalNewsList.addAll(DataUtils.getNewsList(Constants.UNROLLING, pageSize, currentPage));
-//            System.out.println("加载的动态新闻：" + mLocalNewsList);
             return null;
         }
 
@@ -287,7 +286,7 @@ public class BreakingNewsFragment extends Fragment implements
                     @Override
                     public void onRefreshBegin(PtrFrameLayout frame) {
                         //重载数据
-                        currentPage = 0;
+                        currentPage = 1;
                         new ReLoadTask().execute();
                     }
                 });

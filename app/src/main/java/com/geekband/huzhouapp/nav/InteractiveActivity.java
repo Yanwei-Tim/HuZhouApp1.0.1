@@ -23,7 +23,10 @@ import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.vo.BirthdayInfo;
 import com.lidroid.xutils.BitmapUtils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Administrator on 2016/6/29
@@ -33,7 +36,7 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
     private static final int PULL_TO_REFRESH = 1;//下拉刷新
     private static final int PULL_TO_LOAD = 2;//上拉加载
     int pageSize = 10;
-    int currentPage = 0;
+    int currentPage = 1;
     private ArrayList<BirthdayInfo> mList;
     private PtrClassicFrameLayout mPtr;
     private RecyclerAdapterWithHF mAdapterWithHF;
@@ -57,11 +60,11 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
 
             @Override
             public void convertView(CommonRecyclerViewHolder holder, BirthdayInfo birthdayInfo) {
-
                 ImageView imageView = holder.getView(R.id.avatar_birthday);
                 bitmapUtils.display(imageView, birthdayInfo.getAvatarImage());
                 holder.setText(R.id.name_birthday, birthdayInfo.getRealName());
-                holder.setText(R.id.content_birthday, "距离生日还有" + birthdayInfo.getDate() + "天");
+                System.out.println("还有多少天:"+birthdayInfo.getDate());
+                holder.setText(R.id.content_birthday, "距离生日还有" + getDays(birthdayInfo.getDate()) + "天");
 
             }
         };
@@ -87,16 +90,15 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
                 new Thread() {
                     @Override
                     public void run() {
-                        currentPage = 0;
+                        currentPage = 1;
                         mList.clear();
                         ArrayList<BirthdayInfo> birthdays = DataUtils.getBirthdayInfo(pageSize, currentPage);
                         if (birthdays != null) {
-                            for (int i = 0; i < birthdays.size(); i++) {
-                                if (birthdays.get(i).getDate() == null) {
+                            for (int i = birthdays.size() - 1; i >= 0; i--) {
+                                if (birthdays.get(i).getDate() == null || birthdays.get(i).getDate().isEmpty()) {
                                     birthdays.remove(i);
                                 }
                             }
-                            System.out.println("过生日了1:"+birthdays);
                             mList.addAll(birthdays);
                             Message message = mHandler.obtainMessage();
                             message.what = PULL_TO_REFRESH;
@@ -111,18 +113,17 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
         mPtr.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void loadMore() {
-                new Thread(){
+                new Thread() {
                     @Override
                     public void run() {
                         currentPage += 1;
                         ArrayList<BirthdayInfo> birthdays = DataUtils.getBirthdayInfo(pageSize, currentPage);
                         if (birthdays != null) {
-                            for (int i = 0; i < birthdays.size(); i++) {
+                            for (int i = birthdays.size()-1; i >=0 ; i--) {
                                 if (birthdays.get(i).getDate() == null) {
                                     birthdays.remove(i);
                                 }
                             }
-                            System.out.println("过生日了2:"+birthdays);
                             mList.addAll(birthdays);
                             Message message = mHandler.obtainMessage();
                             message.what = PULL_TO_LOAD;
@@ -163,4 +164,20 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
         intent.setClass(this,GiftActivity.class);
         this.startActivity(intent);
     }
+
+    //计算日期间隔
+    public String getDays (String userBirthday){
+        long days = 0 ;
+        try {
+            Date date = new Date();
+            String currentDateStr = new SimpleDateFormat("MMdd").format(date);
+            Date currentDate = new SimpleDateFormat("MMdd").parse(currentDateStr);
+            Date birthday = new SimpleDateFormat("MMdd").parse(userBirthday);
+            days = (currentDate.getTime()-birthday.getTime())/(24*60*60*1000);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return String.valueOf(days);
+    }
+
 }

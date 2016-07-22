@@ -1,14 +1,13 @@
 package com.geekband.huzhouapp.utils;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.database.dto.DataOperation;
 import com.database.pojo.AlbumTable;
 import com.database.pojo.CategoriesTable;
+import com.database.pojo.CommonTable;
 import com.database.pojo.ContentTable;
 import com.database.pojo.CourseTable;
-import com.database.pojo.CommonTable;
 import com.database.pojo.DepartmentsTable;
 import com.database.pojo.StudyInfoTable;
 import com.database.pojo.UserInfoTable;
@@ -61,9 +60,20 @@ public class DataUtils {
             //在通用信息表里面匹配新闻
             Map<String, String> newsCategory = new HashMap<>();
             newsCategory.put(CommonTable.FIELD_CATEGORYID, newsId);
-            newsCategory.put(CommonTable.FIELD_ISROLLING, isRolling);
+            if (isRolling.equals("1")) {
+                newsCategory.put(CommonTable.FIELD_ISROLLING, isRolling);
+            }
+            newsCategory.put(CommonTable.FIELD_ISPASSED,"1");
+            newsCategory.put(CommonTable.FIELD_ISPUBLISH,"1");
+//            String sql = "from(select * from " + CommonTable.TABLE_NAME + " where"+
+//                    "" + CommonTable.FIELD_CATEGORYID + " = '" + newsId + "' and"+
+//                    " " + CommonTable.FIELD_ISROLLING + " = '" + isRolling + "' and"+
+//                    " " + CommonTable.FIELD_ISPASSED + " = '1' and"+
+//                    " " + CommonTable.FIELD_ISPUBLISH + " = '1' order by " + CommonTable.FIELD_DATETIME + " DESC )"+
+//                    "" + CommonTable.TABLE_NAME + "";
             //noinspection unchecked
-            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, currentPage, pageSize, newsCategory);
+            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME,currentPage, pageSize,newsCategory,CommonTable.FIELD_DATETIME);
+
             if (commonTables != null) {
                 for (int i = 0; i < commonTables.size(); i++) {
                     DynamicNews localNews = new DynamicNews();
@@ -202,39 +212,50 @@ public class DataUtils {
                     String realName = userTable.getField(UserTable.FIELD_REALNAME);
                     String phoneNum = userTable.getField(UserTable.FIELD_TELEPHONE);
                     String emailAddress = userTable.getField(UserTable.FIELD_EMAIL);
-                    //noinspection unchecked
-                    ArrayList<UserInfoTable> userInfoTables = (ArrayList<UserInfoTable>) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, contentId);
-                    if (userInfoTables != null && userInfoTables.size() != 0) {
-                        UserInfoTable userInfoTable = userInfoTables.get(0);
-                        if (userInfoTable != null) {
-                            String sex = userInfoTable.getField(UserInfoTable.FIELD_SEX);
-                            String address = userInfoTable.getField(UserInfoTable.FIELD_ADDRESS);
-                            String birthday = userInfoTable.getField(UserInfoTable.FIELD_BIRTHDAY);
+                    String IDcard = userTable.getField(UserTable.FIELD_IDCARDNO);
 
-                            userBaseInfo.setId(id);
-                            userBaseInfo.setUserName(userName);
-                            userBaseInfo.setContentId(contentId);
-                            userBaseInfo.setRealName(realName);
-                            userBaseInfo.setPhoneNum(phoneNum);
-                            userBaseInfo.setEmailAddress(emailAddress);
-                            userBaseInfo.setSex(sex);
-                            userBaseInfo.setAddress(address);
-                            userBaseInfo.setBirthday(birthday);
+                    String sex = userTable.getField(UserTable.FIELD_SEX);
+                    String policeNum = userTable.getField(UserTable.FIELD_POLICENUM);
+                    String education = userTable.getField(UserTable.FIELD_EDUCATION);
+                    String toWorkTime = userTable.getField(UserTable.FIELD_TOWORKTIME);
+                    String toPoliceTime = userTable.getField(UserTable.FIELD_TOPOLICETIME);
+                    String rank = userTable.getField(UserTable.FIELD_RANK);
+                    String policePost = userTable.getField(UserTable.FIELD_POLICEPOST);
 
-                            try {
-                                MyApplication.sDbUtils.deleteAll(UserBaseInfo.class);
-                                MyApplication.sDbUtils.save(userBaseInfo);
 
-                            } catch (DbException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                    userBaseInfo.setId(id);
+                    userBaseInfo.setUserName(userName);
+                    userBaseInfo.setContentId(contentId);
+                    userBaseInfo.setRealName(realName);
+                    userBaseInfo.setPhoneNum(phoneNum);
+                    userBaseInfo.setPhoneNum(IDcard);
+                    userBaseInfo.setEmailAddress(emailAddress);
+                    userBaseInfo.setSex(sex);
+                    userBaseInfo.setPoliceNum(policeNum);
+                    userBaseInfo.setEducation(education);
+                    userBaseInfo.setToWorkTime(toWorkTime);
+                    userBaseInfo.setToPoliceTime(toPoliceTime);
+                    userBaseInfo.setRank(rank);
+                    userBaseInfo.setPolicePost(policePost);
+
+                    //System.out.println("Data_userBaseInfo:"+userBaseInfo);
+
+                    try {
+                        MyApplication.sDbUtils.deleteAll(UserBaseInfo.class);
+                        MyApplication.sDbUtils.save(userBaseInfo);
+
+                    } catch (DbException e) {
+                        e.printStackTrace();
                     }
+
+
                 }
             }
+
             return null;
         }
     }
+
 
     /**
      * 保存相册信息
@@ -414,43 +435,41 @@ public class DataUtils {
      */
 
     public static ArrayList<BirthdayInfo> getBirthdayInfo(int pageSize, int currentPage) {
+
         ArrayList<BirthdayInfo> arrayList = new ArrayList<>();
+        int start = pageSize * (currentPage - 1) + 1;
+        int end = pageSize * currentPage;
+//        String sql = "select * from (select e.* ,rownum rn from (" +
+//                "select * from USERS where IDCARDNO is not null ) e) where rn>=" + start + " and rn<=" + end + " ";
+        String sql = "from(select * from users where IdCardNo is not null)users";
         //noinspection unchecked
-        ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, currentPage, pageSize, (Map<String, String>) null);
+        ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, sql, currentPage, pageSize);
         if (userTables != null && userTables.size() != 0) {
             for (UserTable userTable : userTables) {
                 String userId = userTable.getContentId();
-                Log.i("contentId：", userId);
-                //noinspection unchecked
-                ArrayList<UserInfoTable> userInfoTables = (ArrayList<UserInfoTable>) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, userId);
-                if (userInfoTables != null && userInfoTables.size() != 0) {
-                    //真实姓名
-                    String realName = userTable.getField(UserTable.FIELD_REALNAME);
-                    //生日
-                    String idCardNum = userInfoTables.get(0).getField(UserInfoTable.FIELD_IDCARDNO);
-                    String birthdayStr = null;
-                    if (idCardNum != null && idCardNum.length() == 18) {
-                        birthdayStr = idCardNum.substring(10, 14);
-                    }
-                    //头像地址
-                    ArrayList<String> avatarUrls = (ArrayList<String>) userTable.getAccessaryFileUrlList();
-                    String avatarUrl = null;
-                    if (avatarUrls != null && avatarUrls.size() != 0) {
-                        avatarUrl = avatarUrls.get(0);
-                    }
-                    BirthdayInfo birthdayInfo = new BirthdayInfo();
-                    birthdayInfo.setUserId(userId);
-                    birthdayInfo.setRealName(realName);
-                    birthdayInfo.setDate(birthdayStr);
-                    birthdayInfo.setAvatarImage(avatarUrl);
-                    arrayList.add(birthdayInfo);
-
-
+                //真实姓名
+                String realName = userTable.getField(UserTable.FIELD_REALNAME);
+                //生日
+                String idCardNum = userTable.getField(UserInfoTable.FIELD_IDCARDNO);
+                String birthdayStr = null;
+                if (idCardNum != null && idCardNum.length() == 18) {
+                    birthdayStr = idCardNum.substring(10, 14);
                 }
+                //头像地址
+                ArrayList<String> avatarUrls = (ArrayList<String>) userTable.getAccessaryFileUrlList();
+                String avatarUrl = null;
+                if (avatarUrls != null && avatarUrls.size() != 0) {
+                    avatarUrl = avatarUrls.get(0);
+                }
+                BirthdayInfo birthdayInfo = new BirthdayInfo();
+                birthdayInfo.setUserId(userId);
+                birthdayInfo.setRealName(realName);
+                birthdayInfo.setDate(birthdayStr);
+                birthdayInfo.setAvatarImage(avatarUrl);
+                arrayList.add(birthdayInfo);
 
             }
         }
-        System.out.println("获取的生日信息：" + arrayList);
         return arrayList;
     }
 
@@ -485,6 +504,7 @@ public class DataUtils {
             }
             return null;
         }
+
     }
 
     //apk下载
@@ -618,36 +638,37 @@ public class DataUtils {
 
     /**
      * 获取所有用户信息
+     *
      * @param currentPage 当前页码
-     * @param pageSize 当前数据条数
+     * @param pageSize    当前数据条数
      * @return 用户信息合
      */
     public static ArrayList<UserBaseInfo> getUserInfo(int currentPage, int pageSize) {
         ArrayList<UserBaseInfo> userBaseInfos = new ArrayList<>();
         //noinspection unchecked
-        ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME,currentPage,pageSize,(Map)null);
+        ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, currentPage, pageSize, (Map) null);
         if (userTables != null && userTables.size() != 0) {
             for (int i = 0; i < userTables.size(); i++) {
                 String userId = userTables.get(i).getContentId();
                 //noinspection unchecked
                 ArrayList<UserInfoTable> userInfoTables = (ArrayList<UserInfoTable>) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, userId);
                 if (userInfoTables != null && userInfoTables.size() != 0) {
-                        UserBaseInfo userBaseInfo = new UserBaseInfo();
-                        UserInfoTable userInfoTable = userInfoTables.get(0);
-                        userBaseInfo.setId(i);
-                        String avatarUrl ;
-                        ArrayList<String> avatarUrls = (ArrayList<String>) userTables.get(i).getAccessaryFileUrlList();
-                        if (avatarUrls != null && avatarUrls.size() != 0) {
-                            avatarUrl = avatarUrls.get(0);
-                        }else {
-                            avatarUrl = "";
-                        }
-                        userBaseInfo.setAvatarUrl(avatarUrl);
-                        userBaseInfo.setRealName(userTables.get(i).getField(UserTable.FIELD_REALNAME));
-                        userBaseInfo.setSex(userInfoTable.getField(UserInfoTable.FIELD_SEX));
-                        userBaseInfo.setPhoneNum(userTables.get(i).getField(UserTable.FIELD_TELEPHONE));
+                    UserBaseInfo userBaseInfo = new UserBaseInfo();
+                    UserInfoTable userInfoTable = userInfoTables.get(0);
+                    userBaseInfo.setId(i);
+                    String avatarUrl;
+                    ArrayList<String> avatarUrls = (ArrayList<String>) userTables.get(i).getAccessaryFileUrlList();
+                    if (avatarUrls != null && avatarUrls.size() != 0) {
+                        avatarUrl = avatarUrls.get(0);
+                    } else {
+                        avatarUrl = "";
+                    }
+                    userBaseInfo.setAvatarUrl(avatarUrl);
+                    userBaseInfo.setRealName(userTables.get(i).getField(UserTable.FIELD_REALNAME));
+                    userBaseInfo.setSex(userInfoTable.getField(UserInfoTable.FIELD_SEX));
+                    userBaseInfo.setPhoneNum(userTables.get(i).getField(UserTable.FIELD_TELEPHONE));
 
-                        userBaseInfos.add(userBaseInfo);
+                    userBaseInfos.add(userBaseInfo);
                 }
             }
         }

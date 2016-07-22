@@ -29,7 +29,7 @@ public class NewsRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         mLocalNewses = localNewses;
         mContext = context;
         mLayoutInflater = LayoutInflater.from(mContext);
-        mBitmapUtils = BitmapHelper.getBitmapUtils(mContext, null, 0, 0);
+        mBitmapUtils = BitmapHelper.getBitmapUtils(mContext, null, R.drawable.default_news_pic,  R.drawable.default_news_pic);
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder{

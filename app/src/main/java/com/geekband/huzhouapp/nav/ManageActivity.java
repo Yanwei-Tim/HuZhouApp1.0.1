@@ -16,15 +16,14 @@ import android.widget.Toast;
 
 import com.database.dto.DataOperation;
 import com.database.pojo.Document;
-import com.database.pojo.UserInfoTable;
 import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.activity.MainActivity;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
-import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.vo.ManageInfo;
 import com.geekband.huzhouapp.vo.UserBaseInfo;
 import com.lidroid.xutils.exception.DbException;
@@ -43,27 +42,35 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
     private boolean isUpdate;
     private ArrayList<ManageInfo> mManageList;
     private ScrollView mScrollView;
+    private TextView mPrivate_info;
+    private UserBaseInfo mUserBaseInfo;
+    private UserTable mUserTable;
+    private TextView mManage_hint;
+    private CommonAdapter<ManageInfo> mCommonAdapter;
+    private ProgressDialog mPd;
+    private String mUserName;
+    private String mRealName;
+    private String mPhoneNum;
+    private String mEmailAddress;
+    private String mSex;
+    private String mPoliceNum;
+    private String mEducation;
+    private String mToWorkTime;
+    private String mToPoliceTime;
+    private String mRank;
+    private String mPolicePost;
+    private String mIDcard;
     private EditText mUpdate_realName;
     private EditText mUpdate_phoneNum;
     private EditText mUpdate_emailAddress;
     private EditText mUpdate_sex;
-    private EditText mUpdate_address;
-    private EditText mUpdate_birthday;
+    private EditText mUpdate_police_num;
+    private EditText mUpdate_education;
+    private EditText mUpdate_work_time;
+    private EditText mUpdate_police_time;
+    private EditText mUpdate_rank;
+    private EditText mUpdate_post;
     private EditText mUpdate_card;
-    private String mUserName;
-    private String mRealName;
-    private String mTelephone;
-    private String mEmail;
-    private String mSex;
-    private String mAddress;
-    private String mBirthday;
-    private TextView mPrivate_info;
-    private UserBaseInfo mUserBaseInfo;
-    private UserTable mUserTable;
-    private UserInfoTable mUserInfoTable;
-    private TextView mManage_hint;
-    private CommonAdapter<ManageInfo> mCommonAdapter;
-    private ProgressDialog mPd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +79,13 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
 
         isUpdate = true;
 
+        initView();
+
+        new LocalTask().execute();
+
+    }
+
+    private void initView() {
         mManage_back_textBtn = (TextView) findViewById(R.id.manage_back_textBtn);
         mUpdate_manage_btn = (TextView) findViewById(R.id.update_manage_btn);
         mPrivate_info = (TextView) findViewById(R.id.private_info);
@@ -85,18 +99,18 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         mUpdate_phoneNum = (EditText) findViewById(R.id.update_phoneNum);
         mUpdate_emailAddress = (EditText) findViewById(R.id.update_emailAddress);
         mUpdate_sex = (EditText) findViewById(R.id.update_sex);
-        mUpdate_address = (EditText) findViewById(R.id.update_address);
-        mUpdate_birthday = (EditText) findViewById(R.id.update_birthday);
+        mUpdate_police_num = (EditText) findViewById(R.id.update_police_num);
+        mUpdate_work_time = (EditText) findViewById(R.id.update_work_time);
+        mUpdate_police_time = (EditText) findViewById(R.id.update_police_time);
+        mUpdate_education = (EditText) findViewById(R.id.update_education);
+        mUpdate_rank = (EditText) findViewById(R.id.update_rank);
+        mUpdate_post = (EditText) findViewById(R.id.update_post);
         mUpdate_card = (EditText) findViewById(R.id.update_card);
-
         mManage_hint = (TextView) findViewById(R.id.manage_hint);
 
         mManage_listView.setOnItemClickListener(this);
         mManage_back_textBtn.setOnClickListener(this);
         mUpdate_manage_btn.setOnClickListener(this);
-
-        new LocalTask().execute();
-
     }
 
     @Override
@@ -140,11 +154,16 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
                         mManage_listView.setVisibility(View.GONE);
                         mScrollView.setVisibility(View.VISIBLE);
                         mUpdate_realName.setText(mRealName);
-                        mUpdate_phoneNum.setText(mTelephone);
-                        mUpdate_emailAddress.setText(mEmail);
+                        mUpdate_phoneNum.setText(mPhoneNum);
+                        mUpdate_emailAddress.setText(mEmailAddress);
                         mUpdate_sex.setText(mSex);
-                        mUpdate_address.setText(mAddress);
-                        mUpdate_birthday.setText(mBirthday);
+                        mUpdate_police_num.setText(mPoliceNum);
+                        mUpdate_education.setText(mEducation);
+                        mUpdate_work_time.setText(mToWorkTime);
+                        mUpdate_police_time.setText(mToPoliceTime);
+                        mUpdate_rank.setText(mRank);
+                        mUpdate_post.setText(mPolicePost);
+                        mUpdate_card.setText(mIDcard);
                         //更改btn
                         mPrivate_info.setText("编辑信息");
                         mManage_back_textBtn.setText("取消");
@@ -194,22 +213,33 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
                 //初始化用户信息
                 mUserName = mUserBaseInfo.getUserName();
                 mRealName = mUserBaseInfo.getRealName();
-                mTelephone = mUserBaseInfo.getPhoneNum();
-                mEmail = mUserBaseInfo.getEmailAddress();
-
+                mPhoneNum = mUserBaseInfo.getPhoneNum();
+                mEmailAddress = mUserBaseInfo.getEmailAddress();
                 mSex = mUserBaseInfo.getSex();
-                mAddress = mUserBaseInfo.getAddress();
-                mBirthday = mUserBaseInfo.getBirthday();
+                mPoliceNum = mUserBaseInfo.getPoliceNum();
+                mEducation = mUserBaseInfo.getEducation();
+                mToWorkTime = mUserBaseInfo.getToWorkTime();
+                mToPoliceTime = mUserBaseInfo.getToPoliceTime();
+                mRank = mUserBaseInfo.getRank();
+                mPolicePost = mUserBaseInfo.getPolicePost();
+                mIDcard = mUserBaseInfo.getIDcard();
+
 
                 mManageList = new ArrayList<>();
                 mManageList.add(new ManageInfo("用户名称", mUserName, R.drawable.app_ailistview_item_three_back));
                 mManageList.add(new ManageInfo("真实姓名", mRealName, R.drawable.app_ailistview_item_three_back));
-                mManageList.add(new ManageInfo("手机号码", mTelephone, R.drawable.app_ailistview_item_three_back));
-                mManageList.add(new ManageInfo("邮箱地址", mEmail, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("手机号码", mPhoneNum, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("邮箱地址", mEmailAddress, R.drawable.app_ailistview_item_three_back));
 
                 mManageList.add(new ManageInfo("性别", mSex, R.drawable.app_ailistview_item_three_back));
-                mManageList.add(new ManageInfo("地址", mAddress, R.drawable.app_ailistview_item_three_back));
-                mManageList.add(new ManageInfo("生日", mBirthday, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("警号", mPhoneNum, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("教育程度", mEducation, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("参加工作时间", mToWorkTime, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("参加公安时间", mToPoliceTime, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("警衔", mRank, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("警务", mPolicePost, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("身份证号码", mIDcard, R.drawable.app_ailistview_item_three_back));
+
 
                 mCommonAdapter = new CommonAdapter<ManageInfo>(ManageActivity.this, mManageList, R.layout.item_manage_text) {
                     @Override
@@ -242,7 +272,6 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         @Override
         protected Integer doInBackground(String... params) {
             DataOperation.insertOrUpdateTable(mUserTable, (Document) null);
-            DataOperation.insertOrUpdateTable(mUserInfoTable, (Document) null);
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
             DataUtils.saveUserBaseInfo(contentId);
             return null;
@@ -273,21 +302,37 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         if (!mUpdate_realName.getText().toString().equals(mRealName)) {
             mUserTable.putField(UserTable.FIELD_REALNAME, mUpdate_realName.getText().toString());
         }
-        if (!mUpdate_phoneNum.getText().toString().equals(mTelephone)) {
+        if (!mUpdate_phoneNum.getText().toString().equals(mPhoneNum)) {
             mUserTable.putField(UserTable.FIELD_TELEPHONE, mUpdate_phoneNum.getText().toString());
         }
-        if (!mUpdate_emailAddress.getText().toString().equals(mEmail)) {
+        if (!mUpdate_emailAddress.getText().toString().equals(mEmailAddress)) {
             mUserTable.putField(UserTable.FIELD_EMAIL, mUpdate_emailAddress.getText().toString());
         }
-        //userTableInfo
+
         if (!mUpdate_sex.getText().toString().equals(mSex)) {
-            mUserInfoTable.putField(UserInfoTable.FIELD_SEX, mUpdate_sex.getText().toString());
+            mUserTable.putField(UserTable.FIELD_SEX, mUpdate_sex.getText().toString());
         }
-        if (!mUpdate_address.getText().toString().equals(mAddress)) {
-            mUserInfoTable.putField(UserInfoTable.FIELD_ADDRESS, mUpdate_address.getText().toString());
+        if (!mUpdate_police_num.getText().toString().equals(mPoliceNum)) {
+            mUserTable.putField(UserTable.FIELD_POLICENUM, mUpdate_police_num.getText().toString());
         }
-        if (!mUpdate_birthday.getText().toString().equals(mBirthday)) {
-            mUserInfoTable.putField(UserInfoTable.FIELD_BIRTHDAY, mUpdate_birthday.getText().toString());
+        if (!mUpdate_education.getText().toString().equals(mEducation)) {
+            mUserTable.putField(UserTable.FIELD_EDUCATION, mUpdate_education.getText().toString());
+        }
+        //--
+        if (!mUpdate_work_time.getText().toString().equals(mToWorkTime)) {
+            mUserTable.putField(UserTable.FIELD_TOWORKTIME, mUpdate_work_time.getText().toString());
+        }
+        if (!mUpdate_police_time.getText().toString().equals(mToPoliceTime)) {
+            mUserTable.putField(UserTable.FIELD_TOPOLICETIME, mUpdate_police_time.getText().toString());
+        }
+        if (!mUpdate_rank.getText().toString().equals(mRank)) {
+            mUserTable.putField(UserTable.FIELD_RANK, mUpdate_rank.getText().toString());
+        }
+        if (!mUpdate_post.getText().toString().equals(mPolicePost)) {
+            mUserTable.putField(UserTable.FIELD_POLICEPOST, mUpdate_post.getText().toString());
+        }
+        if (!mUpdate_card.getText().toString().equals(mIDcard)) {
+            mUserTable.putField(UserTable.FIELD_IDCARDNO, mUpdate_card.getText().toString());
         }
     }
 
@@ -296,15 +341,18 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
         @Override
         protected Integer doInBackground(String... params) {
             String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            mUserTable = (UserTable) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, contentId).get(0);
-            mUserInfoTable = (UserInfoTable) DataOperation.queryTable(UserInfoTable.TABLE_NAME, UserInfoTable.FIELD_USERID, contentId).get(0);
+            //noinspection unchecked
+            ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, contentId);
+            if (userTables != null && userTables.size() != 0) {
+                mUserTable = userTables.get(0);
+            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             //编辑信息
-            if (mUserTable != null && mUserInfoTable != null) {
+            if (mUserTable != null ) {
                 updateInfo();
                 //更新信息
                 new UpdateTask().execute();
@@ -313,7 +361,6 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
             }
         }
     }
-
 
     class NetTask extends AsyncTask<String, Integer, Integer> {
 
