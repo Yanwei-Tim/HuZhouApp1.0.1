@@ -36,4 +36,11 @@ public class Constants {
     public static final String INFORMATION_SORT = "3";
     public static final String INFORMATION_CONTENT = "information_content";
 
+    //广播
+    public static final String GRADE_BROADCAST = "android.intent.action.GRADE_BROADCAST";
+    public static final String BIRTHDAY_BROADCAST = "android.intent.action.BIRTHDAY_BROADCAST";
+    //记录是否启通知
+    public static final String IS_RECORD_GRADE ="isRecordGrade";
+    public static final String IS_RECORD_BIRTHDAY ="isRecordBirthday";
+
 }

@@ -1,6 +1,7 @@
 package com.geekband.huzhouapp.activity;
 
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,7 +33,7 @@ import java.util.ArrayList;
 /**
  * Created by Administrator on 2016/5/12
  */
-public class SplashActivity extends BaseActivity {
+public class SplashActivity extends Activity {
 
     private static final int NEED_UPDATE = 0;
     /**

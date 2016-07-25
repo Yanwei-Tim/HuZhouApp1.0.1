@@ -10,9 +10,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.database.dto.DataOperation;
+import com.database.pojo.CommonTable;
 import com.database.pojo.ContentTable;
 import com.database.pojo.Document;
-import com.database.pojo.OpinionTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
@@ -53,8 +53,8 @@ public class GiftActivity extends Activity implements View.OnClickListener {
             case R.id.gift_send_btn:
                 String contentStr = mGift_edit.getText().toString();
                 String receiverId = getIntent().getStringExtra(Constants.BIRTHDAY_GIFT);
-                String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-                new SendGiftTask().execute(contentStr, receiverId, userId);
+                String senderId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
+                new SendGiftTask().execute(contentStr, receiverId, senderId);
 
 
         }
@@ -71,28 +71,41 @@ public class GiftActivity extends Activity implements View.OnClickListener {
         protected Integer doInBackground(String... params) {
             String contentStr = params[0];
             String receiverId = params[1];
-            String userId = params[2];
-            String postDate = FileUtils.getCurrentTimeStr();
+            String senderId = params[2];
+            String postDate = FileUtils.getCurrentTimeStr("yyyy-MM-dd HH:mm:ss");
             //插入一张需求建议表
-            OpinionTable opinionTable = new OpinionTable();
-            opinionTable.putField(OpinionTable.FIELD_USERID, receiverId);
-            opinionTable.putField(OpinionTable.FIELD_POSTTIME, postDate);
-            if (DataOperation.insertOrUpdateTable(opinionTable,(Document) null)){
+            CommonTable commonTable = new CommonTable();
+            commonTable.putField(CommonTable.FIELD_WRITERID, senderId);
+            commonTable.putField(CommonTable.FIELD_DATETIME, postDate);
+            commonTable.putField(CommonTable.FIELD_AUDITOR,receiverId);
+            boolean isSuccess = DataOperation.insertOrUpdateTable(commonTable,(Document) null);
+            //System.out.println("接受的内容isSuccess:"+isSuccess);
+            if (isSuccess){
                 //获取通用表并插入数据
                 ContentTable contentTable = new ContentTable();
+                //区分日期
+                String divDate = FileUtils.getCurrentTimeStr("yyyy-MM-dd");
                 contentTable.putField(ContentTable.FIELD_SUBSTANCE,contentStr);
-                contentTable.putField(ContentTable.FIELD_NEWSID, opinionTable.getContentId());
-                contentTable.putField(ContentTable.FIELD_DIVI, userId);
+                contentTable.putField(ContentTable.FIELD_NEWSID, commonTable.getContentId());
+                contentTable.putField(ContentTable.FIELD_DIVI,divDate);
+                //System.out.println("接受的内容:"+commonTable.getContentId());
                 //这里可以选择放入贺卡
-                DataOperation.insertOrUpdateTable(contentTable, (Document) null);
+                boolean isSuccess2 = DataOperation.insertOrUpdateTable(contentTable, (Document) null);
+                if (isSuccess2){
+                    return 1;
+                }
+
             }
 
-            return null;
+            return 2;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             mPd.dismiss();
+            if (integer==1) {
+               GiftActivity.this.finish();
+            }
         }
     }
 }

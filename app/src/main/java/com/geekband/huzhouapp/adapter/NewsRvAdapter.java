@@ -22,17 +22,18 @@ public class NewsRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     private Context mContext;
     private ArrayList<DynamicNews> mLocalNewses;
-    private LayoutInflater mLayoutInflater ;
+    private LayoutInflater mLayoutInflater;
     private BitmapUtils mBitmapUtils;
 
     public NewsRvAdapter(ArrayList<DynamicNews> localNewses, Context context) {
         mLocalNewses = localNewses;
         mContext = context;
         mLayoutInflater = LayoutInflater.from(mContext);
-        mBitmapUtils = BitmapHelper.getBitmapUtils(mContext, null, R.drawable.default_news_pic,  R.drawable.default_news_pic);
+        mBitmapUtils = BitmapHelper.getBitmapUtils(mContext, null, R.drawable.default_news_pic, R.drawable.default_news_pic);
+
     }
 
-    class MyViewHolder extends RecyclerView.ViewHolder{
+    class MyViewHolder extends RecyclerView.ViewHolder {
 
         private final ImageView mItem_newsImage;
         private final TextView mItem_newsTitle;
@@ -48,16 +49,18 @@ public class NewsRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new MyViewHolder(mLayoutInflater.inflate(R.layout.item_card_view_news,parent,false));
+        return new MyViewHolder(mLayoutInflater.inflate(R.layout.item_card_view_news, parent, false));
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         MyViewHolder viewHolder = (MyViewHolder) holder;
-        if (mLocalNewses.get(position)==null){
+        if (mLocalNewses.get(position) == null) {
             mLocalNewses.remove(position);
         }
-        mBitmapUtils.display(viewHolder.mItem_newsImage,mLocalNewses.get(position).getPicUrl());
+
+        mBitmapUtils.display(viewHolder.mItem_newsImage, mLocalNewses.get(position).getPicUrl());
+
         viewHolder.mItem_newsTitle.setText(mLocalNewses.get(position).getTitle());
         viewHolder.mItem_newsDate.setText(mLocalNewses.get(position).getDate());
     }

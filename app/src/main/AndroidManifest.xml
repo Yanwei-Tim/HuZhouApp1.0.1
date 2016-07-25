@@ -61,22 +61,7 @@
         <activity android:name="com.chat.activity.CreateQuestionActivity"/>
         <activity android:name="com.chat.activity.MyQuestionActivity"/>
         <activity android:name="com.chat.activity.QuestionChatActivity"/>
-        <receiver android:name=".service.NotificationBroadCast">
-            <intent-filter>
-                <action android:name="android.intent.action.NOTIFICATION_BROADCAST"/>
-                <category android:name="ANDROID.INTENT.CATEGORY.DEFAULT"/>
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name="com.chat.receiver.MyReceiver" >
-            <intent-filter >
-                <action android:name="whyd.APP_STATE_START"/>
-            </intent-filter>
-        </receiver>
-
         <service android:name=".service.NotificationService"/>
-
     </application>
 
 </manifest>

@@ -246,7 +246,7 @@ public final class DataOperation {
                 new DocInfor("", tableName),
                 true,
                 false,
-                currentPage*pageSize == -1 ? "" : String.valueOf((currentPage-1)*pageSize)+1);
+                currentPage*pageSize == -1 ? "" : String.valueOf(((currentPage-1)*pageSize)+1));
     }
 
     /**

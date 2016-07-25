@@ -11,4 +11,7 @@ public class FileUtils {
     public static String getCurrentTimeStr(){
         return new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
     }
+    public static String getCurrentTimeStr(String dateType){
+        return new SimpleDateFormat(dateType).format(new Date());
+    }
 }

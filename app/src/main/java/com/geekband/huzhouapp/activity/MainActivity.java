@@ -38,7 +38,6 @@ import com.geekband.huzhouapp.nav.CameraActivity;
 import com.geekband.huzhouapp.nav.GalleryActivity;
 import com.geekband.huzhouapp.nav.InteractiveActivity;
 import com.geekband.huzhouapp.nav.ManageActivity;
-import com.geekband.huzhouapp.service.NotificationService;
 import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.FileUtil;
@@ -93,8 +92,7 @@ public class MainActivity extends BaseActivity
         mFragmentManager = getSupportFragmentManager();
         // 第一次启动时选中第0个tab
         setTabSelection(0);
-        //启动通知栏服务
-        startService();
+
 
     }
 
@@ -498,7 +496,4 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    public void startService() {
-        startService(new Intent(this, NotificationService.class));
-    }
 }

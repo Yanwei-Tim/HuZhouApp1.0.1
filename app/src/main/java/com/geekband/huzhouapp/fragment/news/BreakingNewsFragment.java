@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -185,7 +186,12 @@ public class BreakingNewsFragment extends Fragment implements
 
         @Override
         protected Integer doInBackground(String... params) {
+            Log.i(BreakingNewsFragment.class.getSimpleName(),String.valueOf(currentPage));
+//            System.out.println("之前的集合数据:"+mLocalNewsList);
+//            System.out.println("之前的集合数据:" + mLocalNewsList.size());
             mLocalNewsList.addAll(DataUtils.getNewsList(Constants.UNROLLING, pageSize, currentPage));
+//            System.out.println("之后的集合数据:"+mLocalNewsList);
+//            System.out.println("之后的集合数据:" + mLocalNewsList.size());
             return null;
         }
 

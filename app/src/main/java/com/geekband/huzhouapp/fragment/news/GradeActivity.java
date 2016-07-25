@@ -108,7 +108,7 @@ public class GradeActivity extends Activity {
             if (integer == 1) {
                 mGrade_progress.setVisibility(View.GONE);
                 Date date = new Date();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String time = sdf.format(date);
 
                 mGrade_times.setText(time);

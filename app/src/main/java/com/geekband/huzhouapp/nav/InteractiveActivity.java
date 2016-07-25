@@ -23,10 +23,9 @@ import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.vo.BirthdayInfo;
 import com.lidroid.xutils.BitmapUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Administrator on 2016/6/29
@@ -63,9 +62,15 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
                 ImageView imageView = holder.getView(R.id.avatar_birthday);
                 bitmapUtils.display(imageView, birthdayInfo.getAvatarImage());
                 holder.setText(R.id.name_birthday, birthdayInfo.getRealName());
-                System.out.println("还有多少天:"+birthdayInfo.getDate());
-                holder.setText(R.id.content_birthday, "距离生日还有" + getDays(birthdayInfo.getDate()) + "天");
-
+                int time = Integer.parseInt(DataUtils.getDays(birthdayInfo.getDate()));
+                if (time<0){
+                    holder.setText(R.id.content_birthday, "生日已经过去" + Math.abs(time) + "天,日夜思君不见君,泪如雨淋淋");
+                }else if (time>0){
+                    holder.setText(R.id.content_birthday, "距离生日还有" + time + "天，准备为伟大的诞生献上最美好的祝福啦");
+                }else if (time==0){
+                    holder.setText(R.id.content_birthday, "今天这里聚集了世界的目光，点击发送生日贺卡吧");
+                    holder.setImageResource(R.id.happy_birthday, R.drawable.happy_birthday_ico);
+                }
             }
         };
         //noinspection unchecked
@@ -139,6 +144,7 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
     Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(Message msg) {
+            Collections.sort(mList,mComparator);
             switch (msg.what) {
                 case PULL_TO_REFRESH:
                     mAdapterWithHF.notifyDataSetChanged();
@@ -165,19 +171,12 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
         this.startActivity(intent);
     }
 
-    //计算日期间隔
-    public String getDays (String userBirthday){
-        long days = 0 ;
-        try {
-            Date date = new Date();
-            String currentDateStr = new SimpleDateFormat("MMdd").format(date);
-            Date currentDate = new SimpleDateFormat("MMdd").parse(currentDateStr);
-            Date birthday = new SimpleDateFormat("MMdd").parse(userBirthday);
-            days = (currentDate.getTime()-birthday.getTime())/(24*60*60*1000);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return String.valueOf(days);
-    }
 
+    //按照日期排序
+    Comparator<BirthdayInfo> mComparator = new Comparator<BirthdayInfo>() {
+        @Override
+        public int compare(BirthdayInfo lhs, BirthdayInfo rhs) {
+            return Integer.parseInt(lhs.getDate())-Integer.parseInt(rhs.getDate());
+        }
+    };
 }

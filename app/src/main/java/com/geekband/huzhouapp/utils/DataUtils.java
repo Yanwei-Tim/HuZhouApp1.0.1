@@ -34,7 +34,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -437,8 +440,6 @@ public class DataUtils {
     public static ArrayList<BirthdayInfo> getBirthdayInfo(int pageSize, int currentPage) {
 
         ArrayList<BirthdayInfo> arrayList = new ArrayList<>();
-        int start = pageSize * (currentPage - 1) + 1;
-        int end = pageSize * currentPage;
 //        String sql = "select * from (select e.* ,rownum rn from (" +
 //                "select * from USERS where IDCARDNO is not null ) e) where rn>=" + start + " and rn<=" + end + " ";
         String sql = "from(select * from users where IdCardNo is not null)users";
@@ -473,6 +474,59 @@ public class DataUtils {
         return arrayList;
     }
 
+//查询所有今天过生日的用户
+    public static ArrayList<BirthdayInfo> getBirthdayInfo() {
+
+        ArrayList<BirthdayInfo> arrayList = new ArrayList<>();
+//        String sql = "select * from (select e.* ,rownum rn from (" +
+//                "select * from USERS where IDCARDNO is not null ) e) where rn>=" + start + " and rn<=" + end + " ";
+        String sql = "from(select * from users where IdCardNo is not null)users";
+        //noinspection unchecked
+        ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, sql);
+        if (userTables != null && userTables.size() != 0) {
+            for (UserTable userTable : userTables) {
+                String userId = userTable.getContentId();
+                //真实姓名
+                String realName = userTable.getField(UserTable.FIELD_REALNAME);
+                //生日
+                String idCardNum = userTable.getField(UserInfoTable.FIELD_IDCARDNO);
+                String birthdayStr = null;
+                if (idCardNum != null && idCardNum.length() == 18) {
+                    birthdayStr = idCardNum.substring(10, 14);
+                }
+                //头像地址
+                ArrayList<String> avatarUrls = (ArrayList<String>) userTable.getAccessaryFileUrlList();
+                String avatarUrl = null;
+                if (avatarUrls != null && avatarUrls.size() != 0) {
+                    avatarUrl = avatarUrls.get(0);
+                }
+                BirthdayInfo birthdayInfo = new BirthdayInfo();
+                birthdayInfo.setUserId(userId);
+                birthdayInfo.setRealName(realName);
+                birthdayInfo.setDate(birthdayStr);
+                birthdayInfo.setAvatarImage(avatarUrl);
+                arrayList.add(birthdayInfo);
+
+            }
+        }
+        return arrayList;
+    }
+
+    //计算日期间隔
+    public static String getDays (String userBirthday){
+        long days = 0 ;
+        try {
+            Date date = new Date();
+            String currentDateStr = new SimpleDateFormat("MMdd").format(date);
+            Date currentDate = new SimpleDateFormat("MMdd").parse(currentDateStr);
+            Date birthday = new SimpleDateFormat("MMdd").parse(userBirthday);
+            days = (birthday.getTime()-currentDate.getTime())/(24*60*60*1000);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return String.valueOf(days);
+    }
+
     /**
      * 保存成绩信息
      */
@@ -505,6 +559,27 @@ public class DataUtils {
             return null;
         }
 
+    }
+
+    /**
+     * 获取学习信息
+     * @param contentId
+     * @return
+     */
+    public static GradeInfo getGrade (String contentId){
+        int id = 0;
+        //获取需修学分
+        int needScore = DataOperation.queryUserNeedScore(contentId);
+        //获取已修学分
+        int currentScore = DataOperation.queryUserCurrentScore(contentId);
+        //必修课程
+        //选修课程
+        GradeInfo gradeInfo = new GradeInfo();
+        gradeInfo.setNeedGrade(String.valueOf(needScore));
+        gradeInfo.setAlreadyGrade(String.valueOf(currentScore));
+        gradeInfo.setId(id);
+
+        return gradeInfo;
     }
 
     //apk下载

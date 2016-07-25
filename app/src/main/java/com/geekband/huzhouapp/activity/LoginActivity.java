@@ -1,5 +1,6 @@
 package com.geekband.huzhouapp.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 /**
  * Created by Administrator on 2016/5/12
  */
-public class LoginActivity extends BaseActivity implements View.OnClickListener {
+public class LoginActivity extends Activity implements View.OnClickListener {
     private Button mLogin_btn;
     private EditText mLogin_user_et;
     private EditText mLogin_password_et;
