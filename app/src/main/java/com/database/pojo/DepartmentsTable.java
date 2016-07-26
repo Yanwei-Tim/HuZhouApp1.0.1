@@ -6,7 +6,7 @@ package com.database.pojo;
 public class DepartmentsTable extends BaseTable {
     private static final long serialVersionUID = 1L;
 
-    public static final String TABLE_NAME = "COURSE";
+    public static final String TABLE_NAME = "DEPARTMENTS";
     /** 部门名称 */
     public static final String FIELD_DEPARTMENTNAME= "DEPARTMENTNAME";
     /** 部门权限 */

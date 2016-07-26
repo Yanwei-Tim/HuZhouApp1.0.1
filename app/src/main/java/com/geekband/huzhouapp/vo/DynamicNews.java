@@ -13,8 +13,8 @@ public class DynamicNews implements Serializable,Parcelable{
     private int id;
     private String title;
     private String date;
-    private String writerId;
-    private String auditorId;
+    private String writer;
+    private String departmentName;
     private String picUrl;
     private String content;
 
@@ -25,8 +25,8 @@ public class DynamicNews implements Serializable,Parcelable{
         id = in.readInt();
         title = in.readString();
         date = in.readString();
-        writerId = in.readString();
-        auditorId = in.readString();
+        writer = in.readString();
+        departmentName = in.readString();
         picUrl = in.readString();
         content = in.readString();
     }
@@ -67,20 +67,20 @@ public class DynamicNews implements Serializable,Parcelable{
         this.date = date;
     }
 
-    public String getWriterId() {
-        return writerId;
+    public String getWriter() {
+        return writer;
     }
 
-    public void setWriterId(String writerId) {
-        this.writerId = writerId;
+    public void setWriter(String writer) {
+        this.writer = writer;
     }
 
-    public String getAuditorId() {
-        return auditorId;
+    public String getDepartmentName() {
+        return departmentName;
     }
 
-    public void setAuditorId(String auditorId) {
-        this.auditorId = auditorId;
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 
     public String getPicUrl() {
@@ -109,8 +109,8 @@ public class DynamicNews implements Serializable,Parcelable{
         dest.writeInt(id);
         dest.writeString(title);
         dest.writeString(date);
-        dest.writeString(writerId);
-        dest.writeString(auditorId);
+        dest.writeString(writer);
+        dest.writeString(departmentName);
         dest.writeString(picUrl);
         dest.writeString(content);
     }
@@ -121,8 +121,8 @@ public class DynamicNews implements Serializable,Parcelable{
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", date='" + date + '\'' +
-                ", writerId='" + writerId + '\'' +
-                ", auditorId='" + auditorId + '\'' +
+                ", writerId='" + writer + '\'' +
+                ", auditorId='" + departmentName + '\'' +
                 ", picUrl='" + picUrl + '\'' +
                 ", content='" + content + '\'' +
                 '}';

@@ -66,7 +66,7 @@ public class ImageActivity extends Activity {
 
         @Override
         protected void onPostExecute(Integer integer) {
-            if (integer==1) {
+            if (integer==1&&mImageList.size()!=0) {
                 mBitmapUtils.display(mTop_imageView, mImageList.get(0));
             }
             initView();
@@ -99,12 +99,13 @@ public class ImageActivity extends Activity {
                     public void onItemClick(View view, int position) {
                         Intent intent = new Intent(ImageActivity.this, AlbumActivity.class);
                         if (mImageList != null) {
-                            //将所点击的图片放到第一个位置，浏览时首先打开这个图片，然后依次浏览其他的图片
-                            String tempStr = mImageList.get(position);
-                            mImageList.remove(position);
-                            mImageList.add(0, tempStr);
+//                            //将所点击的图片放到第一个位置，浏览时首先打开这个图片，然后依次浏览其他的图片
+//                            String tempStr = mImageList.get(position);
+//                            mImageList.remove(position);
+//                            mImageList.add(0, tempStr);
                             intent.setAction("albumList");
                             intent.putStringArrayListExtra("albumList", mImageList);
+                            intent.putExtra("position",position);
                             startActivity(intent);
                         }
 

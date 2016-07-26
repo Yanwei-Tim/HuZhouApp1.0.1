@@ -156,10 +156,20 @@ public final class DataOperation {
         return queryTable(tableName, fieldName, -1, -1, fieldValue);
     }
 
+    public static ArrayList<?> queryTable(String tableName, String fieldName, String fieldValue,String order) {
+        return queryTable(tableName, fieldName, -1, -1, fieldValue,order);
+    }
+
     public static ArrayList<?> queryTable(String tableName, String fieldName, int currentPage, int pageSize, String fieldValue) {
         HashMap<String, String> fieldList = new HashMap<>();
         fieldList.put(fieldName, fieldValue);
         return queryTable(tableName, currentPage, pageSize, fieldList);
+    }
+
+    public static ArrayList<?> queryTable(String tableName, String fieldName, int currentPage, int pageSize, String fieldValue,String order) {
+        HashMap<String, String> fieldList = new HashMap<>();
+        fieldList.put(fieldName, fieldValue);
+        return queryTable(tableName, currentPage, pageSize, fieldList,order);
     }
 
     /**

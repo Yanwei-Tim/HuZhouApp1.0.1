@@ -25,9 +25,11 @@ public class AlbumActivity extends FragmentActivity {
         Intent intent = getIntent();
         String tag = intent.getAction();
         mAlbumList = new ArrayList<>();
+        int position = 0;
         if (tag.equals("albumList")) {
             mAlbumList.clear();
             mAlbumList = intent.getStringArrayListExtra("albumList");
+            position = intent.getIntExtra("position",0);
         } else if (tag.equals("localImages")) {
             mAlbumList.clear();
             mAlbumList = intent.getStringArrayListExtra("localImages");
@@ -35,5 +37,6 @@ public class AlbumActivity extends FragmentActivity {
         mPicture_pager = (ViewPager) findViewById(R.id.picture_pager);
         mPictureSlidePagerAdapter = new PictureSlidePagerAdapter(getSupportFragmentManager(), mAlbumList);
         mPicture_pager.setAdapter(mPictureSlidePagerAdapter);
+        mPicture_pager.setCurrentItem(position);
     }
 }

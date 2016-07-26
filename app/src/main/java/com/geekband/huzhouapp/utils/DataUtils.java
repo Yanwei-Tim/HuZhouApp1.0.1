@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import com.database.dto.DataOperation;
 import com.database.pojo.AlbumTable;
+import com.database.pojo.BaseTable;
 import com.database.pojo.CategoriesTable;
 import com.database.pojo.CommonTable;
 import com.database.pojo.ContentTable;
@@ -66,8 +67,8 @@ public class DataUtils {
             if (isRolling.equals("1")) {
                 newsCategory.put(CommonTable.FIELD_ISROLLING, isRolling);
             }
-            newsCategory.put(CommonTable.FIELD_ISPASSED,"1");
-            newsCategory.put(CommonTable.FIELD_ISPUBLISH,"1");
+            newsCategory.put(CommonTable.FIELD_ISPASSED, "1");
+            newsCategory.put(CommonTable.FIELD_ISPUBLISH, "1");
 //            String sql = "from(select * from " + CommonTable.TABLE_NAME + " where"+
 //                    "" + CommonTable.FIELD_CATEGORYID + " = '" + newsId + "' and"+
 //                    " " + CommonTable.FIELD_ISROLLING + " = '" + isRolling + "' and"+
@@ -75,28 +76,30 @@ public class DataUtils {
 //                    " " + CommonTable.FIELD_ISPUBLISH + " = '1' order by " + CommonTable.FIELD_DATETIME + " DESC )"+
 //                    "" + CommonTable.TABLE_NAME + "";
             //noinspection unchecked
-            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME,currentPage, pageSize,newsCategory,CommonTable.FIELD_DATETIME);
+            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, currentPage, pageSize, newsCategory, CommonTable.FIELD_DATETIME);
 
             if (commonTables != null) {
                 for (int i = 0; i < commonTables.size(); i++) {
                     DynamicNews localNews = new DynamicNews();
                     String title = commonTables.get(i).getField(CommonTable.FIELD_TITLE);
-                    String writer = commonTables.get(i).getField(CommonTable.FIELD_WRITERID);
+                    String writerId = commonTables.get(i).getField(CommonTable.FIELD_WRITERID);
                     //noinspection unchecked
-                    ArrayList<UserTable> writerTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, writer);
-                    String writerId = null;
+                    ArrayList<UserTable> writerTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, writerId);
+                    String writer = "";
+                    String departmentName = "";
                     if (writerTables != null && writerTables.size() != 0) {
-                        writerId = writerTables.get(0).getField(UserTable.FIELD_REALNAME);
-                    }
-                    String auditor = commonTables.get(i).getField(CommonTable.FIELD_AUDITOR);
-                    String auditorId = null;
-                    //noinspection unchecked
-                    ArrayList<DepartmentsTable> departmentsTables = (ArrayList<DepartmentsTable>) DataOperation.queryTable(DepartmentsTable.TABLE_NAME, DepartmentsTable.CONTENTID, auditor);
-                    if (departmentsTables != null && departmentsTables.size() != 0) {
-                        auditorId = departmentsTables.get(0).getField(DepartmentsTable.FIELD_DEPARTMENTNAME);
-                    }
+                        writer = writerTables.get(0).getField(UserTable.FIELD_REALNAME);
+                        String departmentsId = writerTables.get(0).getField(UserTable.FIELD_DEPARTMENTNO);
+                        if (departmentsId != null) {
+                            //noinspection unchecked
+                            ArrayList<BaseTable> departmentsTables = (ArrayList<BaseTable>) DataOperation.queryTable(DepartmentsTable.TABLE_NAME, DepartmentsTable.CONTENTID, departmentsId);
+                            if (departmentsTables != null && departmentsTables.size() != 0) {
+                                departmentName = departmentsTables.get(0).getField(DepartmentsTable.FIELD_DEPARTMENTNAME);
 
-                    String date = commonTables.get(i).getField(CommonTable.FIELD_DATETIME);
+                            }
+                        }
+                    }
+                    String date = commonTables.get(i).getField(CommonTable.FIELD_DATETIME).substring(0, 10);
                     String picUrl = null;
                     if (isRolling.equals("0")) {
                         ArrayList<String> picUrls = (ArrayList<String>) commonTables.get(i).getAccessaryFileUrlList();
@@ -118,8 +121,8 @@ public class DataUtils {
                         //将获取的新闻信息放入本地LocalNews
                     }
                     localNews.setTitle(title);
-                    localNews.setWriterId(writerId);
-                    localNews.setAuditorId(auditorId);
+                    localNews.setWriter(writer);
+                    localNews.setDepartmentName(departmentName);
                     localNews.setPicUrl(picUrl);
                     localNews.setDate(date);
                     localNews.setContent(content);
@@ -231,7 +234,7 @@ public class DataUtils {
                     userBaseInfo.setContentId(contentId);
                     userBaseInfo.setRealName(realName);
                     userBaseInfo.setPhoneNum(phoneNum);
-                    userBaseInfo.setPhoneNum(IDcard);
+                    userBaseInfo.setIDcard(IDcard);
                     userBaseInfo.setEmailAddress(emailAddress);
                     userBaseInfo.setSex(sex);
                     userBaseInfo.setPoliceNum(policeNum);
@@ -474,7 +477,7 @@ public class DataUtils {
         return arrayList;
     }
 
-//查询所有今天过生日的用户
+    //查询所有今天过生日的用户
     public static ArrayList<BirthdayInfo> getBirthdayInfo() {
 
         ArrayList<BirthdayInfo> arrayList = new ArrayList<>();
@@ -513,14 +516,14 @@ public class DataUtils {
     }
 
     //计算日期间隔
-    public static String getDays (String userBirthday){
-        long days = 0 ;
+    public static String getDays(String userBirthday) {
+        long days = 0;
         try {
             Date date = new Date();
             String currentDateStr = new SimpleDateFormat("MMdd").format(date);
             Date currentDate = new SimpleDateFormat("MMdd").parse(currentDateStr);
             Date birthday = new SimpleDateFormat("MMdd").parse(userBirthday);
-            days = (birthday.getTime()-currentDate.getTime())/(24*60*60*1000);
+            days = (birthday.getTime() - currentDate.getTime()) / (24 * 60 * 60 * 1000);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -563,10 +566,11 @@ public class DataUtils {
 
     /**
      * 获取学习信息
+     *
      * @param contentId
      * @return
      */
-    public static GradeInfo getGrade (String contentId){
+    public static GradeInfo getGrade(String contentId) {
         int id = 0;
         //获取需修学分
         int needScore = DataOperation.queryUserNeedScore(contentId);
@@ -663,48 +667,48 @@ public class DataUtils {
             String informationId = categoriesTables.get(0).getContentId();
             //System.out.println(informationId);
             //noinspection unchecked
-            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, CommonTable.FIELD_CATEGORYID, currentPage, pageSize, informationId);
+            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, CommonTable.FIELD_CATEGORYID, currentPage, pageSize, informationId,CommonTable.FIELD_DATETIME);
             //System.out.println(commonTables);
             if (commonTables != null && commonTables.size() != 0) {
 
                 for (int i = 0; i < commonTables.size(); i++) {
                     DynamicNews dynamicNews = new DynamicNews();
                     String title = commonTables.get(i).getField(CommonTable.FIELD_TITLE);
-                    String writer = commonTables.get(i).getField(CommonTable.FIELD_WRITERID);
+                    String writerId = commonTables.get(i).getField(CommonTable.FIELD_WRITERID);
                     //noinspection unchecked
-                    ArrayList<UserTable> writerTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, writer);
-                    String writerId = null;
+                    ArrayList<UserTable> writerTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, writerId);
+                    String writer = "";
+                    String departmentName = "";
                     if (writerTables != null && writerTables.size() != 0) {
-                        writerId = writerTables.get(0).getField(UserTable.FIELD_REALNAME);
-                    }
-                    String auditor = commonTables.get(i).getField(CommonTable.FIELD_AUDITOR);
-                    String auditorId = null;
-                    //noinspection unchecked
-                    ArrayList<DepartmentsTable> departmentsTables = (ArrayList<DepartmentsTable>) DataOperation.
-                            queryTable(DepartmentsTable.TABLE_NAME, DepartmentsTable.CONTENTID, auditor);
-                    if (departmentsTables != null && departmentsTables.size() != 0) {
-                        auditorId = departmentsTables.get(0).getField(DepartmentsTable.FIELD_DEPARTMENTNAME);
-                    }
+                        writer = writerTables.get(0).getField(UserTable.FIELD_REALNAME);
+                        String departmentNo = writerTables.get(0).getField(UserTable.FIELD_DEPARTMENTNO);
+                        //noinspection unchecked
+                        ArrayList<BaseTable> departmentsTables = (ArrayList<BaseTable>) DataOperation.
+                                queryTable(DepartmentsTable.TABLE_NAME, DepartmentsTable.CONTENTID, departmentNo);
+                        if (departmentsTables != null && departmentsTables.size() != 0) {
+                            departmentName = departmentsTables.get(0).getField(DepartmentsTable.FIELD_DEPARTMENTNAME);
+                        }
 
-                    String date = commonTables.get(i).getField(CommonTable.FIELD_DATETIME);
+                        String date = commonTables.get(i).getField(CommonTable.FIELD_DATETIME).substring(0, 10);
 
-                    String contentID = commonTables.get(i).getContentId();
+                        String contentID = commonTables.get(i).getContentId();
 
-                    //根据contentId获取新闻内容
-                    String content = null;
-                    //noinspection unchecked
-                    ArrayList<ContentTable> contentTables = (ArrayList<ContentTable>) DataOperation.
-                            queryTable(ContentTable.TABLE_NAME, ContentTable.FIELD_NEWSID, contentID);
-                    if (contentTables != null && contentTables.size() != 0) {
-                        content = contentTables.get(0).getField(ContentTable.FIELD_SUBSTANCE);
+                        //根据contentId获取新闻内容
+                        String content = null;
+                        //noinspection unchecked
+                        ArrayList<ContentTable> contentTables = (ArrayList<ContentTable>) DataOperation.
+                                queryTable(ContentTable.TABLE_NAME, ContentTable.FIELD_NEWSID, contentID);
+                        if (contentTables != null && contentTables.size() != 0) {
+                            content = contentTables.get(0).getField(ContentTable.FIELD_SUBSTANCE);
+                        }
+                        dynamicNews.setTitle(title);
+                        dynamicNews.setWriter(writer);
+                        dynamicNews.setDepartmentName(departmentName);
+                        dynamicNews.setDate(date);
+                        dynamicNews.setContent(content);
+                        dynamicNews.setId(i);
+                        arrayList.add(dynamicNews);
                     }
-                    dynamicNews.setTitle(title);
-                    dynamicNews.setWriterId(writerId);
-                    dynamicNews.setAuditorId(auditorId);
-                    dynamicNews.setDate(date);
-                    dynamicNews.setContent(content);
-                    dynamicNews.setId(i);
-                    arrayList.add(dynamicNews);
                 }
             }
         }

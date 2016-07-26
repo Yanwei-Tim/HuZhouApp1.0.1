@@ -39,7 +39,7 @@ public class PictureSlideFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mIndex = getArguments() != null ? getArguments().getInt("index") : 1;
-        mBitmapUtils = BitmapHelper.getBitmapUtils(getActivity(),null,0,0);
+        mBitmapUtils = BitmapHelper.getBitmapUtils(getActivity(), null, 0, 0);
     }
 
     @Nullable
@@ -50,7 +50,9 @@ public class PictureSlideFragment extends Fragment {
         TextView pic_count = (TextView) view.findViewById(R.id.pic_count);
         String displayText = mIndex + 1 + "/" + mList.size();
         pic_count.setText(displayText);
-        mBitmapUtils.display(iv_main_pic,mList.get(mIndex));
+
+        mBitmapUtils.display(iv_main_pic, mList.get(mIndex));
+
         new PhotoViewAttacher(iv_main_pic);
         return view;
     }

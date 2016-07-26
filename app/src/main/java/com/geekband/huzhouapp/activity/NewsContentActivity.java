@@ -39,8 +39,8 @@ public class NewsContentActivity extends BaseActivity {
         TextView content_writer = (TextView) findViewById(R.id.content_writer);
 
         String title = dynamicNews.getTitle();
-        String writer = "发布人:"+dynamicNews.getWriterId();
-        String auditor = "审核处:"+dynamicNews.getAuditorId();
+        String writer = "发布人:"+dynamicNews.getWriter();
+        String auditor = "来源部门:"+dynamicNews.getDepartmentName();
         String date = "发布时间:"+dynamicNews.getDate();
 
 
@@ -74,7 +74,7 @@ public class NewsContentActivity extends BaseActivity {
                 return true;
             }
         });
-        String htmlStr = "<html><head><style>img{width:100%;height:auto; !important;}</style></head>" + "<body>" + dynamicNews.getContent() + "</body>" + "</html>";
+        String htmlStr = "<html><head><style>img{width:100%;height:auto; !important;}</style></head>" + "<body style='background-color:#d6d3ac;'>" + dynamicNews.getContent() + "</body>" + "</html>";
         webView.loadDataWithBaseURL(null, htmlStr, "text/html", "utf-8", null);
 
         webView.setVisibility(View.VISIBLE);
