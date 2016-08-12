@@ -55,6 +55,9 @@ public class PostHttp {
         reader.parse(new InputSource(new StringReader(str)));
         parsedExampleDataSet = myExampleHandler.dataSet;
 
+        //IOUtils.writeStringToFile(str, Environment.getExternalStorageDirectory()+"/xmlData.txt");
+        //IOUtils.writeStringToFile(contents, Environment.getExternalStorageDirectory()+"/xmlStr.txt");
+
         // } catch (Exception e) {
         // e.printStackTrace();
         // } finally {

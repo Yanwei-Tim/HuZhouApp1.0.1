@@ -96,9 +96,10 @@ public class ExpertListAdapter extends BaseAdapter
 		UserInfoTable expertUserInfo = getItem(position).getExpertUserInfo();
 		
 		String headIconUrl = "";
-		if(expertInfo.getAccessaryFileUrlList()!=null && expertInfo.getAccessaryFileUrlList().size()!=0 )
-		{
-			headIconUrl = expertInfo.getAccessaryFileUrlList().get(0);
+		if (expertInfo!=null) {
+			if (expertInfo.getAccessaryFileUrlList() != null && expertInfo.getAccessaryFileUrlList().size() != 0) {
+				headIconUrl = expertInfo.getAccessaryFileUrlList().get(0);
+			}
 		}
 		bitmapUtils.display(vh.iv_head, headIconUrl);
 		

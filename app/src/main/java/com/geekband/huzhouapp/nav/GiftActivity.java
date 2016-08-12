@@ -31,6 +31,7 @@ public class GiftActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gift);
         initView();
+
     }
 
     private void initView() {
@@ -39,8 +40,8 @@ public class GiftActivity extends Activity implements View.OnClickListener {
         TextView gift_send_btn = (TextView) findViewById(R.id.gift_send_btn);
         gift_send_btn.setOnClickListener(this);
         gift_back_textBtn.setOnClickListener(this);
-
     }
+
 
     @Override
     public void onClick(View v) {
@@ -73,39 +74,32 @@ public class GiftActivity extends Activity implements View.OnClickListener {
             String receiverId = params[1];
             String senderId = params[2];
             String postDate = FileUtils.getCurrentTimeStr("yyyy-MM-dd HH:mm:ss");
-            //插入一张需求建议表
+            //插入一张通用信息表
             CommonTable commonTable = new CommonTable();
             commonTable.putField(CommonTable.FIELD_WRITERID, senderId);
             commonTable.putField(CommonTable.FIELD_DATETIME, postDate);
-            commonTable.putField(CommonTable.FIELD_AUDITOR,receiverId);
-            boolean isSuccess = DataOperation.insertOrUpdateTable(commonTable,(Document) null);
-            //System.out.println("接受的内容isSuccess:"+isSuccess);
-            if (isSuccess){
-                //获取通用表并插入数据
-                ContentTable contentTable = new ContentTable();
-                //区分日期
-                String divDate = FileUtils.getCurrentTimeStr("yyyy-MM-dd");
-                contentTable.putField(ContentTable.FIELD_SUBSTANCE,contentStr);
-                contentTable.putField(ContentTable.FIELD_NEWSID, commonTable.getContentId());
-                contentTable.putField(ContentTable.FIELD_DIVI,divDate);
-                //System.out.println("接受的内容:"+commonTable.getContentId());
-                //这里可以选择放入贺卡
-                boolean isSuccess2 = DataOperation.insertOrUpdateTable(contentTable, (Document) null);
-                if (isSuccess2){
-                    return 1;
-                }
+            commonTable.putField(CommonTable.FIELD_AUDITOR, receiverId);
+            commonTable.putField(CommonTable.FIELD_ISPASSED, "0");
+            DataOperation.insertOrUpdateTable(commonTable, (Document) null);
 
-            }
-
-            return 2;
+            //获取通用表并插入数据
+            ContentTable contentTable = new ContentTable();
+            //区分日期
+            String divDate = FileUtils.getCurrentTimeStr("yyyy-MM-dd");
+            contentTable.putField(ContentTable.FIELD_SUBSTANCE, contentStr);
+            contentTable.putField(ContentTable.FIELD_NEWSID, commonTable.getContentId());
+            contentTable.putField(ContentTable.FIELD_DIVI, divDate);
+            //System.out.println("接受的内容:"+commonTable.getContentId());
+            //这里可以选择放入贺卡
+            DataOperation.insertOrUpdateTable(contentTable, (Document) null);
+            return null;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             mPd.dismiss();
-            if (integer==1) {
-               GiftActivity.this.finish();
-            }
+            GiftActivity.this.finish();
+
         }
     }
 }

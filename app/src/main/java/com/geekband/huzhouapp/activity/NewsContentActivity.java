@@ -74,9 +74,11 @@ public class NewsContentActivity extends BaseActivity {
                 return true;
             }
         });
-        String htmlStr = "<html><head><style>img{width:100%;height:auto; !important;}</style></head>" + "<body style='background-color:#d6d3ac;'>" + dynamicNews.getContent() + "</body>" + "</html>";
+        String htmlStr = "<html><head><style>img{width:100%;height:auto; !important;}" +
+                "</style></head>" + "<body style='background-color:#d6d3ac;'>" +
+                dynamicNews.getContent() + "</body>" +
+                "</html>";
         webView.loadDataWithBaseURL(null, htmlStr, "text/html", "utf-8", null);
-
         webView.setVisibility(View.VISIBLE);
     }
 

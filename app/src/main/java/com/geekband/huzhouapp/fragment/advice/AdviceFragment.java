@@ -2,6 +2,7 @@ package com.geekband.huzhouapp.fragment.advice;
 
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,13 +13,16 @@ import android.widget.GridView;
 import android.widget.ListView;
 
 import com.chat.activity.ExpertActivity;
+import com.chat.activity.MyQuestionActivity;
 import com.chat.activity.OthersQuestionActivity;
 import com.chat.adapter.QuestionMenuItemListAdapter;
 import com.chat.adapter.pojo.QuestionMenuItem;
+import com.database.dto.DataOperation;
+import com.database.pojo.CategoriesTable;
 import com.geekband.huzhouapp.R;
-import com.chat.activity.MyQuestionActivity;
 import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
+import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.vo.ClassInfo;
 
 import java.util.ArrayList;
@@ -28,7 +32,7 @@ import java.util.ArrayList;
  */
 public class AdviceFragment extends Fragment implements AdapterView.OnItemClickListener {
 
-    ArrayList<ClassInfo> classList;
+
     private GridView mAdvice_class_gridView;
 
     private ListView lv_questionMenuListView;
@@ -42,12 +46,9 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
         mAdvice_class_gridView = (GridView) view.findViewById(R.id.advice_class_gridView);
         mAdvice_class_gridView.setOnItemClickListener(this);
 
-//        QuestionMenuFragment qmf = new QuestionMenuFragment();
-//        getFragmentManager().beginTransaction().replace(R.id.container, qmf).commit();
 
-        //初始化分类列表
-        initClassList();
-
+        //加载并初始化分类列表
+        new LoadCategoriesTask().execute();
 
         lv_questionMenuListView = (ListView) view.findViewById(R.id.lv_questionmenu_menuItemList);
         initVar();
@@ -57,16 +58,26 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
         return view;
     }
 
-    private void initClassList() {
-        classList = new ArrayList<>();
-        classList.add(new ClassInfo(R.drawable.law, "法律"));
-        classList.add(new ClassInfo(R.drawable.criminal, "刑侦"));
-        classList.add(new ClassInfo(R.drawable.traffic_police, "交警"));
-        classList.add(new ClassInfo(R.drawable.firefighting, "消防"));
-        classList.add(new ClassInfo(R.drawable.psychology, "心理"));
-        classList.add(new ClassInfo(R.drawable.political, "政工"));
-        classList.add(new ClassInfo(R.drawable.document, "公文写作"));
-        classList.add(new ClassInfo(R.drawable.informatization, "信息化"));
+    private void initClassList(ArrayList<String> list) {
+        ArrayList<Integer> icons = new ArrayList<>();
+        icons.add(R.drawable.law);
+        icons.add(R.drawable.criminal);
+        icons.add(R.drawable.traffic_police);
+        icons.add(R.drawable.firefighting);
+        icons.add(R.drawable.psychology);
+        icons.add(R.drawable.political);
+        icons.add(R.drawable.document);
+        icons.add(R.drawable.informatization);
+        ArrayList<ClassInfo> classList = new ArrayList<>();
+        int i = 0;
+        if (icons.size()<list.size()) {
+            i = icons.size();
+        }else if (icons.size()>list.size()){
+           i= list.size();
+        }
+        for ( int j = 0; j< i; j++) {
+            classList.add(new ClassInfo(icons.get(j),list.get(j)));
+        }
 
         mAdvice_class_gridView.setAdapter(new CommonAdapter<ClassInfo>(getActivity(), classList, R.layout.item_class) {
             @Override
@@ -83,7 +94,7 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
         mAdvice_class_gridView.setSelector(R.color.blue_background);
         //跳转设置
         Intent intent = new Intent();
-        intent.putExtra("class", position+1);
+        intent.putExtra("wxzj_class", position+1);
         intent.setClass(getActivity(), ExpertActivity.class);
         startActivity(intent);
     }
@@ -143,4 +154,36 @@ public class AdviceFragment extends Fragment implements AdapterView.OnItemClickL
     public static final String MENU_ITEM_PERSONANSWER = "我的回答";
     public static final String MENU_ITEM_EXPERT = "咨询专家";
     public static final String MENU_ITEM_NEWQUESTION = "最新问答";
+
+
+    public ArrayList<String> getCategoryNames() {
+        ArrayList<String> categoryNames = new ArrayList<>();
+        ArrayList<CategoriesTable>  categoriesTables= (ArrayList<CategoriesTable>) DataOperation.queryTable(CategoriesTable.TABLE_NAME,CategoriesTable.FIELD_PARENTID, Constants.WXZJ_CATEGORIES_ID);
+
+        if (categoriesTables!=null&&categoriesTables.size()!=0){
+            for (CategoriesTable categoriesTable:categoriesTables) {
+                String categoryName = categoriesTable.getField(CategoriesTable.FIELD_NAME);
+                categoryNames.add(categoryName);
+            }
+        }
+        return categoryNames;
+    }
+
+    class LoadCategoriesTask extends AsyncTask<String,Integer,Integer>{
+
+        private ArrayList<String> mCategoryNames;
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            mCategoryNames = getCategoryNames();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+
+            //初始化分类列表
+            initClassList(mCategoryNames);
+        }
+    }
 }

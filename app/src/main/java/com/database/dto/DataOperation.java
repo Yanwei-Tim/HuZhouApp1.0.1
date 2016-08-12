@@ -183,6 +183,10 @@ public final class DataOperation {
     public static ArrayList<?> queryTable(String tableName, Map<String, String> fieldList) {
         return queryTable(tableName, -1, -1, fieldList);
     }
+    public static ArrayList<?> queryTable(String tableName, Map<String, String> fieldList,String orderStr) {
+        return queryTable(tableName, -1, -1, fieldList,orderStr);
+    }
+
 //new
     public static ArrayList<?> queryTable(String tableName, int currentPage, int pageSize, Map<String, String> fieldList) {
         StringBuilder sqlStr = new StringBuilder();
@@ -234,6 +238,7 @@ public final class DataOperation {
         return queryTable(tableName, sqlStr.toString(), currentPage, pageSize);
     }
 
+
     /**
      * 根据表名，执行sql语句查询表记录；
      *
@@ -245,6 +250,8 @@ public final class DataOperation {
     public static ArrayList<?> queryTable(String tableName, String sqlStr) {
         return queryTable(tableName, sqlStr, -1, -1);
     }
+
+
 
     public static ArrayList<?> queryTable(String tableName, String sqlStr, int currentPage, int pageSize) {
         return queryTable(

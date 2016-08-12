@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.geekband.huzhouapp.service.BirthdayBroadcastReceiver;
 import com.geekband.huzhouapp.service.GradeBroadcastReceiver;
+import com.geekband.huzhouapp.service.MessageInformationReceiver;
 import com.geekband.huzhouapp.service.NotificationService;
 import com.geekband.huzhouapp.utils.Constants;
 
@@ -18,6 +19,7 @@ public class BaseActivity extends FragmentActivity {
 
     GradeBroadcastReceiver mGbr;
     private BirthdayBroadcastReceiver mBbr;
+    private MessageInformationReceiver mMir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +42,12 @@ public class BaseActivity extends FragmentActivity {
         mBbr = new BirthdayBroadcastReceiver();
         IntentFilter birthdayFilter = new IntentFilter();
         birthdayFilter.addAction(Constants.BIRTHDAY_BROADCAST);
-        registerReceiver(mBbr,birthdayFilter);
+        registerReceiver(mBbr, birthdayFilter);
+
+        mMir = new MessageInformationReceiver();
+        IntentFilter messageFilter = new IntentFilter();
+        messageFilter.addAction(Constants.MESSAGE_BROADCAST);
+        registerReceiver(mMir, messageFilter);
     }
 
 
@@ -54,6 +61,7 @@ public class BaseActivity extends FragmentActivity {
         super.onDestroy();
         unregisterReceiver(mGbr);
         unregisterReceiver(mBbr);
+        unregisterReceiver(mMir);
     }
 
 }

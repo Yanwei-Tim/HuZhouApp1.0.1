@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:focusable="true"
-    android:focusableInTouchMode="true"
-    android:orientation="vertical" >
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:focusable="true"
+              android:focusableInTouchMode="true"
+              android:orientation="vertical" >
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -38,7 +38,7 @@
                 android:text="正在加载..."
                 android:textColor="#BEBEBE" />
         </LinearLayout>
-        
+
         <LinearLayout
             android:id="@+id/vg_expert_errorTip"
             android:layout_width="match_parent"
@@ -53,6 +53,20 @@
                 android:textColor="#BEBEBE" />
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/vg_expert_emptyTip"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:visibility="visible" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="没有相关数据"
+                android:textColor="#BEBEBE" />
+        </LinearLayout>
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
@@ -64,7 +78,8 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:layout_marginBottom="10dp"
-                android:layout_marginRight="5dp"/>
+                android:layout_marginRight="5dp"
+                android:background="@drawable/bg_btn_3" />
         </RelativeLayout>
     </FrameLayout>
 

@@ -3,6 +3,7 @@ package com.geekband.huzhouapp.service;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -13,6 +14,7 @@ import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.vo.BirthdayInfo;
+import com.geekband.huzhouapp.vo.DynamicNews;
 import com.geekband.huzhouapp.vo.GradeInfo;
 
 import java.text.ParseException;
@@ -29,6 +31,7 @@ public class NotificationService extends Service {
 
     private static final int GRADE_TIMER = 1;
     private static final int BIRTHDAY_TIMER = 2;
+    private static final int MESSAGE_TIMER = 3;
 
     @Nullable
     @Override
@@ -55,12 +58,14 @@ public class NotificationService extends Service {
             Timer timer = new Timer();
             //判断今天是否启动过生日通知
             String currentDateStr = new SimpleDateFormat("yyMMdd").format(new Date());
-            if (!currentDateStr.equals(MyApplication.sSharedPreferences.getString(Constants.IS_RECORD_GRADE, null))) {
+            if (!currentDateStr.equals(MyApplication.sSharedPreferences.getString(Constants.RECORD_CURRENT_DATE, null))) {
 
                 timer.schedule(gradeTimer, startTime, 24 * 60 * 60 * 1000);
 
+
             }
             timer.schedule(birthdayTimer, startTime, 24 * 60 * 60 * 1000);
+            timer.schedule(messageTimer, startTime, 24 * 60 * 60 * 1000);
 
 
         } catch (ParseException e) {
@@ -98,10 +103,30 @@ public class NotificationService extends Service {
                 ArrayList<BirthdayInfo> users = DataUtils.getBirthdayInfo();
                 for (BirthdayInfo birthdayInfo : users) {
                     if (birthdayInfo.getDate() != null && DataUtils.getDays(birthdayInfo.getDate()).equals("0")) {
-                        Intent intent = new Intent("android.intent.action.BIRTHDAY_BROADCAST");
+                        Intent intent = new Intent(Constants.BIRTHDAY_BROADCAST);
                         intent.putExtra("birthdayMessage", "有朋友今天生日，赶快送上祝福吧！(点击可查看名单)");
                         sendBroadcast(intent);
                     }
+                }
+            }
+        }.start();
+
+    }
+
+
+    public void sendMessageNotification() {
+        new Thread() {
+            @Override
+            public void run() {
+                ArrayList<DynamicNews> dynamicNewses = DataUtils.getGiftInfo();
+
+                if (dynamicNewses!=null&&dynamicNewses.size()!=0) {
+                    Intent intent = new Intent(Constants.MESSAGE_BROADCAST);
+                    intent.putExtra("giftMessage", "收到生日祝福！(点击可查)");
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelableArrayList("gifts",dynamicNewses);
+                    intent.putExtras(bundle);
+                    sendBroadcast(intent);
                 }
             }
         }.start();
@@ -115,10 +140,14 @@ public class NotificationService extends Service {
             switch (msg.what) {
                 case GRADE_TIMER:
                     sendGradeNotification();
-                    recordDate(Constants.IS_RECORD_GRADE);
+                    recordDate(Constants.RECORD_CURRENT_DATE);
                     break;
                 case BIRTHDAY_TIMER:
                     sendBirthdayNotification();
+                    break;
+
+                case MESSAGE_TIMER:
+                    sendMessageNotification();
                     break;
 
             }
@@ -141,6 +170,16 @@ public class NotificationService extends Service {
             Message message = Message.obtain();
             message.what = BIRTHDAY_TIMER;
             notificationHandler.sendMessage(message);
+        }
+    };
+
+    private TimerTask messageTimer = new TimerTask() {
+        @Override
+        public void run() {
+            Message message = Message.obtain();
+            message.what = MESSAGE_TIMER;
+            notificationHandler.sendMessage(message);
+
         }
     };
 

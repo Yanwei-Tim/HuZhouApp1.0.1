@@ -39,8 +39,20 @@ public class Constants {
     //广播
     public static final String GRADE_BROADCAST = "android.intent.action.GRADE_BROADCAST";
     public static final String BIRTHDAY_BROADCAST = "android.intent.action.BIRTHDAY_BROADCAST";
-    //记录是否启通知
-    public static final String IS_RECORD_GRADE ="isRecordGrade";
-    public static final String IS_RECORD_BIRTHDAY ="isRecordBirthday";
+    public static final String MESSAGE_BROADCAST = "android.intent.action.MESSAGE_BROADCAST";
+    //记录通知信息日期
+    public static final String RECORD_CURRENT_DATE = "isRecordGrade";
+    public static final String IS_RECORD_BIRTHDAY = "isRecordBirthday";
+    //bs.必修视频 xs.选修视频 bw.必修文档 xw.选修文档
+    public static final String BS = "b,s";
+    public static final String XS = "x,s";
+    public static final String BW = "b,w";
+    public static final String XW = "x,w";
+    public static final String BS_STR = "必修视频";
+    public static final String XS_STR = "选修视频";
+    public static final String BW_STR = "必修文档";
+    public static final String XW_STR = "选修文档";
 
+    public static final String TIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
+    public static final String WXZJ_CATEGORIES_ID = "A0100020166081053577090838";
 }

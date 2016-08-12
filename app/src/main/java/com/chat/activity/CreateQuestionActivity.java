@@ -16,10 +16,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chat.adapter.pojo.Question;
+import com.database.dto.DataOperation;
+import com.database.pojo.CategoriesTable;
 import com.geekband.huzhouapp.R;
+import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataOperationHelper;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class CreateQuestionActivity extends Activity implements View.OnClickListener
@@ -28,9 +32,9 @@ public class CreateQuestionActivity extends Activity implements View.OnClickList
 	private TextView tv_title;
 	private EditText et_content;
 	private Button btn_submit;
-	
+
 	private int selectedCategory;
-	private String[] categories = new String[]{"法律", "刑侦", "交警", "消防", "心理", "政工", "公文写作", "信息化"};
+	private ArrayList<CategoriesTable> categories;
 	private Spinner mSpinner;
 
 	@Override
@@ -43,6 +47,7 @@ public class CreateQuestionActivity extends Activity implements View.OnClickList
 		initVar();
 		initView();
 		initListener();
+		runAsyncTask(AsyncDataLoader.TASK_INITCATEGORY);
 	}
 	
 	private void findView()
@@ -52,15 +57,14 @@ public class CreateQuestionActivity extends Activity implements View.OnClickList
 		et_content = (EditText) findViewById(R.id.et_createQuestion_content);
 		btn_submit = (Button) findViewById(R.id.btn_createquestion_submin);
 		mSpinner = (Spinner) findViewById(R.id.spinner_question_type);
-		mSpinner.setBackgroundResource(R.drawable.abc_spinner_ab_pressed_holo_light);
-		ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,categories);
-		arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mSpinner.setAdapter(arrayAdapter);
 	}
 	
 	private void initView()
 	{
 		tv_title.setText("发布新问题");
+
+		categories = new ArrayList<>();
+		mSpinner.setBackgroundResource(R.drawable.abc_spinner_ab_pressed_holo_light);
 	}
 	
 	private void initVar()
@@ -114,6 +118,9 @@ public class CreateQuestionActivity extends Activity implements View.OnClickList
 		private static final int TASK_CREATEQUESTION = 1;
 		private static final int TASK_CREATEQUESTION_RESULT_SUCCESS = 1;
 		private static final int TASK_CREATEQUESTION_RESULT_ERROR = -1;
+		public static final int TASK_INITCATEGORY = 2;
+		public static final int TASK_INITCATEGORY_RESULT_SUCCESS = 2;
+		public static final int TASK_INITCATEGORY_RESULT_ERROR = -2;
 		
 		private int task;
 		private Object[] params;
@@ -128,12 +135,18 @@ public class CreateQuestionActivity extends Activity implements View.OnClickList
 		@Override
 		protected void onPreExecute()
 		{
+			btn_submit.setEnabled(false);
 			switch (task)
 			{
 				case TASK_CREATEQUESTION: //显示问题发布进度条对话框，并执行问题发布任务
 				{
 					mPd = ProgressDialog.show(CreateQuestionActivity.this, null, "正在上上传...");
 					
+				}break;
+
+				case TASK_INITCATEGORY:
+				{
+
 				}break;
 			}
 		}
@@ -168,6 +181,22 @@ public class CreateQuestionActivity extends Activity implements View.OnClickList
 					
 					return TASK_CREATEQUESTION_RESULT_ERROR;
 				}
+
+				case TASK_INITCATEGORY:
+				{
+					try
+					{
+						categories = (ArrayList<CategoriesTable>) DataOperation.queryTable(CategoriesTable.TABLE_NAME, CategoriesTable.FIELD_PARENTID, Constants.WXZJ_CATEGORIES_ID);
+
+						return TASK_INITCATEGORY_RESULT_SUCCESS;
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+					}
+
+					return TASK_CREATEQUESTION_RESULT_ERROR;
+				}
 			}
 			
 			return 0;
@@ -176,6 +205,7 @@ public class CreateQuestionActivity extends Activity implements View.OnClickList
 		@Override
 		protected void onPostExecute(Integer taskResult)
 		{
+
 			switch (taskResult)
 			{
 				case TASK_CREATEQUESTION_RESULT_SUCCESS:
@@ -195,6 +225,24 @@ public class CreateQuestionActivity extends Activity implements View.OnClickList
 				{
 					mPd.setMessage("上传失败！");
 					mPd.dismiss();
+				}break;
+
+				case TASK_INITCATEGORY_RESULT_SUCCESS:
+				{
+					String[] categoryArr = new String[categories.size()];
+					for (int i=0;i<categories.size();i++)
+					{
+						categoryArr[i] = categories.get(i).getField(CategoriesTable.FIELD_NAME);
+					}
+					ArrayAdapter arrayAdapter = new ArrayAdapter<>(CreateQuestionActivity.this, android.R.layout.simple_spinner_item, categoryArr);
+					arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+					mSpinner.setAdapter(arrayAdapter);
+					btn_submit.setEnabled(true);
+				}break;
+
+				case TASK_INITCATEGORY_RESULT_ERROR:
+				{
+
 				}break;
 			}
 		}

@@ -88,6 +88,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     private CommonAdapter<String> mSelectViewAdapter;
     private GridView mSelected_image_grid;
     private final String IMAGE_TAG = "addMoreImage";
+    private ArrayAdapter<String> mArrayAdapter;
 
 
     @Override
@@ -96,7 +97,6 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         setContentView(R.layout.activity_gallery);
         isCreate = true;
         mGalleryList = new ArrayList<>();
-        mGalleryList.add(0, "默认相册");
         mPathList = new ArrayList<>();
         mBitmapUtils = BitmapHelper.getBitmapUtils(this, null, 0, 0);
         //控件信息
@@ -105,6 +105,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         new LocalTask().execute();
 
     }
+
 
     private void initAlbum() {
         mGallery_gridView.setAdapter(new CommonAdapter<AlbumTable>(this, mAlbumInfoList, R.layout.item_album) {
@@ -136,9 +137,11 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         mSelected_layout = (LinearLayout) findViewById(R.id.selected_layout);
         mSpinner_select_gallery = (Spinner) findViewById(R.id.spinner_select_gallery);
         mSpinner_select_gallery.setBackgroundResource(R.drawable.abc_spinner_ab_pressed_holo_light);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mGalleryList);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mSpinner_select_gallery.setAdapter(arrayAdapter);
+        mArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, mGalleryList);
+        mSpinner_select_gallery.setAdapter(mArrayAdapter);
+        mArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+
 //        mSelected_pic = (ImageView) findViewById(R.id.selected_pic);
         mUp_btn = (Button) findViewById(R.id.up_btn);
         mSelected_image = (GridView) findViewById(R.id.selected_image_grid);
@@ -199,7 +202,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                         Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
                 break;
             case R.id.create_imageView:
-                Toast.makeText(this, "我被点击了", Toast.LENGTH_SHORT).show();
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("创建相册");
                 View view = LinearLayout.inflate(this, R.layout.view_create_gallery, null);
@@ -392,11 +395,13 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
             if (mAlbumInfoList != null && mAlbumInfoList.size() != 0) {
                 //封面图地址
                 mImageThumbUrls = new ArrayList<>();
+                mGalleryList.clear();
                 for (AlbumTable albumTable : mAlbumInfoList) {
                     ArrayList<String> urlList = (ArrayList<String>) albumTable.getAccessaryFileUrlList();
                     if (urlList != null && urlList.size() != 0) {
                         mImageThumbUrls.add(urlList.get(0));
                     }
+                    //System.out.println("相册名称：" + (albumTable.getField(AlbumTable.FIELD_NAME)));
                     mGalleryList.add(albumTable.getField(AlbumTable.FIELD_NAME));
                 }
                 return 1;
@@ -408,6 +413,8 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         @Override
         protected void onPostExecute(Integer integer) {
             if (integer == 1) {
+                //为了防止异步加载数据spinner选择值为空，故将setAdapter放在异步加载之后
+                mArrayAdapter.notifyDataSetChanged();
                 mGallery_progress.setVisibility(View.GONE);
                 mGallery_gridView.setVisibility(View.VISIBLE);
                 //初始化相册GridView
@@ -539,7 +546,6 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         }
 
     }
-
     private class CreateGallery extends AsyncTask<String, Integer, Integer> {
 
         private ProgressDialog mPd;

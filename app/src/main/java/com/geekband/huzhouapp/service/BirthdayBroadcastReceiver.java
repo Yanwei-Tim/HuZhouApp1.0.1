@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
@@ -25,9 +24,9 @@ public class BirthdayBroadcastReceiver extends BroadcastReceiver {
         mContext = context;
 
 
-        Log.i(BirthdayBroadcastReceiver.class.getSimpleName() + "目前：", intent.getAction());
+       // Log.i(BirthdayBroadcastReceiver.class.getSimpleName() + "目前：", intent.getAction());
         if (intent.getAction().equals(Constants.BIRTHDAY_BROADCAST)) {
-            Log.i(BirthdayBroadcastReceiver.class.getSimpleName() + "关注：", "生日通知是否启动");
+            //Log.i(BirthdayBroadcastReceiver.class.getSimpleName() + "关注：", "生日通知是否启动");
             String msg1 = intent.getStringExtra("birthdayMessage");
             // System.out.println("msg1:"+msg1);
             showIntentActivityNotify(msg1, "系统通知", "生日通知");

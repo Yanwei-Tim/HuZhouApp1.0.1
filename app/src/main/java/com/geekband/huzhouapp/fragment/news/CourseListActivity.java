@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.database.pojo.CourseTable;
 import com.geekband.huzhouapp.R;
@@ -29,6 +30,7 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
     private ListView mCourse_listView;
     private ArrayList<CourseInfo> mMyCourseList;
     private Button mCourseList_backBtn;
+    private TextView mCourse_center;
 
 
     @Override
@@ -39,14 +41,17 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
         mCourse_listView = (ListView) findViewById(R.id.course_listView);
         mCourse_progress = (ProgressBar) findViewById(R.id.course_progress);
         mCourseList_backBtn = (Button) findViewById(R.id.courseList_backBtn);
+        mCourse_center = (TextView) findViewById(R.id.course_center);
 
 
         mCourseList_backBtn.setOnClickListener(this);
 
         Intent intent = getIntent();
         if (intent.getAction().equals("allCourse")) {
+            mCourse_center.setText("全部课程");
             new AllCoursesTask().execute();
         } else if (intent.getAction().equals("myCourse")) {
+            mCourse_center.setText("已选课程");
             new MyCourseTask().execute();
         }
 
@@ -99,6 +104,23 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
                     String title = courseTables.get(i).getField(CourseTable.FIELD_COURSENAME);
                     //选修必修
                     String type = courseTables.get(i).getField(CourseTable.FIELD_COURSETYPE);
+                    //bs.必修视频 xs.选修视频 bw.必修文档 xw.选修文档
+                    String typeStr = "";
+                    switch (type){
+                        case Constants.BS:
+                            typeStr = Constants.BS_STR;
+                            break;
+                        case Constants.XS:
+                            typeStr = Constants.XS_STR;
+                            break;
+                        case Constants.BW:
+                            typeStr = Constants.BW_STR;
+                            break;
+                        case Constants.XW:
+                            typeStr = Constants.XW_STR;
+                            break;
+                    }
+
                     //课程简介
                     String intro = courseTables.get(i).getField(CourseTable.FIELD_COURSEINTRO);
                     //详细内容
@@ -109,7 +131,7 @@ public class CourseListActivity extends Activity implements AdapterView.OnItemCl
                     String detailed = courseTables.get(i).getField(CourseTable.FIELD_DETAILED);
                     courseInfo.setId(i+1);
                     courseInfo.setTitle(title);
-                    courseInfo.setType(type);
+                    courseInfo.setType(typeStr);
                     courseInfo.setIntro(intro);
                     courseInfo.setPoint(point);
                     courseInfo.setTime(time);

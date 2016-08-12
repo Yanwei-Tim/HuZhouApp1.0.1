@@ -345,6 +345,24 @@ public class DataUtils {
                             String title = courseTable.getField(CourseTable.FIELD_COURSENAME);
                             //选修必修
                             String type = courseTable.getField(CourseTable.FIELD_COURSETYPE);
+
+                            //bs.必修视频 xs.选修视频 bw.必修文档 xw.选修文档
+                            String typeStr = "";
+                            switch (type) {
+                                case Constants.BS:
+                                    typeStr = Constants.BS_STR;
+                                    break;
+                                case Constants.XS:
+                                    typeStr = Constants.XS_STR;
+                                    break;
+                                case Constants.BW:
+                                    typeStr = Constants.BW_STR;
+                                    break;
+                                case Constants.XW:
+                                    typeStr = Constants.XW_STR;
+                                    break;
+                            }
+
                             //课程简介
                             String intro = courseTable.getField(CourseTable.FIELD_COURSEINTRO);
                             //详细内容
@@ -356,7 +374,7 @@ public class DataUtils {
 
                             courseInfo.setId(i);
                             courseInfo.setTitle(title);
-                            courseInfo.setType(type);
+                            courseInfo.setType(typeStr);
                             courseInfo.setPoint(point);
                             courseInfo.setIntro(intro);
                             courseInfo.setTime(time);
@@ -402,6 +420,24 @@ public class DataUtils {
                         String title = courseTable.getField(CourseTable.FIELD_COURSENAME);
                         //选修必修
                         String type = courseTable.getField(CourseTable.FIELD_COURSETYPE);
+
+                        //bs.必修视频 xs.选修视频 bw.必修文档 xw.选修文档
+                        String typeStr = "";
+                        switch (type) {
+                            case Constants.BS:
+                                typeStr = Constants.BS_STR;
+                                break;
+                            case Constants.XS:
+                                typeStr = Constants.XS_STR;
+                                break;
+                            case Constants.BW:
+                                typeStr = Constants.BW_STR;
+                                break;
+                            case Constants.XW:
+                                typeStr = Constants.XW_STR;
+                                break;
+                        }
+
                         //课程简介
                         String intro = courseTable.getField(CourseTable.FIELD_COURSEINTRO);
                         //详细内容
@@ -413,7 +449,7 @@ public class DataUtils {
 
                         courseInfo.setId(i + 1);
                         courseInfo.setTitle(title);
-                        courseInfo.setType(type);
+                        courseInfo.setType(typeStr);
                         courseInfo.setPoint(point);
                         courseInfo.setIntro(intro);
                         courseInfo.setTime(time);
@@ -667,7 +703,7 @@ public class DataUtils {
             String informationId = categoriesTables.get(0).getContentId();
             //System.out.println(informationId);
             //noinspection unchecked
-            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, CommonTable.FIELD_CATEGORYID, currentPage, pageSize, informationId,CommonTable.FIELD_DATETIME);
+            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, CommonTable.FIELD_CATEGORYID, currentPage, pageSize, informationId, CommonTable.FIELD_DATETIME);
             //System.out.println(commonTables);
             if (commonTables != null && commonTables.size() != 0) {
 
@@ -752,5 +788,48 @@ public class DataUtils {
             }
         }
         return userBaseInfos;
+    }
+
+    public static ArrayList<DynamicNews> getGiftInfo() {
+        ArrayList<DynamicNews> dynamicNewses = new ArrayList<>();
+        String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
+        Map<String, String> map = new HashMap<>();
+        map.put("AUDITOR", userId);
+        map.put("ISPASSED", "0");
+        ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, map, "ISPASSED");
+
+        if (commonTables != null && commonTables.size() != 0) {
+            for (int i = 0; i < commonTables.size(); i++) {
+                String contentId = commonTables.get(i).getContentId();
+                String senderId = commonTables.get(i).getField(CommonTable.FIELD_WRITERID);
+                String senderName = null;
+                String senderPicUrl = null ;
+                ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, UserTable.CONTENTID, senderId);
+
+
+                if (userTables != null && userTables.size() != 0) {
+                    senderName = userTables.get(0).getField(UserTable.FIELD_REALNAME);
+                    ArrayList<String> senderPicUrls = (ArrayList<String>) userTables.get(0).getAccessaryFileUrlList();
+                    if (senderPicUrls!=null&&senderPicUrls.size()!=0){
+                        senderPicUrl = senderPicUrls.get(0);
+                    }
+                }
+
+                ArrayList<ContentTable> contentTables = (ArrayList<ContentTable>) DataOperation.queryTable(ContentTable.TABLE_NAME, ContentTable.FIELD_NEWSID, contentId);
+
+
+                if (contentTables != null && contentTables.size() != 0) {
+                    for (int j = 0; j < contentTables.size(); j++) {
+                        DynamicNews dynamicNews = new DynamicNews();
+                        dynamicNews.setWriter(senderName);
+                        dynamicNews.setPicUrl(senderPicUrl);
+                        dynamicNews.setContent(contentTables.get(j).getField(ContentTable.FIELD_SUBSTANCE));
+                        dynamicNewses.add(dynamicNews);
+                    }
+                }
+            }
+        }
+
+        return dynamicNewses;
     }
 }

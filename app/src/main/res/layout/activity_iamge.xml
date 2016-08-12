@@ -3,16 +3,29 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
-    <ImageView
+    <!--<ImageView
         android:id="@+id/top_imageView"
         android:layout_width="match_parent"
         android:layout_height="240dp"
         android:contentDescription="@string/app_name"
-        android:scaleType="fitXY"/>
+        android:scaleType="fitXY"/>-->
 
+    <!--
     <android.support.v7.widget.RecyclerView
         android:id="@+id/image_recyclerView"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"/>-->
+
+    <GridView
+        android:id="@+id/gridView_image"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp"/>
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:stretchMode="columnWidth"
+        android:numColumns="3"
+        android:horizontalSpacing="4dp"
+        android:verticalSpacing="4dp">
+    </GridView>
 </LinearLayout>
