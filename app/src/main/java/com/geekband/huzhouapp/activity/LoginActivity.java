@@ -104,7 +104,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         DataUtils.saveUserBaseInfo(mUserTable.getContentId());
                         saveAvatarUrl();
                         //缓存相册信息
-                        DataUtils.saveAlbum(mUserTable.getContentId());
+                        //DataUtils.saveAlbum(mUserTable.getContentId());
                         //缓存课程信息
                         DataUtils.saveCourse(mUserTable.getContentId());
                         //获取学分

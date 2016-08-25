@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.database.dto.DataOperation;
+import com.database.pojo.CommonTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
@@ -23,6 +27,9 @@ import java.util.ArrayList;
  */
 public class ReceiveGiftListActivity extends Activity implements AdapterView.OnItemClickListener{
 
+    private static final int READ_INFORMATION = 1;
+    private static final int UNSUCCESSFUL = 2;
+    private static final int SUCCESSFUL = 3;
     private ListView mListView;
     private BitmapUtils mBitmapUtils;
     private ArrayList<DynamicNews> mDynamicNewses;
@@ -69,12 +76,19 @@ public class ReceiveGiftListActivity extends Activity implements AdapterView.OnI
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        //标记已读信息
+        Message message = Message.obtain();
+        message.obj = position;
+        message.what = READ_INFORMATION;
+        mHandler.sendMessage(message);
+        //跳转详情界面
         Intent intent = new Intent();
         intent.setClass(this, GiftMessageActivity.class);
         Bundle bundle = new Bundle();
         bundle.putParcelable("giftMessage",mDynamicNewses.get(position));
         intent.putExtras(bundle);
         startActivity(intent);
+        ReceiveGiftListActivity.this.finish();
     }
 
     class GiftMessageTask extends AsyncTask<String,Integer,Integer>{
@@ -90,4 +104,43 @@ public class ReceiveGiftListActivity extends Activity implements AdapterView.OnI
             initView();
         }
     }
+
+    Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(final Message msg) {
+            switch (msg.what){
+                case READ_INFORMATION:
+                    final int position = (int) msg.obj;
+                    new Thread(){
+                        @Override
+                        public void run() {
+                            //noinspection unchecked
+                            ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable
+                                    (CommonTable.TABLE_NAME,CommonTable.CONTENTID,mDynamicNewses.get(position).getContentId());
+                            if (commonTables!=null&&commonTables.size()!=0) {
+                                CommonTable commonTable = commonTables.get(0);
+                                //“0”表示未读，“1”表示已读
+                                commonTable.putField(CommonTable.FIELD_ISPASSED, "1");
+                                if (DataOperation.insertOrUpdateTable(commonTable)){
+                                    msg.what = SUCCESSFUL;
+                                    mHandler.sendMessage(msg);
+                                }else {
+                                    msg.what = UNSUCCESSFUL;
+                                    mHandler.sendMessage(msg);
+                                }
+                            }
+                        }
+                    }.start();
+                    break;
+
+                case SUCCESSFUL:
+                    break;
+                case UNSUCCESSFUL:
+                    break;
+            }
+            return false;
+        }
+    });
+
+
 }

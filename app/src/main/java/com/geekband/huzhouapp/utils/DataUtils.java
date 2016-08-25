@@ -821,6 +821,7 @@ public class DataUtils {
                 if (contentTables != null && contentTables.size() != 0) {
                     for (int j = 0; j < contentTables.size(); j++) {
                         DynamicNews dynamicNews = new DynamicNews();
+                        dynamicNews.setContentId(commonTables.get(j).getContentId());
                         dynamicNews.setWriter(senderName);
                         dynamicNews.setPicUrl(senderPicUrl);
                         dynamicNews.setContent(contentTables.get(j).getField(ContentTable.FIELD_SUBSTANCE));

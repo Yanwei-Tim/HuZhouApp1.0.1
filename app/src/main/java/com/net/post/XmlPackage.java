@@ -40,9 +40,8 @@ public class XmlPackage {
         return sb.toString();
     }
 
-    //上述代码改数组
-    public static String packageForInsertFileData(HashMap<?, ?> map, DocInfor docInfor, boolean flag, String[] filePath, String[] fileType )
-    {
+    //更新或者插入表数据
+    public static String packageForInsertFileData(HashMap<?, ?> map, DocInfor docInfor, boolean flag, String[] filePath, String[] fileType) {
         StringBuilder sb = new StringBuilder();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Envelope  xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">");
         sb.append("<Body><REQUEST><AUTHENTICATION><SERVERDEF><SERVERNAME>server</SERVERNAME></SERVERDEF><LOGONDATA>");
@@ -57,8 +56,7 @@ public class XmlPackage {
         Iterator<?> iterator = set.iterator();
         String key = null;
         String value = null;
-        while (iterator.hasNext())
-        {
+        while (iterator.hasNext()) {
             key = (String) iterator.next();
             value = (String) map.get(key);
             sb.append("<YOUNGPROPERTY><NAME>" + key + "</NAME><TYPE>12</TYPE><VALUE>" + value + "</VALUE></YOUNGPROPERTY>");
@@ -66,21 +64,19 @@ public class XmlPackage {
         sb.append("</YOUNGPROPERTIES>");
 
         sb.append("<YOUNGDOCUMENTS>");
-        for (int i = 0; i < filePath.length; i++)
-        {
-            if (filePath[i].length() != 0)
-            {
-                InputStream is = null;
-                try
-                {
+        //修复内存溢出对象定义在循环外面
+        InputStream is = null;
+        byte[] data = null;
+        byte[] fileStream = null;
+        for (int i = 0; i < filePath.length; i++) {
+            if (filePath[i].length() != 0) {
+                try {
                     is = new FileInputStream(filePath[i]);
-                }
-                catch (FileNotFoundException e)
-                {
+                } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
-                byte[] data = inputStreamToByte(is);
-                byte[] fileStream = Base64.encode(data, 1);
+                data = inputStreamToByte(is);
+                fileStream = Base64.encode(data,i);
 
                 sb.append("<YOUNGDOCUMENT>");
                 sb.append("<SOURCEFILENAME>" + filePath[i].substring(filePath[i].lastIndexOf("/") + 1, filePath[i].length()) + "</SOURCEFILENAME>");
@@ -89,6 +85,13 @@ public class XmlPackage {
                 sb.append("<SIZE>" + new File(filePath[i]).length() + "</SIZE>");
                 sb.append("<MIMETYPE>" + fileType[i] + "&#xD;</MIMETYPE>");
                 sb.append("</YOUNGDOCUMENT>");
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
         sb.append("</YOUNGDOCUMENTS>");
@@ -145,12 +148,62 @@ public class XmlPackage {
         return sb.toString();
     }
 
+    //添加额外的附件
+    public static String packageForInsertFileData(HashMap<?, ?> map, DocInfor docInfor, boolean flag, String[] filePath, String[] fileType, String[] serviceFilePath, InputStream serviceFile) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Envelope  xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">");
+        sb.append("<Body><REQUEST><AUTHENTICATION><SERVERDEF><SERVERNAME>server</SERVERNAME></SERVERDEF><LOGONDATA>");
+        sb.append("<USERNAME>" + Constants.USERID + "</USERNAME>");// 用户名
+        sb.append("<PASSWORD>" + Constants.PSWID + "</PASSWORD >");// 密码
+        sb.append("</LOGONDATA></AUTHENTICATION><COMMAND>IMPORTYOUNGCONTENT</COMMAND><DATA>");
+        sb.append("<CONTENTID>" + docInfor.getContentId() + "</CONTENTID>");// contentId，为null时，插入新数据，不为null时，更改该条数据属性
+        sb.append("<CONTENTTYPENAME>" + docInfor.getContentName() + "</CONTENTTYPENAME>");// 表名
+        sb.append("<FOLDER>" + flag + "</FOLDER>");
+        sb.append("<YOUNGPROPERTIES>");
+        Set<?> set = map.keySet();
+        Iterator<?> iterator = set.iterator();
+        String key = null;
+        String value = null;
+        while (iterator.hasNext()) {
+            key = (String) iterator.next();
+            value = (String) map.get(key);
+            sb.append("<YOUNGPROPERTY><NAME>" + key + "</NAME><TYPE>12</TYPE><VALUE>" + value + "</VALUE></YOUNGPROPERTY>");
+        }
+        sb.append("</YOUNGPROPERTIES>");
+
+        sb.append("<YOUNGDOCUMENTS>");
+        for (int i = 0; i < filePath.length; i++) {
+            if (filePath[i].length() != 0) {
+                InputStream is = null;
+                try {
+                    is = new FileInputStream(filePath[i]);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                byte[] data = inputStreamToByte(is);
+                byte[] fileStream = Base64.encode(data, 1);
+
+                sb.append("<YOUNGDOCUMENT>");
+                sb.append("<SOURCEFILENAME>" + filePath[i].substring(filePath[i].lastIndexOf("/") + 1, filePath[i].length()) + "</SOURCEFILENAME>");
+                sb.append("<DOCUMENTTYPENAME>FILE</DOCUMENTTYPENAME>");
+                sb.append("<INPUTSTREAM>" + new String(fileStream) + "</INPUTSTREAM>");
+                sb.append("<SIZE>" + new File(filePath[i]).length() + "</SIZE>");
+                sb.append("<MIMETYPE>" + fileType[i] + "&#xD;</MIMETYPE>");
+                sb.append("</YOUNGDOCUMENT>");
+            }
+        }
+        sb.append("</YOUNGDOCUMENTS>");
+
+        sb.append("</DATA></REQUEST></Body></Envelope>");
+        return sb.toString();
+    }
+
     // 输入流转Byte
     public static byte[] inputStreamToByte(InputStream is) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         if (is != null) {
-            byte data[] = new byte[1024];
+            byte data[] = new byte[2048];
             int count;
             try {
 
@@ -280,5 +333,6 @@ public class XmlPackage {
         sb.append("</DATA></REQUEST></Body></Envelope>");
         return sb.toString();
     }
+
 
 }

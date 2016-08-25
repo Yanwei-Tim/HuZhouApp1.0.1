@@ -17,6 +17,7 @@ import com.chanven.lib.cptr.recyclerview.RecyclerAdapterWithHF;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.baseadapter.CommonRecyclerAdapter;
 import com.geekband.huzhouapp.baseadapter.CommonRecyclerViewHolder;
+import com.geekband.huzhouapp.custom.FloatView;
 import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
@@ -46,6 +47,19 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
         setContentView(R.layout.activity_interactive);
         mList = new ArrayList<>();
         initView();
+        findView();
+    }
+
+    private void findView() {
+        FloatView floatView = new FloatView(this,0,0,R.layout.float_view_layout);
+        floatView.addToWindow();
+        floatView.setFloatViewClickListener(new FloatView.IFloatViewClick() {
+            @Override
+            public void onFloatViewClick() {
+                Intent intent = new Intent(InteractiveActivity.this,ReceiveGiftListActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     private void initView() {

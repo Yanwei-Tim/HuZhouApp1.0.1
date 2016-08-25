@@ -212,7 +212,7 @@ public class SplashActivity extends Activity {
                 //缓存个人信息
                 DataUtils.saveUserBaseInfo(isAuto);
                 //缓存相册信息
-                DataUtils.saveAlbum(isAuto);
+                //DataUtils.saveAlbum(isAuto);
                 //缓存课程信息
                 DataUtils.saveCourse(isAuto);
                 //获取学分

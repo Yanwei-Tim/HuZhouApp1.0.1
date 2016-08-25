@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
@@ -36,23 +37,25 @@ public class PostHttp {
         httpurlconnection.setConnectTimeout(20000);// 设置连接主机超时为20秒钟
         httpurlconnection.setReadTimeout(25000); // 设置从主机读取数据超时为25秒钟
 
-        httpurlconnection.getOutputStream().write(contents.getBytes());
+        OutputStream os = httpurlconnection.getOutputStream();
+        os.write(contents.getBytes());
         try {
-            httpurlconnection.getOutputStream().flush();
+            os.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        httpurlconnection.getOutputStream().close();
+        os.close();
         InputStream stream = httpurlconnection.getInputStream();
-        String str = convertStreamToString(stream);
+ //       String str = convertStreamToString(stream);
 //        System.out.println("********** request str:"+str);
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         XMLReader reader = saxParserFactory.newSAXParser().getXMLReader();
 
         XMLContentHandlerForList myExampleHandler = new XMLContentHandlerForList();
         reader.setContentHandler(myExampleHandler);
-        reader.parse(new InputSource(new StringReader(str)));
+        //reader.parse(new InputSource(new StringReader(str)));
+        reader.parse(new InputSource(stream));
         parsedExampleDataSet = myExampleHandler.dataSet;
 
         //IOUtils.writeStringToFile(str, Environment.getExternalStorageDirectory()+"/xmlData.txt");

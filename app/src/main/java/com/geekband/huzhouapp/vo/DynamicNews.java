@@ -11,6 +11,7 @@ import java.io.Serializable;
 public class DynamicNews implements Serializable,Parcelable{
     private static final long serialVersionUID = 5116622373292499331L;
     private int id;
+    private String contentId;
     private String title;
     private String date;
     private String writer;
@@ -23,6 +24,7 @@ public class DynamicNews implements Serializable,Parcelable{
 
     protected DynamicNews(Parcel in) {
         id = in.readInt();
+        contentId = in.readString();
         title = in.readString();
         date = in.readString();
         writer = in.readString();
@@ -50,6 +52,10 @@ public class DynamicNews implements Serializable,Parcelable{
     public void setId(int id) {
         this.id = id;
     }
+
+    public String getContentId(){return contentId;}
+
+    public void setContentId(String contentId){this.contentId = contentId;}
 
     public String getTitle() {
         return title;
@@ -107,6 +113,7 @@ public class DynamicNews implements Serializable,Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
+        dest.writeString(contentId);
         dest.writeString(title);
         dest.writeString(date);
         dest.writeString(writer);
@@ -119,6 +126,7 @@ public class DynamicNews implements Serializable,Parcelable{
     public String toString() {
         return "DynamicNews{" +
                 "id=" + id +
+                ", contentId='"+contentId+'\''+
                 ", title='" + title + '\'' +
                 ", date='" + date + '\'' +
                 ", writerId='" + writer + '\'' +

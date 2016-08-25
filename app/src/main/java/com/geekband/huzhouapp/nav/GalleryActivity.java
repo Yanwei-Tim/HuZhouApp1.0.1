@@ -38,13 +38,13 @@ import com.geekband.huzhouapp.baseadapter.CommonAdapter;
 import com.geekband.huzhouapp.baseadapter.ViewHolder;
 import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
+import com.geekband.huzhouapp.utils.FileUtil;
+import com.geekband.huzhouapp.utils.FileUtils;
 import com.geekband.huzhouapp.utils.SelectPicPopupWindow;
 import com.geekband.huzhouapp.utils.UriToPathUtils;
-import com.geekband.huzhouapp.vo.AlbumInfo;
 import com.lidroid.xutils.BitmapUtils;
-import com.lidroid.xutils.db.sqlite.WhereBuilder;
-import com.lidroid.xutils.exception.DbException;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -80,7 +80,6 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     private final String IMAGE_TYPE = "image/*";
     private final int IMAGE_CODE = 0;   //这里的IMAGE_CODE是自己任意定义的
     private BitmapUtils mBitmapUtils;
-    private ProgressDialog mPd;
     private Spinner mSpinner_select_gallery;
     private ArrayList<String> mGalleryList;
     private GridView mSelected_image;
@@ -108,17 +107,18 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
 
     private void initAlbum() {
-        mGallery_gridView.setAdapter(new CommonAdapter<AlbumTable>(this, mAlbumInfoList, R.layout.item_album) {
-            @Override
-            public void convert(ViewHolder viewHolder, AlbumTable item) {
-                viewHolder.setText(R.id.item_albumName, item.getField(AlbumTable.FIELD_NAME));
-                viewHolder.setText(R.id.item_albumCount, String.valueOf(item.getAccessaryFileUrlList().size()));
-                ImageView imageView = viewHolder.getView(R.id.item_albumImage);
-                if (item.getAccessaryFileUrlList() != null && item.getAccessaryFileUrlList().size() != 0) {
-                    mBitmapUtils.display(imageView, item.getAccessaryFileUrlList().get(0));
-                }
-            }
-        });
+        mGallery_gridView.setAdapter(
+                new CommonAdapter<AlbumTable>(this, mAlbumInfoList, R.layout.item_album) {
+                    @Override
+                    public void convert(ViewHolder viewHolder, AlbumTable item) {
+                        viewHolder.setText(R.id.item_albumName, item.getField(AlbumTable.FIELD_NAME));
+                        viewHolder.setText(R.id.item_albumCount, String.valueOf(item.getAccessaryFileUrlList().size()));
+                        ImageView imageView = viewHolder.getView(R.id.item_albumImage);
+                        if (item.getAccessaryFileUrlList() != null && item.getAccessaryFileUrlList().size() != 0) {
+                            mBitmapUtils.display(imageView, item.getAccessaryFileUrlList().get(0));
+                        }
+                    }
+                });
         mGallery_gridView.setOnItemClickListener(this);
     }
 
@@ -177,6 +177,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                 if (isCreate) {
                     mCreate_gallery_btn.setBackgroundResource(R.mipmap.create_cancle_btn);
                     mGallery_layout.setVisibility(View.VISIBLE);
+                    mPathList.clear();
                     isCreate = false;
                 } else {
                     mCreate_gallery_btn.setBackgroundResource(R.mipmap.create_gallery_btn);
@@ -221,8 +222,12 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                 break;
 
             case R.id.up_btn:
-                String galleryClass = mSpinner_select_gallery.getSelectedItem().toString();
-                new UpTask().execute(galleryClass);
+                Object galleryClass = mSpinner_select_gallery.getSelectedItem();
+                if (galleryClass != null) {
+                    new UpTask().execute(galleryClass.toString());
+                } else {
+                    Toast.makeText(GalleryActivity.this, "您还未创建相册，请先创建相册", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
     }
@@ -370,11 +375,10 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        TextView textView = (TextView) view.findViewById(R.id.item_albumName);
-        final String albumName = textView.getText().toString();
-        if (!albumName.equals("默认相册")) {
-            showDeleteDialog(albumName);
-        }
+//        TextView textView = (TextView) view.findViewById(R.id.item_albumName);
+//        final String albumName = textView.getText().toString();
+        showDeleteDialog(position);
+
         return true;
     }
 
@@ -393,6 +397,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
             //noinspection unchecked
             mAlbumInfoList = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, userId);
             if (mAlbumInfoList != null && mAlbumInfoList.size() != 0) {
+
                 //封面图地址
                 mImageThumbUrls = new ArrayList<>();
                 mGalleryList.clear();
@@ -427,6 +432,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     }
 
     class UpTask extends AsyncTask<String, Integer, Integer> {
+        private ProgressDialog mPd;
 
         @Override
         protected void onPreExecute() {
@@ -437,6 +443,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         @Override
         protected Integer doInBackground(String... params) {
             String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
+            // String dateTime = FileUtils.getCurrentTimeStr("yyyy-MM-dd HH:mm:ss");
             //noinspection unchecked
             ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, userId);
             if (albumTables != null && albumTables.size() != 0) {
@@ -451,33 +458,62 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                     AlbumTable albumTable = new AlbumTable();
                     albumTable.putField(AlbumTable.FIELD_NAME, "默认相册");
                     albumTable.putField(AlbumTable.FIELD_USERID, userId);
-                    DataOperation.insertOrUpdateTable(albumTable,(Document)null);
+                    albumTable.putField(AlbumTable.FIELD_DATETIME, FileUtils.getCurrentTimeStr("yyyy-MM-dd HH:mm:ss"));
+                    DataOperation.insertOrUpdateTable(albumTable, (Document) null);
                 }
                 //上传照片
                 //noinspection unchecked
-                ArrayList<AlbumTable> albums = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME,AlbumTable.FIELD_NAME, params[0]);
-                if (albums!=null&&albums.size()!=0){
-                    insertPic(albums.get(0));
+                ArrayList<AlbumTable> albums = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_NAME, params[0]);
+                if (albums != null && albums.size() != 0) {
+                    //判断原相册是否有附件，有则下载到本地
+                    ArrayList<String> fileUrls = (ArrayList<String>) albums.get(0).getAccessaryFileUrlList();
+                    if (fileUrls != null && fileUrls.size() != 0) {
+                        ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(GalleryActivity.this,fileUrls);
+                        mPathList.addAll(localFileUrls);
+                        try {
+                            boolean isSuccess = insertPic(albums.get(0));
+                            if (isSuccess) {
+                                return 1;
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            //删除本独文件缓存
+                            File file = new File(localFileUrls.get(0).substring(0, localFileUrls.get(0).lastIndexOf("/")));
+                            FileUtil.deleteFile(file);
+                        }
+
+                    } else {
+                        boolean isSuccess = insertPic(albums.get(0));
+                        if (isSuccess) {
+                            return 1;
+                        }
+                    }
                 }
             }
-            return null;
+            return 2;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             mPd.dismiss();
-
             mGallery_progress.setVisibility(View.GONE);
-            mSelected_layout.setVisibility(View.GONE);
-            mGallery_gridView.setVisibility(View.VISIBLE);
-            mPathList.clear();
-            new LocalTask().execute();
-
+            if (integer == 1) {
+                mSelected_layout.setVisibility(View.GONE);
+                mGallery_gridView.setVisibility(View.VISIBLE);
+                mPathList.clear();
+                new LocalTask().execute();
+            } else if (integer == 2) {
+                Toast.makeText(GalleryActivity.this, "添加照片失败", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     private boolean insertPic(AlbumTable albumTable) {
         if (mPathList != null && mPathList.size() != 0) {
+            if (mPathList.contains(IMAGE_TAG)) {
+                mPathList.remove(IMAGE_TAG);
+            }
             Document[] documents = new Document[mPathList.size()];
             for (int i = 0; i < mPathList.size(); i++) {
 //                Log.i("新添加的照片mPathList:", mPathList.get(i));
@@ -489,14 +525,14 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     }
 
 
-    public void showDeleteDialog(final String name) {
+    public void showDeleteDialog(final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("删除相册");
-        builder.setMessage("删除的图片不可恢复，您确认删除？");
+        builder.setMessage("删除的相册不可恢复，您确认删除？");
         builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        new DeleteGalleryTask().execute(name);
+                        new DeleteGalleryTask().execute(position);
                     }
                 }
 
@@ -513,39 +549,31 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         builder.create().show();
     }
 
-    class DeleteGalleryTask extends AsyncTask<String, Integer, Integer> {
+    class DeleteGalleryTask extends AsyncTask<Integer, Integer, Integer> {
+        private ProgressDialog mPd;
 
         @Override
-        protected Integer doInBackground(String... params) {
+        protected void onPreExecute() {
+            mPd = ProgressDialog.show(GalleryActivity.this, null, "正在删除...");
+        }
 
-            AlbumTable selectAlbum = null;
-            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            //noinspection unchecked
-            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, contentId);
-            if (albumTables != null) {
-                for (AlbumTable albumTable : albumTables) {
-                    if (albumTable.getField(AlbumTable.FIELD_NAME).equals(params[0])) {
-                        selectAlbum = albumTable;
-                        break;
-                    }
-                }
-            }
+        @Override
+        protected Integer doInBackground(Integer... params) {
+
+            AlbumTable selectAlbum = mAlbumInfoList.get(params[0]);
             DataOperation.deleteTable(selectAlbum);
-            try {
-                MyApplication.sDbUtils.delete(AlbumInfo.class, WhereBuilder.b("albumName", "=", params[0]));
-            } catch (DbException e) {
-                e.printStackTrace();
-            }
             return null;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
+            mPd.dismiss();
             //刷新界面
             new LocalTask().execute();
         }
 
     }
+
     private class CreateGallery extends AsyncTask<String, Integer, Integer> {
 
         private ProgressDialog mPd;
@@ -566,7 +594,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                 for (AlbumTable albumTable : albumTables) {
                     String albumName = albumTable.getField(AlbumTable.FIELD_NAME);
                     if (albumName.equals(galleryName)) {
-                        Toast.makeText(GalleryActivity.this, "相册已存在", Toast.LENGTH_SHORT).show();
+                        return 2;
                     }
                 }
             }
@@ -575,14 +603,19 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
             albumTable.putField(AlbumTable.FIELD_USERID, userId);
             albumTable.putField(AlbumTable.FIELD_NAME, galleryName);
             albumTable.putField(AlbumTable.FIELD_DESCRIPTION, galleryDescription);
+            albumTable.putField(AlbumTable.FIELD_DATETIME, FileUtils.getCurrentTimeStr("yyyy-MM-dd HH:mm:ss"));
             DataOperation.insertOrUpdateTable(albumTable, new Document[]{});
-            return null;
+            return 1;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             mPd.dismiss();
-            new LocalTask().execute();
+            if (integer == 1) {
+                new LocalTask().execute();
+            } else if (integer == 2) {
+                Toast.makeText(GalleryActivity.this, "相册已存在", Toast.LENGTH_LONG).show();
+            }
         }
     }
 }
