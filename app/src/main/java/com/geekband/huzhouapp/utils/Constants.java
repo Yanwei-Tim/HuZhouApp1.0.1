@@ -55,4 +55,11 @@ public class Constants {
 
     public static final String TIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String WXZJ_CATEGORIES_ID = "A0100020166081053577090838";
+
+    //创建相册缓存文件名
+    public static final String GALLERY_DIRECTORY_NAME = "gallery";
+    //创建头像缓存文件名
+    public static final String AVATAR_DIRECTORY_NAME = "avatar";
+    //应用缓存文件根目录
+    public static final String ROOT_DIRECTORY_NAME = "HZGA";
 }

@@ -44,7 +44,6 @@ import com.geekband.huzhouapp.utils.SelectPicPopupWindow;
 import com.geekband.huzhouapp.utils.UriToPathUtils;
 import com.lidroid.xutils.BitmapUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -468,7 +467,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                     //判断原相册是否有附件，有则下载到本地
                     ArrayList<String> fileUrls = (ArrayList<String>) albums.get(0).getAccessaryFileUrlList();
                     if (fileUrls != null && fileUrls.size() != 0) {
-                        ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(GalleryActivity.this,fileUrls);
+                        ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(Constants.GALLERY_DIRECTORY_NAME,fileUrls);
                         mPathList.addAll(localFileUrls);
                         try {
                             boolean isSuccess = insertPic(albums.get(0));
@@ -479,8 +478,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                             e.printStackTrace();
                         } finally {
                             //删除本独文件缓存
-                            File file = new File(localFileUrls.get(0).substring(0, localFileUrls.get(0).lastIndexOf("/")));
-                            FileUtil.deleteFile(file);
+                            FileUtil.clearFolder(Constants.GALLERY_DIRECTORY_NAME);
                         }
 
                     } else {
@@ -617,5 +615,10 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
                 Toast.makeText(GalleryActivity.this, "相册已存在", Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 }

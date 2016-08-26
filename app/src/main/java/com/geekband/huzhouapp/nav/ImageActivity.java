@@ -187,10 +187,17 @@ public class ImageActivity extends Activity implements AdapterView.OnItemClickLi
         protected Integer doInBackground(Integer... params) {
             int position = params[0];
             mImageList.remove(position);
-            ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(ImageActivity.this, mImageList);
-            //更新服务器数据
-            if (insertPic(mAlbumTable,localFileUrls)){
-                return 1;
+            try {
+                ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(Constants.GALLERY_DIRECTORY_NAME, mImageList);
+                //更新服务器数据
+                if (insertPic(mAlbumTable, localFileUrls)) {
+                    return 1;
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                //删除本独文件缓存
+                FileUtil.clearFolder(Constants.GALLERY_DIRECTORY_NAME);
             }
             return 2;
         }

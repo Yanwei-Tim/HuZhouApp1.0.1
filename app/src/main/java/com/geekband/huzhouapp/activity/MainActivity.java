@@ -44,7 +44,6 @@ import com.geekband.huzhouapp.utils.FileUtil;
 import com.geekband.huzhouapp.utils.FileUtils;
 import com.geekband.huzhouapp.utils.GetLocalBitmap;
 import com.geekband.huzhouapp.utils.SelectPicPopupWindow;
-import com.geekband.huzhouapp.vo.AlbumInfo;
 import com.geekband.huzhouapp.vo.CourseInfo;
 import com.geekband.huzhouapp.vo.UserBaseInfo;
 import com.lidroid.xutils.BitmapUtils;
@@ -232,6 +231,7 @@ public class MainActivity extends BaseActivity
             intent.setClass(this, ManageActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_share) {
+           new ClearCacheTask().execute();
 
         } else if (id == R.id.nav_send) {
             intent.setClass(this, InteractiveActivity.class);
@@ -325,7 +325,7 @@ public class MainActivity extends BaseActivity
             Bitmap photo = extras.getParcelable("data");
             Drawable drawable = new BitmapDrawable(null, photo);
             String fileName = FileUtils.getCurrentTimeStr()+"avatars.jpg";
-            urlPath = FileUtil.saveFile(this, fileName, photo);
+            urlPath = FileUtil.saveFile(Constants.AVATAR_DIRECTORY_NAME,fileName, photo);
             //保存地址值方便以后登录直接获取该图片
             SharedPreferences.Editor editor = MyApplication.sSharedPreferences.edit();
             editor.putString(Constants.AVATAR_IMAGE, urlPath);
@@ -478,7 +478,8 @@ public class MainActivity extends BaseActivity
         protected Integer doInBackground(String... params) {
             try {
                 MyApplication.sDbUtils.deleteAll(UserBaseInfo.class);
-                MyApplication.sDbUtils.deleteAll(AlbumInfo.class);
+                MyApplication.sDbUtils.deleteAll(CourseInfo.class);
+                //MyApplication.sDbUtils.deleteAll(AlbumInfo.class);
                 MyApplication.sDbUtils.deleteAll(CourseInfo.class);
             } catch (DbException e) {
                 e.printStackTrace();
@@ -493,6 +494,25 @@ public class MainActivity extends BaseActivity
             intent.setClass(MainActivity.this, LoginActivity.class);
             startActivity(intent);
             MainActivity.this.finish();
+        }
+    }
+
+    class ClearCacheTask extends AsyncTask<String,Integer,Integer>{
+        ProgressDialog pd;
+        @Override
+        protected void onPreExecute() {
+            pd = ProgressDialog.show(MainActivity.this,null,"正在清理缓存...");
+        }
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            FileUtil.clearFolder("");
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            pd.dismiss();
         }
     }
 
