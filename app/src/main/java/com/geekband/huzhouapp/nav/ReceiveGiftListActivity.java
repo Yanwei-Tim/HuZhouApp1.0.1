@@ -9,6 +9,8 @@ import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.database.dto.DataOperation;
 import com.database.pojo.CommonTable;
@@ -33,6 +35,8 @@ public class ReceiveGiftListActivity extends Activity implements AdapterView.OnI
     private ListView mListView;
     private BitmapUtils mBitmapUtils;
     private ArrayList<DynamicNews> mDynamicNewses;
+    private ProgressBar mGift_list_progress;
+    private TextView mGift_list_text;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +76,9 @@ public class ReceiveGiftListActivity extends Activity implements AdapterView.OnI
         mListView = (ListView) findViewById(R.id.receiver_gift_list);
         mListView.setOnItemClickListener(this);
 
+        mGift_list_progress = (ProgressBar) findViewById(R.id.gift_list_progress);
+        mGift_list_text = (TextView) findViewById(R.id.gift_list_text);
+
     }
 
     @Override
@@ -94,14 +101,32 @@ public class ReceiveGiftListActivity extends Activity implements AdapterView.OnI
     class GiftMessageTask extends AsyncTask<String,Integer,Integer>{
 
         @Override
+        protected void onPreExecute() {
+            mGift_list_progress.setVisibility(View.VISIBLE);
+            mListView.setVisibility(View.GONE);
+        }
+
+        @Override
         protected Integer doInBackground(String... params) {
             mDynamicNewses = DataUtils.getGiftInfo();
-            return null;
+            if (mDynamicNewses!=null&&mDynamicNewses.size()!=0){
+                return 1;
+            }
+            return 2;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
-            initView();
+            mGift_list_progress.setVisibility(View.GONE);
+            if (integer==1){
+                mGift_list_text.setVisibility(View.GONE);
+                mListView.setVisibility(View.VISIBLE);
+                initView();
+            }else if (integer==2){
+                mGift_list_text.setText("暂无信息...");
+                mGift_list_text.setVisibility(View.VISIBLE);
+            }
+
         }
     }
 
@@ -122,11 +147,13 @@ public class ReceiveGiftListActivity extends Activity implements AdapterView.OnI
                                 //“0”表示未读，“1”表示已读
                                 commonTable.putField(CommonTable.FIELD_ISPASSED, "1");
                                 if (DataOperation.insertOrUpdateTable(commonTable)){
-                                    msg.what = SUCCESSFUL;
-                                    mHandler.sendMessage(msg);
+                                    Message message = Message.obtain();
+                                    message.what = SUCCESSFUL;
+                                    mHandler.sendMessage(message);
                                 }else {
-                                    msg.what = UNSUCCESSFUL;
-                                    mHandler.sendMessage(msg);
+                                    Message message = Message.obtain();
+                                    message.what = UNSUCCESSFUL;
+                                    mHandler.sendMessage(message);
                                 }
                             }
                         }

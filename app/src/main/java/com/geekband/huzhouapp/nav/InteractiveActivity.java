@@ -21,6 +21,7 @@ import com.geekband.huzhouapp.custom.FloatView;
 import com.geekband.huzhouapp.utils.BitmapHelper;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
+import com.geekband.huzhouapp.utils.FileUtils;
 import com.geekband.huzhouapp.vo.BirthdayInfo;
 import com.lidroid.xutils.BitmapUtils;
 
@@ -51,7 +52,9 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
     }
 
     private void findView() {
-        FloatView floatView = new FloatView(this,0,0,R.layout.float_view_layout);
+        int layoutWidth = FileUtils.getScreenWidth(this);
+        int layoutHeight = FileUtils.getScreenHeight(this);
+        FloatView floatView = new FloatView(this,layoutWidth,layoutHeight/2,R.layout.float_view_layout);
         floatView.addToWindow();
         floatView.setFloatViewClickListener(new FloatView.IFloatViewClick() {
             @Override
@@ -77,7 +80,7 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
                 bitmapUtils.display(imageView, birthdayInfo.getAvatarImage());
                 holder.setText(R.id.name_birthday, birthdayInfo.getRealName());
                 int time = Integer.parseInt(DataUtils.getDays(birthdayInfo.getDate()));
-                if (time<0){
+                if (time<0&&time>=-7){
                     holder.setText(R.id.content_birthday, "生日已经过去" + Math.abs(time) + "天,日夜思君不见君,泪如雨淋淋");
                 }else if (time>0){
                     holder.setText(R.id.content_birthday, "距离生日还有" + time + "天，准备为伟大的诞生献上最美好的祝福啦");
@@ -114,8 +117,13 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
                         ArrayList<BirthdayInfo> birthdays = DataUtils.getBirthdayInfo(pageSize, currentPage);
                         if (birthdays != null) {
                             for (int i = birthdays.size() - 1; i >= 0; i--) {
-                                if (birthdays.get(i).getDate() == null || birthdays.get(i).getDate().isEmpty()) {
+                                String date = birthdays.get(i).getDate();
+                                if (date == null || date.isEmpty()) {
                                     birthdays.remove(i);
+                                }else {
+                                    if (Integer.parseInt(DataUtils.getDays(date))<-7){
+                                        birthdays.remove(i);
+                                    }
                                 }
                             }
                             mList.addAll(birthdays);
