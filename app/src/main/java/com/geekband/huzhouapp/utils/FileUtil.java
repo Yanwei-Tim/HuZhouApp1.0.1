@@ -194,10 +194,9 @@ public class FileUtil {
 //                            System.out.println("bitmap装换流:" + bitmap);
 //                            System.out.println("localFileUrl本地文件地址:"+localFileUrl);
                 localFileUrls.add(localFileUrl);
-                //防止内存溢出及时释放bitmap资源
-                if (bitmap != null) {
+                //防止内存溢出及时释放bitmap资
                     bitmap.recycle();
-                }
+
             }
 
         }
