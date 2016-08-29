@@ -189,10 +189,12 @@ public class ImageActivity extends Activity implements AdapterView.OnItemClickLi
             mImageList.remove(position);
             try {
                 ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(Constants.GALLERY_DIRECTORY_NAME, mImageList);
-                //更新服务器数据
-                if (insertPic(mAlbumTable, localFileUrls)) {
-                    return 1;
-                }
+                System.out.println("得到的文件路径:"+localFileUrls);
+                    //更新服务器数据
+                    if (insertPic(mAlbumTable, localFileUrls)) {
+                        return 1;
+                    }
+
             }catch (Exception e){
                 e.printStackTrace();
             }finally {
@@ -215,6 +217,7 @@ public class ImageActivity extends Activity implements AdapterView.OnItemClickLi
     }
 
     private boolean insertPic(AlbumTable albumTable,ArrayList<String> mPathList) {
+        System.out.println("原插入方法:"+mPathList);
         if (mPathList != null && mPathList.size() != 0) {
             Document[] documents = new Document[mPathList.size()];
             for (int i = 0; i < mPathList.size(); i++) {
@@ -222,6 +225,17 @@ public class ImageActivity extends Activity implements AdapterView.OnItemClickLi
                 documents[i] = new Document(mPathList.get(i));
             }
             return DataOperation.insertOrUpdateTable(albumTable, documents);
+        }else if (mPathList!=null&&mPathList.size()==0) {
+            AlbumTable newAlbum = new AlbumTable();
+            String userId = albumTable.getField(AlbumTable.FIELD_USERID);
+            String albumName = albumTable.getField(AlbumTable.FIELD_NAME);
+            String dateTime = albumTable.getField(AlbumTable.FIELD_DATETIME);
+            String description = albumTable.getField(AlbumTable.FIELD_DESCRIPTION);
+            newAlbum.putField(AlbumTable.FIELD_USERID, userId);
+            newAlbum.putField(AlbumTable.FIELD_NAME, albumName);
+            newAlbum.putField(AlbumTable.FIELD_DATETIME, dateTime);
+            newAlbum.putField(AlbumTable.FIELD_DESCRIPTION, description);
+            return DataOperation.insertOrUpdateTable(newAlbum) && DataOperation.deleteTable(albumTable);
         }
         return false;
     }

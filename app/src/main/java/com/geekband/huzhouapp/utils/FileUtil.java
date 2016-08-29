@@ -32,13 +32,14 @@ public class FileUtil {
      * @return
      */
     //1
-    public static String saveFile(String directoryName ,String fileName, Bitmap bitmap) {
-        return saveFile( directoryName,"", fileName, bitmap);
+    public static String saveFile(String directoryName, String fileName, Bitmap bitmap) {
+        return saveFile(directoryName, "", fileName, bitmap);
     }
+
     //2
-    public static String saveFile(String directoryName,String filePath, String fileName, Bitmap bitmap) {
+    public static String saveFile(String directoryName, String filePath, String fileName, Bitmap bitmap) {
         byte[] bytes = bitmapToBytes(bitmap);
-        return saveFile(directoryName,filePath, fileName, bytes);
+        return saveFile(directoryName, filePath, fileName, bytes);
     }
 
     public static byte[] bitmapToBytes(Bitmap bm) {
@@ -49,9 +50,10 @@ public class FileUtil {
 
     /**
      * 创建文件
+     *
      * @param filePath 上级文件路径名
      * @param fileName 文件名称
-     * @param bytes 流
+     * @param bytes    流
      * @return
      */
     //3
@@ -63,7 +65,7 @@ public class FileUtil {
         try {
             String suffix = "";
             if (filePath == null || filePath.trim().length() == 0) {
-                filePath = Environment.getExternalStorageDirectory() + "/HZGA/" + directoryName+"/"+dateFolder + "/";
+                filePath = Environment.getExternalStorageDirectory() + "/HZGA/" + directoryName + "/" + dateFolder + "/";
             }
             File file = new File(filePath);
             if (!file.exists()) {
@@ -120,7 +122,7 @@ public class FileUtil {
     }
 
     public static File saveFile(String typeFile, String fileName) {
-        String filePath = Environment.getExternalStorageDirectory() + "/"+Constants.ROOT_DIRECTORY_NAME+"/" + typeFile + "/";
+        String filePath = Environment.getExternalStorageDirectory() + "/" + Constants.ROOT_DIRECTORY_NAME + "/" + typeFile + "/";
         File file = new File(filePath);
         if (!file.exists()) {
             file.mkdirs();
@@ -177,7 +179,7 @@ public class FileUtil {
     }
 
     //下载网络图片到本地
-    public static ArrayList<String> loadImageByUrl(String directoryName,ArrayList<String> imageUrls){
+    public static ArrayList<String> loadImageByUrl(String directoryName, ArrayList<String> imageUrls) {
         ArrayList<String> localFileUrls = new ArrayList<>();
         Bitmap bitmap = null;
         for (String fileUrl : imageUrls) {
@@ -186,23 +188,26 @@ public class FileUtil {
             int first = fileUrl.lastIndexOf("/");
             int second = fileUrl.substring(0, first).lastIndexOf("/");
             String fileName = fileUrl.substring(second + 1, first);
-            String localFileUrl = FileUtil.saveFile(directoryName, fileName, bitmap);
+            if (bitmap!=null) {
+                String localFileUrl = FileUtil.saveFile(directoryName, fileName, bitmap);
 //                            System.out.println("fileUrl源文件地址:"+fileUrl);
 //                            System.out.println("bitmap装换流:" + bitmap);
 //                            System.out.println("localFileUrl本地文件地址:"+localFileUrl);
-            localFileUrls.add(localFileUrl);
-            //防止内存溢出及时释放bitmap资源
-            if (bitmap != null) {
-                bitmap.recycle();
+                localFileUrls.add(localFileUrl);
+                //防止内存溢出及时释放bitmap资源
+                if (bitmap != null) {
+                    bitmap.recycle();
+                }
             }
+
         }
         return localFileUrls;
     }
 
     //清除HZGA目录下的文件
-    public static boolean clearFolder(String directoryName){
-        String filePath = Environment.getExternalStorageDirectory() + "/"+Constants.ROOT_DIRECTORY_NAME+"/"+directoryName;
+    public static boolean clearFolder(String directoryName) {
+        String filePath = Environment.getExternalStorageDirectory() + "/" + Constants.ROOT_DIRECTORY_NAME + "/" + directoryName;
         deleteFile(new File(filePath));
-       return false;
+        return false;
     }
 }
