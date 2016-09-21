@@ -1,8 +1,9 @@
-package com.net.post;
+package com.geekband.huzhouapp.post;
 
 import android.util.Base64;
 import android.util.Log;
 
+import com.net.post.DocInfor;
 import com.oa.util.Constants;
 
 import java.io.ByteArrayOutputStream;
@@ -40,8 +41,8 @@ public class XmlPackage {
         return sb.toString();
     }
 
-    //更新或者插入表数据
-    public static String packageForInsertFileData(HashMap<?, ?> map, DocInfor docInfor, boolean flag, String[] filePath, String[] fileType) {
+    //更新或者插入表数据(头部)
+    public static String insertHeaderFileData(HashMap<?, ?> map, DocInfor docInfor, boolean flag) {
         StringBuffer sb = new StringBuffer();
         sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Envelope  xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">");
         sb.append("<Body><REQUEST><AUTHENTICATION><SERVERDEF><SERVERNAME>server</SERVERNAME></SERVERDEF><LOGONDATA>");
@@ -62,47 +63,83 @@ public class XmlPackage {
             sb.append("<YOUNGPROPERTY><NAME>" + key + "</NAME><TYPE>12</TYPE><VALUE>" + value + "</VALUE></YOUNGPROPERTY>");
         }
         sb.append("</YOUNGPROPERTIES>");
-
         sb.append("<YOUNGDOCUMENTS>");
-        //修复内存溢出对象定义在循环外面
-        InputStream is = null;
-        byte[] data = null;
-        byte[] fileStream = null;
-        for (int i = 0; i < filePath.length; i++) {
-            if (filePath[i].length() != 0) {
-                try {
-                    is = new FileInputStream(filePath[i]);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-                data = inputStreamToByte(is);
-                fileStream = Base64.encode(data, Base64.DEFAULT);
 
-                sb.append("<YOUNGDOCUMENT>");
-                sb.append("<SOURCEFILENAME>" + filePath[i].substring(filePath[i].lastIndexOf("/") + 1, filePath[i].length()) + "</SOURCEFILENAME>");
-                sb.append("<DOCUMENTTYPENAME>FILE</DOCUMENTTYPENAME>");
-//                sb.append("<INPUTSTREAM>" + new String(fileStream) + "</INPUTSTREAM>");//new String(fileStream)
-                sb.append("<INPUTSTREAM>").append(new String(fileStream)).append("</INPUTSTREAM>");
-//                sb.append("<INPUTSTREAM>");
-//                for (byte stream:fileStream){
-//                    sb.append(stream);
-//                }
-//                sb.append("</INPUTSTREAM>");
-                sb.append("<SIZE>" + new File(filePath[i]).length() + "</SIZE>");
-                sb.append("<MIMETYPE>" + fileType[i] + "&#xD;</MIMETYPE>");
-                sb.append("</YOUNGDOCUMENT>");
-                if (is != null) {
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+
+        return sb.toString();
+    }
+
+
+    public static String insertContentHeaderFileData(String filePath){
+        StringBuffer sb = new StringBuffer();
+        sb.append("<YOUNGDOCUMENT>");
+        sb.append("<SOURCEFILENAME>" + filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length()) + "</SOURCEFILENAME>");
+        sb.append("<DOCUMENTTYPENAME>FILE</DOCUMENTTYPENAME>");
+        sb.append("<INPUTSTREAM>");
+        return sb.toString();
+    }
+
+    //更新或者插入表数据(附件部)
+//    public static String insertContentFileData(String filePath) {
+//        StringBuffer sb = new StringBuffer();
+//        //修复内存溢出对象定义在循环外面
+//        InputStream is = null;
+//        byte[] data = null;
+//        byte[] fileStream = null;
+//        try {
+//            is = new FileInputStream(filePath);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        data = inputStreamToByte(is);
+//        fileStream = Base64.encode(data, Base64.DEFAULT);
+//        //将文件分段拼入
+//        int j = fileStream.length/1024;
+//        for (int i = 0; i<j;i++){
+//            sb.append(new String(Arrays.copyOfRange(fileStream,i*1024,(i+1)*1024)));
+//            System.gc();
+//        }
+//        if (fileStream.length%1024!=0) {
+//            sb.append(new String(Arrays.copyOfRange(fileStream, j * 1024, fileStream.length)));
+//            System.gc();
+//        }
+//        if (is != null) {
+//            try {
+//                is.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        return sb.toString();
+//    }
+
+    //更新或者插入表数据(附件部)
+    public static byte[] insertContentFileData(String filePath) {
+        InputStream is = null;
+        try {
+            is = new FileInputStream(filePath);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
+        byte[] data  = inputStreamToByte(is);
+        return Base64.encode(data, Base64.DEFAULT);
+    }
+
+    public static String insertContentFooterFileData(String filePath, String fileType){
+        StringBuffer sb= new StringBuffer();
+        sb.append("</INPUTSTREAM>");
+        sb.append("<SIZE>" + new File(filePath).length() + "</SIZE>");
+        sb.append("<MIMETYPE>" + fileType + "&#xD;</MIMETYPE>");
+        sb.append("</YOUNGDOCUMENT>");
+        return sb.toString();
+    }
+
+    //更新或者插入表数据(尾部)
+    public static String insertFooterFileData() {
+        StringBuffer sb = new StringBuffer();
         sb.append("</YOUNGDOCUMENTS>");
         sb.append("</DATA></REQUEST></Body></Envelope>");
-//        return sb.toString();
         return sb.toString();
     }
 

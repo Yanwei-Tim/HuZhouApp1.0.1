@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -27,7 +28,7 @@ import java.util.ArrayList;
 /**
  * Created by Administrator on 2016/8/12
  */
-public class ReceiveGiftListActivity extends Activity implements AdapterView.OnItemClickListener{
+public class ReceiveBlessListActivity extends Activity implements AdapterView.OnItemClickListener{
 
     private static final int READ_INFORMATION = 1;
     private static final int UNSUCCESSFUL = 2;
@@ -72,6 +73,15 @@ public class ReceiveGiftListActivity extends Activity implements AdapterView.OnI
     }
 
     private void findView() {
+
+        Button blessList_backBtn = (Button) findViewById(R.id.blessList_backBtn);
+        blessList_backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ReceiveBlessListActivity.this.finish();
+            }
+        });
+
         mBitmapUtils = BitmapHelper.getBitmapUtils(this, mListView, R.drawable.head_default, R.drawable.head_default);
         mListView = (ListView) findViewById(R.id.receiver_gift_list);
         mListView.setOnItemClickListener(this);
@@ -90,12 +100,12 @@ public class ReceiveGiftListActivity extends Activity implements AdapterView.OnI
         mHandler.sendMessage(message);
         //跳转详情界面
         Intent intent = new Intent();
-        intent.setClass(this, GiftMessageActivity.class);
+        intent.setClass(this, BlessMessageActivity.class);
         Bundle bundle = new Bundle();
         bundle.putParcelable("giftMessage",mDynamicNewses.get(position));
         intent.putExtras(bundle);
         startActivity(intent);
-        ReceiveGiftListActivity.this.finish();
+        ReceiveBlessListActivity.this.finish();
     }
 
     class GiftMessageTask extends AsyncTask<String,Integer,Integer>{

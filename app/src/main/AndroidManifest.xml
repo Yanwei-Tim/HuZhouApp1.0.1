@@ -40,6 +40,7 @@
         </activity>
         <activity android:name=".activity.MainActivity"/>
         <activity android:name=".activity.LoginActivity"/>
+        <activity android:name=".activity.InformationContentActivity"/>
         <activity android:name=".nav.GalleryActivity"/>
         <activity android:name=".nav.CameraActivity"/>
         <activity android:name=".activity.WebViewActivity"/>
@@ -51,9 +52,9 @@
         <activity android:name=".fragment.news.GradeActivity"/>
         <activity android:name=".nav.ImageActivity"/>
         <activity android:name=".nav.InteractiveActivity"/>
-        <activity android:name=".nav.GiftActivity"/>
-        <activity android:name=".nav.ReceiveGiftListActivity"/>
-        <activity android:name=".nav.GiftMessageActivity"/>
+        <activity android:name=".nav.SendGiftActivity"/>
+        <activity android:name=".nav.ReceiveBlessListActivity"/>
+        <activity android:name=".nav.BlessMessageActivity"/>
         <activity android:name="com.chat.activity.ChatActivity"/>
         <activity android:name="com.chat.activity.ExpertActivity"
             android:theme="@style/Theme.PageIndicatorDefaults"/>

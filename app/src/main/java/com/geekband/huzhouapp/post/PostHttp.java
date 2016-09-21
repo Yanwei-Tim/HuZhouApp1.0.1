@@ -1,6 +1,12 @@
-package com.net.post;
+package com.geekband.huzhouapp.post;
 
+import com.database.pojo.BaseTable;
 import com.database.pojo.DataSetList;
+import com.database.pojo.Document;
+import com.net.post.DocInfor;
+import com.net.post.XMLContentHandlerForList;
+import com.net.post.XmlParseForDocDetail;
+import com.net.post.XmlParseForDocList;
 import com.oa.util.Constants;
 
 import org.xml.sax.InputSource;
@@ -15,6 +21,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 
 import javax.xml.parsers.SAXParserFactory;
 
@@ -25,7 +32,17 @@ import javax.xml.parsers.SAXParserFactory;
  */
 public class PostHttp {
 
-    public static DataSetList PostXML(String contents) throws Exception {
+    public static DataSetList PostXML(BaseTable tableData, Document[] file) throws Exception {
+
+        //数据解析
+        String xmlStr = "";
+        String[] filePath = new String[file.length];
+        String[] fileType = new String[file.length];
+        for (int i = 0; i < file.length; i++) {
+            filePath[i] = file[i] == null ? "" : file[i].getPath();
+            fileType[i] = file[i] == null ? "" : file[i].getFileType();
+        }
+
         URL url = null;
         HttpURLConnection httpurlconnection = null;
         DataSetList parsedExampleDataSet = null;
@@ -34,27 +51,98 @@ public class PostHttp {
         httpurlconnection = (HttpURLConnection) url.openConnection();
         httpurlconnection.setDoOutput(true);
         httpurlconnection.setRequestMethod("POST");
+        httpurlconnection.setUseCaches(false);
         httpurlconnection.setConnectTimeout(20000);// 设置连接主机超时为20秒钟
         httpurlconnection.setReadTimeout(25000); // 设置从主机读取数据超时为25秒钟
 
         OutputStream os = httpurlconnection.getOutputStream();
-        os.write(contents.getBytes());
+        //第一部分
+        String headerStr = XmlPackage.insertHeaderFileData((HashMap<?, ?>) tableData.getFieldList(),
+                new DocInfor(tableData.getContentId(), tableData.getTableName()), true);
+        os.write(headerStr.getBytes());
         try {
             os.flush();
+            headerStr = null;
+            System.gc();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        //第二部分
+        String contentHeaderStr;
+        String contentFooterStr;
+        byte[] fileStream;
+        for (int i = 0; i < filePath.length; i++) {
+            contentHeaderStr = XmlPackage.insertContentHeaderFileData(filePath[i]);
+            os.write(contentHeaderStr.getBytes());
+            try {
+                os.flush();
+                contentHeaderStr = null;
+                System.gc();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //拆分附件
+            int value = 1024;
+            fileStream = XmlPackage.insertContentFileData(filePath[i]);
+//            int j = fileStream.length / value;
+//            for (int k = 0; k < j; k++) {
+//                os.write(Arrays.copyOfRange(fileStream, k * value, (k + 1) * value));
+//                try {
+//                    os.flush();
+//                    System.gc();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            if (fileStream.length % value != 0) {
+//                os.write(Arrays.copyOfRange(fileStream, j * value, fileStream.length));
+//                try {
+//                    os.flush();
+//                    System.gc();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
 
+            os.write(fileStream);
+            try {
+                os.flush();
+                fileStream = null;
+                System.gc();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            contentFooterStr = XmlPackage.insertContentFooterFileData(filePath[i], fileType[i]);
+            os.write(contentFooterStr.getBytes());
+            try {
+                os.flush();
+                contentFooterStr = null;
+                System.gc();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        //第三部分
+        String footerStr = XmlPackage.insertFooterFileData();
+        os.write(footerStr.getBytes());
+        try {
+            os.flush();
+            footerStr = null;
+            System.gc();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         os.close();
         InputStream stream = httpurlconnection.getInputStream();
-//       String str = convertStreamToString(stream);
+//        String str = convertStreamToString(stream);
 //        System.out.println("********** request str:"+str);
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         XMLReader reader = saxParserFactory.newSAXParser().getXMLReader();
 
         XMLContentHandlerForList myExampleHandler = new XMLContentHandlerForList();
         reader.setContentHandler(myExampleHandler);
-        //reader.parse(new InputSource(new StringReader(str)));
+//        reader.parse(new InputSource(new StringReader(convertStreamToString(stream))));
         reader.parse(new InputSource(stream));
         parsedExampleDataSet = myExampleHandler.dataSet;
 
@@ -64,7 +152,8 @@ public class PostHttp {
         // } catch (Exception e) {
         // e.printStackTrace();
         // } finally {
-        if (httpurlconnection != null) httpurlconnection.disconnect();
+        httpurlconnection.disconnect();
+        stream.close();
         // }
         return parsedExampleDataSet;
     }

@@ -16,8 +16,6 @@ import com.database.pojo.UserTable;
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
-import com.geekband.huzhouapp.utils.DataUtils;
-import com.geekband.huzhouapp.vo.DynamicNews;
 
 import java.util.ArrayList;
 
@@ -83,8 +81,6 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     }
 
         class MyTask extends AsyncTask<String, Integer, Integer> {
-             private ArrayList<DynamicNews> localNewses;
-
             @Override
             protected void onPreExecute() {
                 mLogin_progress.setVisibility(View.VISIBLE);
@@ -100,22 +96,7 @@ public class LoginActivity extends Activity implements View.OnClickListener {
                         editor.putString(Constants.AUTO_LOGIN, mUserTable.getContentId());
                         editor.putString(Constants.USER_REAL_NAME,mUserTable.getField(UserTable.FIELD_REALNAME));
                         editor.apply();
-                        //缓存个人信息
-                        DataUtils.saveUserBaseInfo(mUserTable.getContentId());
-                        saveAvatarUrl();
-                        //缓存相册信息
-                        //DataUtils.saveAlbum(mUserTable.getContentId());
-                        //缓存课程信息
-                        DataUtils.saveCourse(mUserTable.getContentId());
-                        //获取学分
-                        DataUtils.saveGrade(mUserTable.getContentId());
-//                        //获取缓存的新闻信息
-//                        try {
-//                            localNewses = (ArrayList<DynamicNews>) MyApplication.sDbUtils.findAll(DynamicNews.class);
-//
-//                        } catch (DbException e) {
-//                            e.printStackTrace();
-//                        }
+
                         return 1; //登录成功
                     } else {
                         return 2;//用户或者密码错误

@@ -13,7 +13,6 @@ import com.geekband.huzhouapp.application.MyApplication;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.utils.DataUtils;
 import com.geekband.huzhouapp.vo.GradeInfo;
-import com.lidroid.xutils.exception.DbException;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,15 +36,8 @@ public class GradeActivity extends Activity {
         setContentView(R.layout.activity_grade);
 
         initView();
-        //初始化加载器
         new LocalTask().execute();
 
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        new NetThread().start();
     }
 
     private void initView() {
@@ -81,23 +73,17 @@ public class GradeActivity extends Activity {
         @Override
         protected Integer doInBackground(String... params) {
 
-            try {
-                GradeInfo gradeInfo = MyApplication.sDbUtils.findFirst(GradeInfo.class);
-                if (gradeInfo != null) {
-                    //获取需修学分
-                    needScore = gradeInfo.getNeedGrade();
-                    //获取已修学分
-                    currentScore = gradeInfo.getAlreadyGrade();
-                    if (Integer.parseInt(needScore)!=-1&&Integer.parseInt(currentScore)!=-1){
-                        return 1;
-                    }
-
-                } else {
-                    return 2;
+            String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
+            GradeInfo gradeInfo = DataUtils.getGrade(userId);
+            if (gradeInfo != null) {
+                //获取需修学分
+                needScore = gradeInfo.getNeedGrade();
+                //获取已修学分
+                currentScore = gradeInfo.getAlreadyGrade();
+                if (Integer.parseInt(needScore) != -1 && Integer.parseInt(currentScore) != -1) {
+                    return 1;
                 }
 
-            } catch (DbException e) {
-                e.printStackTrace();
             }
             return 2;
         }
@@ -123,13 +109,5 @@ public class GradeActivity extends Activity {
         }
     }
 
-
-    class NetThread extends Thread {
-        @Override
-        public void run() {
-            String contentId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            DataUtils.saveGrade(contentId);
-        }
-    }
 
 }

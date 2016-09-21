@@ -2,7 +2,6 @@ package com.geekband.huzhouapp.nav;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -21,7 +20,7 @@ import com.geekband.huzhouapp.utils.FileUtils;
 /**
  * Created by Administrator on 2016/7/8
  */
-public class GiftActivity extends Activity implements View.OnClickListener {
+public class SendGiftActivity extends Activity implements View.OnClickListener {
 
     private EditText mGift_edit;
     private ProgressDialog mPd;
@@ -47,8 +46,6 @@ public class GiftActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.gift_back_textBtn:
-                Intent intent = new Intent(this, InteractiveActivity.class);
-                startActivity(intent);
                 this.finish();
                 break;
             case R.id.gift_send_btn:
@@ -65,7 +62,7 @@ public class GiftActivity extends Activity implements View.OnClickListener {
 
         @Override
         protected void onPreExecute() {
-            mPd = ProgressDialog.show(GiftActivity.this, null, "正在发送");
+            mPd = ProgressDialog.show(SendGiftActivity.this, null, "正在发送");
         }
 
         @Override
@@ -89,7 +86,6 @@ public class GiftActivity extends Activity implements View.OnClickListener {
             contentTable.putField(ContentTable.FIELD_SUBSTANCE, contentStr);
             contentTable.putField(ContentTable.FIELD_NEWSID, commonTable.getContentId());
             contentTable.putField(ContentTable.FIELD_DIVI, divDate);
-            //System.out.println("接受的内容:"+commonTable.getContentId());
             //这里可以选择放入贺卡
             DataOperation.insertOrUpdateTable(contentTable, (Document) null);
             return null;
@@ -98,7 +94,7 @@ public class GiftActivity extends Activity implements View.OnClickListener {
         @Override
         protected void onPostExecute(Integer integer) {
             mPd.dismiss();
-            GiftActivity.this.finish();
+            SendGiftActivity.this.finish();
 
         }
     }

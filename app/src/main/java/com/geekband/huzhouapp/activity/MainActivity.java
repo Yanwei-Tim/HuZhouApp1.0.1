@@ -142,7 +142,7 @@ public class MainActivity extends BaseActivity
                     avatarPath, 100, 100));
         }else {
             String avatarUrl = MyApplication.sSharedPreferences.getString(Constants.AVATAR_URL,null);
-            BitmapUtils bitmapUtils = BitmapHelper.getBitmapUtils(MainActivity.this,null,0,0);
+            BitmapUtils bitmapUtils = BitmapHelper.getBitmapUtils(MainActivity.this,null,R.drawable.head_default,R.drawable.head_default);
             bitmapUtils.display(mAvatar_imageBtn,avatarUrl);
         }
 

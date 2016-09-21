@@ -9,7 +9,7 @@ import android.os.Bundle;
 
 import com.geekband.huzhouapp.R;
 import com.geekband.huzhouapp.application.MyApplication;
-import com.geekband.huzhouapp.nav.ReceiveGiftListActivity;
+import com.geekband.huzhouapp.nav.ReceiveBlessListActivity;
 import com.geekband.huzhouapp.utils.Constants;
 import com.geekband.huzhouapp.vo.DynamicNews;
 
@@ -55,7 +55,7 @@ public class MessageInformationReceiver extends BroadcastReceiver {
         //点击的意图ACTION是跳转到Intent
         Intent resultIntent = new Intent();
         resultIntent.setAction("messageToActivity");
-        resultIntent.setClass(mContext, ReceiveGiftListActivity.class);
+        resultIntent.setClass(mContext, ReceiveBlessListActivity.class);
         Bundle messageBundle = new Bundle();
         messageBundle.putParcelableArrayList("giftMessageToActivity", dynamicNewses);
         resultIntent.putExtras(messageBundle);

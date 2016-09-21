@@ -8,51 +8,51 @@ package com.database.pojo;
  */
 public class UserTable extends BaseTable
 {
-	private static final long serialVersionUID = -7359533823172139550L;
+	private transient static final long serialVersionUID = -7359533823172139550L;
 	
-	public static final String TABLE_NAME = "USERS";
+	public transient static final String TABLE_NAME = "USERS";
 	/** 用户名 */ 
-	public static final String FIELD_USERNAME = "USERNAME";
+	public transient static final String FIELD_USERNAME = "USERNAME";
 	/** 真实姓名 */ 
-	public static final String FIELD_REALNAME = "REALNAME";
+	public transient static final String FIELD_REALNAME = "REALNAME";
 	/** 电话 */ 
-	public static final String FIELD_TELEPHONE = "TELEPHONE";
+	public transient static final String FIELD_TELEPHONE = "TELEPHONE";
 	/** 邮箱 */ 
-	public static final String FIELD_EMAIL = "EMAIL";
+	public transient static final String FIELD_EMAIL = "EMAIL";
 	/** 密码 */ 
-	public static final String FIELD_PASSWORD = "PASSWORD";
+	public transient static final String FIELD_PASSWORD = "PASSWORD";
 	/** 部门编号 */ 
-	public static final String FIELD_DEPARTMENTNO = "DEPARTMENTNO";
+	public transient static final String FIELD_DEPARTMENTNO = "DEPARTMENTNO";
 	/** 角色编号 */ 
-	public static final String FIELD_ROLENO = "ROLENO";
+	public transient static final String FIELD_ROLENO = "ROLENO";
 	/** 组编号 */ 
-	public static final String FIELD_GROUPNO = "GROUPNO";
+	public transient static final String FIELD_GROUPNO = "GROUPNO";
 	/** 用户编号 */ 
-	public static final String FIELD_USERNUM = "USERNUM";
+	public transient static final String FIELD_USERNUM = "USERNUM";
 	/** 警号 */
-	public static final String FIELD_POLICENUM = "POLICENUM";
+	public transient static final String FIELD_POLICENUM = "POLICENUM";
 	/** 文化程度 */
-	public static final String FIELD_EDUCATION = "EDUCATION";
+	public transient static final String FIELD_EDUCATION = "EDUCATION";
 	/** 参加工作时间 */
-	public static final String FIELD_TOWORKTIME = "TOWORKTIME";
+	public transient static final String FIELD_TOWORKTIME = "TOWORKTIME";
 	/** 参加公安时间 */
-	public static final String FIELD_TOPOLICETIME = "TOPOLICETIME";
+	public transient static final String FIELD_TOPOLICETIME = "TOPOLICETIME";
 	/** 警衔 */
-	public static final String FIELD_RANK = "RANK";
+	public transient static final String FIELD_RANK = "RANK";
 	/** 警务 */
-	public static final String FIELD_POLICEPOST = "POLICEPOST";
+	public transient static final String FIELD_POLICEPOST = "POLICEPOST";
 	/** 备注 */
-	public static final String FIELD_REMARK = "REMARK";
+	public transient static final String FIELD_REMARK = "REMARK";
 	/** 手机号 */
-	public static final String FIELD_CELLPHONE = "CELLPHONE";
+	public transient static final String FIELD_CELLPHONE = "CELLPHONE";
 	/** 身份证号 */
-	public static final String FIELD_IDCARDNO = "IDCARDNO";
+	public transient static final String FIELD_IDCARDNO = "IDCARDNO";
 	/** 性别 */
-	public static final String FIELD_SEX = "SEX";
+	public transient static final String FIELD_SEX = "SEX";
 	/** 图片地址 */
-	public static final String FIELD_PICURL = "PICURL";
+	public transient static final String FIELD_PICURL = "PICURL";
 	/** 平台秘钥 */
-	public static final String FIELD_TOKEN = "TOKEN";
+	public transient static final String FIELD_TOKEN = "TOKEN";
 
 
 	public UserTable()

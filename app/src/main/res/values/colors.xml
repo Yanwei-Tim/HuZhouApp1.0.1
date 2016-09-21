@@ -13,7 +13,7 @@
     <color name="background_tab_pressed">#6633B5E5</color>
     <color name="tab_color">#ffffff</color>
     <color name="text_color_1">#02DF82</color>
-    <color name="text_color_2">#ADADAD</color>
+    <color name="text_color_2">#e4dfdf</color>
     <color name="layout_bg_1">#F0F0F0</color>
     <color name="divider_color_1">#BEBEBE</color>
     <color name="divider_color_2">#8E8E8E</color>

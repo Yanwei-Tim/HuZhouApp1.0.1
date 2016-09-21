@@ -7,27 +7,29 @@ package com.database.pojo;
  */
 public class OpinionTable extends BaseTable
 {
-	private static final long serialVersionUID = -1457340830882406359L;
+	private transient static final long serialVersionUID = -1457340830882406359L;
 	
-	public static final String TABLE_NAME = "OPINION";
+	public transient static final String TABLE_NAME = "OPINION";
 	/** 用户的contentId */
-	public static final String FIELD_USERID = "USERID";
+	public transient static final String FIELD_USERID = "USERID";
 	/** 投稿时间 */
-	public static final String FIELD_POSTTIME = "POSTTIME";
+	public transient static final String FIELD_POSTTIME = "POSTTIME";
 	/** 审核时间 */
-	public static final String FIELD_PASSTIME = "PASSTIME";
+	public transient static final String FIELD_PASSTIME = "PASSTIME";
 	/** 是否通过审核 */
-	public static final String FIELD_ISPASSED = "ISPASSED";
+	public transient static final String FIELD_ISPASSED = "ISPASSED";
 	/** 审核人 */
-	public static final String FIELD_AUDITOR = "AUDITOR";
+	public transient static final String FIELD_AUDITOR = "AUDITOR";
 	
 	public OpinionTable()
 	{
 		initTable();
 	}
-	
+
 	private void initTable()
 	{
 		setTableName(TABLE_NAME);
 	}
+
+
 }

@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -70,7 +69,7 @@ public class SplashActivity extends Activity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //登陆
-                new toLogin().execute();
+               toLogin();
             }
         });
 
@@ -82,7 +81,7 @@ public class SplashActivity extends Activity {
         if (requestCode == 250) {
             if (resultCode == RESULT_CANCELED) {
                 //登陆
-                new toLogin().execute();
+               toLogin();
             }
         }
     }
@@ -116,11 +115,9 @@ public class SplashActivity extends Activity {
      * 检测版本更新
      */
     private void checkUpdate() {
-
         new Thread(new Runnable() {
             @Override
             public void run() {
-
                 //noinspection unchecked
                 ArrayList<BaseTable> versionTables = (ArrayList<BaseTable>) DataOperation.queryTable(AppVersionTable.TABLE_NAME);
                 if (versionTables != null && versionTables.size() != 0) {
@@ -151,11 +148,11 @@ public class SplashActivity extends Activity {
                         mHandler.sendMessage(message);
                     } else {
                         //没有最新版本，登陆
-                        new toLogin().execute();
+                        toLogin();
                     }
                 } else {
                     //暂未发布版本，登陆
-                    new toLogin().execute();
+                    toLogin();
                 }
 
             }
@@ -199,45 +196,20 @@ public class SplashActivity extends Activity {
     }
 
     //登录
-    class toLogin extends AsyncTask<String, Integer, Integer> {
+    public void toLogin() {
 
 // 判断之前是否登录过，如果已经登录过就直接进入主界面，不再登录认证。如果退出登录过，那么进入登录界面登录进入
 
-        @Override
-        protected Integer doInBackground(String... params) {
-
-            String isAuto = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-
-            if (isAuto != null) {
-                //缓存个人信息
-                DataUtils.saveUserBaseInfo(isAuto);
-                //缓存相册信息
-                //DataUtils.saveAlbum(isAuto);
-                //缓存课程信息
-                DataUtils.saveCourse(isAuto);
-                //获取学分
-                DataUtils.saveGrade(isAuto);
-
-                return 1;
-
-            } else {
-                return 2;
-            }
-
+        String isAuto = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
+        Intent intent = new Intent();
+        if (isAuto != null) {
+            intent.setClass(SplashActivity.this, MainActivity.class);
+        } else {
+            intent.setClass(SplashActivity.this, LoginActivity.class);
         }
+        startActivity(intent);
+        SplashActivity.this.finish();
 
-        @Override
-        protected void onPostExecute(Integer integer) {
-            Intent intent = new Intent();
-
-            if (integer == 1) {
-                intent.setClass(SplashActivity.this, MainActivity.class);
-            } else {
-                intent.setClass(SplashActivity.this, LoginActivity.class);
-            }
-            startActivity(intent);
-            SplashActivity.this.finish();
-        }
     }
 
 

@@ -12,7 +12,7 @@ import com.geekband.huzhouapp.vo.DynamicNews;
 /**
  * Created by Administrator on 2016/8/12
  */
-public class GiftMessageActivity extends Activity implements View.OnClickListener{
+public class BlessMessageActivity extends Activity implements View.OnClickListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +20,7 @@ public class GiftMessageActivity extends Activity implements View.OnClickListene
         setContentView(R.layout.activity_gift_message);
 
         TextView gift_message_back_textBtn = (TextView) findViewById(R.id.gift_message_back_textBtn);
-        gift_message_back_textBtn.setOnClickListener(GiftMessageActivity.this);
+        gift_message_back_textBtn.setOnClickListener(BlessMessageActivity.this);
 
         TextView giftMessage = (TextView) findViewById(R.id.giftMessage);
         DynamicNews dynamicNews = getIntent().getParcelableExtra("giftMessage");
@@ -31,7 +31,7 @@ public class GiftMessageActivity extends Activity implements View.OnClickListene
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.gift_message_back_textBtn:
-                Intent intent = new Intent(this, ReceiveGiftListActivity.class);
+                Intent intent = new Intent(this, ReceiveBlessListActivity.class);
                 startActivity(intent);
                 this.finish();
                 break;

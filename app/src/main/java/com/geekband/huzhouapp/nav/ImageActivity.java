@@ -32,7 +32,6 @@ public class ImageActivity extends Activity implements AdapterView.OnItemClickLi
     private ArrayList<String> mImageList;
     // private ImageView mTop_imageView;
     private BitmapUtils mBitmapUtils;
-    private Intent mIntent;
     private CommonAdapter<String> mCommonAdapter;
     private AlbumTable mAlbumTable;
 
@@ -189,7 +188,6 @@ public class ImageActivity extends Activity implements AdapterView.OnItemClickLi
             mImageList.remove(position);
             try {
                 ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(Constants.GALLERY_DIRECTORY_NAME, mImageList);
-                System.out.println("得到的文件路径:"+localFileUrls);
                     //更新服务器数据
                     if (insertPic(mAlbumTable, localFileUrls)) {
                         return 1;
@@ -217,7 +215,6 @@ public class ImageActivity extends Activity implements AdapterView.OnItemClickLi
     }
 
     private boolean insertPic(AlbumTable albumTable,ArrayList<String> mPathList) {
-        System.out.println("原插入方法:"+mPathList);
         if (mPathList != null && mPathList.size() != 0) {
             Document[] documents = new Document[mPathList.size()];
             for (int i = 0; i < mPathList.size(); i++) {

@@ -7,6 +7,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.chanven.lib.cptr.PtrClassicFrameLayout;
@@ -52,6 +54,17 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
     }
 
     private void findView() {
+
+        Button birthdayList_backBtn = (Button) findViewById(R.id.birthdayList_backBtn);
+        birthdayList_backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                InteractiveActivity.this.finish();
+            }
+        });
+
+
+        //添加悬浮按钮
         int layoutWidth = FileUtils.getScreenWidth(this);
         int layoutHeight = FileUtils.getScreenHeight(this);
         FloatView floatView = new FloatView(this,layoutWidth,layoutHeight/2,R.layout.float_view_layout);
@@ -59,7 +72,7 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
         floatView.setFloatViewClickListener(new FloatView.IFloatViewClick() {
             @Override
             public void onFloatViewClick() {
-                Intent intent = new Intent(InteractiveActivity.this,ReceiveGiftListActivity.class);
+                Intent intent = new Intent(InteractiveActivity.this,ReceiveBlessListActivity.class);
                 startActivity(intent);
             }
         });
@@ -113,7 +126,7 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
                     @Override
                     public void run() {
                         currentPage = 1;
-                        mList.clear();
+
                         ArrayList<BirthdayInfo> birthdays = DataUtils.getBirthdayInfo(pageSize, currentPage);
                         if (birthdays != null) {
                             for (int i = birthdays.size() - 1; i >= 0; i--) {
@@ -126,6 +139,7 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
                                     }
                                 }
                             }
+                            mList.clear();
                             mList.addAll(birthdays);
                             Message message = mHandler.obtainMessage();
                             message.what = PULL_TO_REFRESH;
@@ -189,7 +203,7 @@ public class InteractiveActivity extends Activity implements RecyclerAdapterWith
         String userId = birthdayInfo.getUserId();
         Intent intent =  new Intent();
         intent.putExtra(Constants.BIRTHDAY_GIFT,userId);
-        intent.setClass(this,GiftActivity.class);
+        intent.setClass(this,SendGiftActivity.class);
         this.startActivity(intent);
     }
 

@@ -7,7 +7,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -63,6 +62,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     private GridView mGallery_gridView;
     private SelectPicPopupWindow mPicPopupWindow;
     private Uri photoUri;
+    private ProgressDialog mPd;
     /**
      * 使用照相机拍照获取图片
      */
@@ -104,6 +104,13 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mPd != null) {
+            mPd.dismiss();
+        }
+    }
 
     private void initAlbum() {
         mGallery_gridView.setAdapter(
@@ -222,6 +229,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
             case R.id.up_btn:
                 Object galleryClass = mSpinner_select_gallery.getSelectedItem();
+
                 if (galleryClass != null) {
                     new UpTask().execute(galleryClass.toString());
                 } else {
@@ -322,7 +330,6 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
      */
     private void doPhoto(int requestCode, Intent data) {
 
-        Bitmap bitmap = null;
         //外界的程序访问ContentProvider所提供数据 可以通过ContentResolver接口
         ContentResolver resolver = getContentResolver();
 
@@ -330,11 +337,6 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         if (requestCode == IMAGE_CODE) {
 
             Uri originalUri = data.getData();        //获得图片的uri
-//                bitmap = MediaStore.Images.Media.getBitmap(resolver, originalUri);
-//                //显得到bitmap图片
-//                mSelected_pic.setImageBitmap(bitmap);
-//                mBitmapUtils.display(mSelected_pic,imagePath);
-
             String picPath = UriToPathUtils.getPath(this, originalUri);
             //上传更多按钮显示
             mPathList.add(picPath);
@@ -374,10 +376,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//        TextView textView = (TextView) view.findViewById(R.id.item_albumName);
-//        final String albumName = textView.getText().toString();
         showDeleteDialog(position);
-
         return true;
     }
 
@@ -431,7 +430,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
     }
 
     class UpTask extends AsyncTask<String, Integer, Integer> {
-        private ProgressDialog mPd;
+
 
         @Override
         protected void onPreExecute() {
@@ -441,54 +440,35 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
         @Override
         protected Integer doInBackground(String... params) {
-            String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
-            // String dateTime = FileUtils.getCurrentTimeStr("yyyy-MM-dd HH:mm:ss");
             //noinspection unchecked
-            ArrayList<AlbumTable> albumTables = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_USERID, userId);
-            if (albumTables != null && albumTables.size() != 0) {
-                //检测默认相册是否存在，不存在则自动创建
-                boolean isExist = false;
-                for (AlbumTable albumTable : albumTables) {
-                    if (albumTable.getField(AlbumTable.FIELD_NAME).equals("默认相册")) {
-                        isExist = true;
-                    }
-                }
-                if (!isExist) {
-                    AlbumTable albumTable = new AlbumTable();
-                    albumTable.putField(AlbumTable.FIELD_NAME, "默认相册");
-                    albumTable.putField(AlbumTable.FIELD_USERID, userId);
-                    albumTable.putField(AlbumTable.FIELD_DATETIME, FileUtils.getCurrentTimeStr("yyyy-MM-dd HH:mm:ss"));
-                    DataOperation.insertOrUpdateTable(albumTable, (Document) null);
-                }
-                //上传照片
-                //noinspection unchecked
-                ArrayList<AlbumTable> albums = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_NAME, params[0]);
-                if (albums != null && albums.size() != 0) {
-                    //判断原相册是否有附件，有则下载到本地
-                    ArrayList<String> fileUrls = (ArrayList<String>) albums.get(0).getAccessaryFileUrlList();
-                    if (fileUrls != null && fileUrls.size() != 0) {
-                        ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(Constants.GALLERY_DIRECTORY_NAME,fileUrls);
-                        mPathList.addAll(localFileUrls);
-                        try {
-                            boolean isSuccess = insertPic(albums.get(0));
-                            if (isSuccess) {
-                                return 1;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        } finally {
-                            //删除本独文件缓存
-                            FileUtil.clearFolder(Constants.GALLERY_DIRECTORY_NAME);
-                        }
-
-                    } else {
+            ArrayList<AlbumTable> albums = (ArrayList<AlbumTable>) DataOperation.queryTable(AlbumTable.TABLE_NAME, AlbumTable.FIELD_NAME, params[0]);
+            if (albums != null && albums.size() != 0) {
+                //判断原相册是否有附件，有则下载到本地
+                ArrayList<String> fileUrls = (ArrayList<String>) albums.get(0).getAccessaryFileUrlList();
+                if (fileUrls != null && fileUrls.size() != 0) {
+                    ArrayList<String> localFileUrls = FileUtil.loadImageByUrl(Constants.GALLERY_DIRECTORY_NAME, fileUrls);
+                    mPathList.addAll(localFileUrls);
+                    try {
                         boolean isSuccess = insertPic(albums.get(0));
                         if (isSuccess) {
                             return 1;
                         }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        //删除本独文件缓存
+                        FileUtil.clearFolder(Constants.GALLERY_DIRECTORY_NAME);
+                    }
+
+                } else {
+                    boolean isSuccess = insertPic(albums.get(0));
+                    if (isSuccess) {
+                        return 1;
                     }
                 }
             }
+
             return 2;
         }
 
@@ -507,6 +487,7 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         }
     }
 
+
     private boolean insertPic(AlbumTable albumTable) {
         if (mPathList != null && mPathList.size() != 0) {
             if (mPathList.contains(IMAGE_TAG)) {
@@ -517,7 +498,8 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 //                Log.i("新添加的照片mPathList:", mPathList.get(i));
                 documents[i] = new Document(mPathList.get(i));
             }
-            return DataOperation.insertOrUpdateTable(albumTable, documents);
+//            return DataOperation.insertOrUpdateTable(albumTable, documents);
+            return com.geekband.huzhouapp.post.DataOperation.insertOrUpdateTable(albumTable, documents);
         }
         return false;
     }
@@ -574,8 +556,6 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
 
     private class CreateGallery extends AsyncTask<String, Integer, Integer> {
 
-        private ProgressDialog mPd;
-
         @Override
         protected void onPreExecute() {
             mPd = ProgressDialog.show(GalleryActivity.this, null, "正在创建相册...");
@@ -617,8 +597,4 @@ public class GalleryActivity extends Activity implements View.OnClickListener, A
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 }

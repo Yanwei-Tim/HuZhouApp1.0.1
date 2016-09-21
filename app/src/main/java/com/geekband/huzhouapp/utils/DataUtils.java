@@ -10,6 +10,7 @@ import com.database.pojo.CommonTable;
 import com.database.pojo.ContentTable;
 import com.database.pojo.CourseTable;
 import com.database.pojo.DepartmentsTable;
+import com.database.pojo.OpinionTable;
 import com.database.pojo.StudyInfoTable;
 import com.database.pojo.UserInfoTable;
 import com.database.pojo.UserTable;
@@ -69,12 +70,7 @@ public class DataUtils {
             }
             newsCategory.put(CommonTable.FIELD_ISPASSED, "1");
             newsCategory.put(CommonTable.FIELD_ISPUBLISH, "1");
-//            String sql = "from(select * from " + CommonTable.TABLE_NAME + " where"+
-//                    "" + CommonTable.FIELD_CATEGORYID + " = '" + newsId + "' and"+
-//                    " " + CommonTable.FIELD_ISROLLING + " = '" + isRolling + "' and"+
-//                    " " + CommonTable.FIELD_ISPASSED + " = '1' and"+
-//                    " " + CommonTable.FIELD_ISPUBLISH + " = '1' order by " + CommonTable.FIELD_DATETIME + " DESC )"+
-//                    "" + CommonTable.TABLE_NAME + "";
+
             //noinspection unchecked
             ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, currentPage, pageSize, newsCategory, CommonTable.FIELD_DATETIME);
 
@@ -399,13 +395,12 @@ public class DataUtils {
     /**
      * 获取个人课程
      *
-     * @return
      */
     public static ArrayList<CourseInfo> bindCourseInfo() {
         ArrayList<CourseInfo> courseList = new ArrayList<>();
         //noinspection unchecked
-        ArrayList<StudyInfoTable> StudyInfoTables = (ArrayList<StudyInfoTable>) DataOperation
-                .queryTable(StudyInfoTable.TABLE_NAME, StudyInfoTable.FIELD_USERNO
+        ArrayList<StudyInfoTable> StudyInfoTables = (ArrayList<StudyInfoTable>) DataOperation .
+                queryTable(StudyInfoTable.TABLE_NAME, StudyInfoTable.FIELD_USERNO
                         , MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null));
         if (StudyInfoTables != null) {
             for (int i = 0; i < StudyInfoTables.size(); i++) {
@@ -481,9 +476,10 @@ public class DataUtils {
         ArrayList<BirthdayInfo> arrayList = new ArrayList<>();
 //        String sql = "select * from (select e.* ,rownum rn from (" +
 //                "select * from USERS where IDCARDNO is not null ) e) where rn>=" + start + " and rn<=" + end + " ";
-        String sql = "from(select * from users where IdCardNo is not null)users";
+        String date = FileUtils.getCurrentTimeStr("MMdd");
+        String sql = "from(select * from users where IdCardNo like '%"+date+"%')users";
         //noinspection unchecked
-        ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, sql, currentPage, pageSize);
+        ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, sql,currentPage,pageSize);
         if (userTables != null && userTables.size() != 0) {
             for (UserTable userTable : userTables) {
                 String userId = userTable.getContentId();
@@ -519,7 +515,8 @@ public class DataUtils {
         ArrayList<BirthdayInfo> arrayList = new ArrayList<>();
 //        String sql = "select * from (select e.* ,rownum rn from (" +
 //                "select * from USERS where IDCARDNO is not null ) e) where rn>=" + start + " and rn<=" + end + " ";
-        String sql = "from(select * from users where IdCardNo is not null)users";
+        String date = FileUtils.getCurrentTimeStr("MMdd");
+        String sql = "from(select * from users where IdCardNo like '%"+date+"%')users";
         //noinspection unchecked
         ArrayList<UserTable> userTables = (ArrayList<UserTable>) DataOperation.queryTable(UserTable.TABLE_NAME, sql);
         if (userTables != null && userTables.size() != 0) {
@@ -566,43 +563,9 @@ public class DataUtils {
         return String.valueOf(days);
     }
 
-    /**
-     * 保存成绩信息
-     */
-    public static void saveGrade(String contentId) {
-        new GradeTask().execute(contentId);
-    }
-
-    static class GradeTask extends AsyncTask<String, Integer, Integer> {
-
-        @Override
-        protected Integer doInBackground(String... params) {
-            int id = 0;
-            //获取需修学分
-            int needScore = DataOperation.queryUserNeedScore(params[0]);
-            //获取已修学分
-            int currentScore = DataOperation.queryUserCurrentScore(params[0]);
-            //必修课程
-            //选修课程
-            GradeInfo gradeInfo = new GradeInfo();
-            gradeInfo.setNeedGrade(String.valueOf(needScore));
-            gradeInfo.setAlreadyGrade(String.valueOf(currentScore));
-            gradeInfo.setId(id);
-
-            try {
-                MyApplication.sDbUtils.deleteAll(GradeInfo.class);
-                MyApplication.sDbUtils.save(gradeInfo);
-            } catch (DbException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-    }
 
     /**
      * 获取学习信息
-     *
      * @param contentId
      * @return
      */
@@ -790,13 +753,17 @@ public class DataUtils {
         return userBaseInfos;
     }
 
+    /**
+     * 收到的好友祝福
+     * @return
+     */
     public static ArrayList<DynamicNews> getGiftInfo() {
         ArrayList<DynamicNews> dynamicNewses = new ArrayList<>();
         String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN, null);
         Map<String, String> map = new HashMap<>();
         map.put("AUDITOR", userId);
         map.put("ISPASSED", "0");
-        ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, map, "ISPASSED");
+        ArrayList<CommonTable> commonTables = (ArrayList<CommonTable>) DataOperation.queryTable(CommonTable.TABLE_NAME, map, "DATETIME");
 
         if (commonTables != null && commonTables.size() != 0) {
             for (int i = 0; i < commonTables.size(); i++) {
@@ -833,4 +800,26 @@ public class DataUtils {
 
         return dynamicNewses;
     }
+
+    //需求意见审核通知
+    public static ArrayList<?> getToDoOpinions (){
+        String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null);
+        String sql = "from (select * from opinion where isPassed ='999' and auditor = '"+userId+"' order by postTime DESC) opinion";
+        //noinspection unchecked
+        return DataOperation.queryTable(OpinionTable.TABLE_NAME,sql);
+    }
+
+    //需求建议审核结果通知
+    public static ArrayList<?> getOpinionsInformation (){
+        String userId = MyApplication.sSharedPreferences.getString(Constants.AUTO_LOGIN,null);
+        String sql = "from (select * from opinion where userId = '"+userId+"'and isPassed !='999' and isPassed is not null order by passTime DESC) opinion";
+        return DataOperation.queryTable(OpinionTable.TABLE_NAME,sql);
+    }
+
+    //需求意见内容
+    public static ArrayList<?> getOpinionContent(OpinionTable opinionTable){
+        String contentId = opinionTable.getContentId();
+        return DataOperation.queryTable(ContentTable.TABLE_NAME,ContentTable.FIELD_NEWSID,contentId);
+    }
+
 }

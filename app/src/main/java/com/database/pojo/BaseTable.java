@@ -1,5 +1,7 @@
 package com.database.pojo;
 
+import android.os.Parcel;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +18,7 @@ public class BaseTable implements Serializable
 {
 	private static final long serialVersionUID = -8683731660085242057L;
 	
-	public static final String CONTENTID = "contentId";
+	public transient static final String CONTENTID = "contentId";
 	
 	/** id */
 	private int id;
@@ -33,7 +35,15 @@ public class BaseTable implements Serializable
 	{
 		initVar();
 	}
-	
+
+	protected BaseTable(Parcel in) {
+		id = in.readInt();
+		contentId = in.readString();
+		accessaryFileUrlList = in.createStringArrayList();
+		tableName = in.readString();
+	}
+
+
 	private void initVar()
 	{
 		id = 0;
@@ -169,4 +179,5 @@ public class BaseTable implements Serializable
 		
 		return false;
 	}
+
 }

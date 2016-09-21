@@ -7,19 +7,19 @@ package com.database.pojo;
  */
 public class StudyScoreTable extends BaseTable
 {
-	private static final long serialVersionUID = 857392987133804661L;
+	private transient static final long serialVersionUID = 857392987133804661L;
 	
-	public static final String TABLE_NAME = "STUDYSCORE";
+	public transient static final String TABLE_NAME = "STUDYSCORE";
 	/** 用户编号 */
-	public static final String FIELD_USERNO = "USERNO";
+	public transient static final String FIELD_USERNO = "USERNO";
 	/** 需修学分 */
-	public static final String FIELD_NEEDSCORE = "NEEDSCORE";
+	public transient static final String FIELD_NEEDSCORE = "NEEDSCORE";
 	/** 必修课程数量 */
-	public static final String FIELD_REQUIREDNUM = "REQUIREDNUM";
+	public transient static final String FIELD_REQUIREDNUM = "REQUIREDNUM";
 	/** 选修课程数量 */
-	public static final String FIELD_ELECTIVENUM = "ELECTIVENUM";
+	public transient static final String FIELD_ELECTIVENUM = "ELECTIVENUM";
 	/** 时间段 */
-	public static final String FIELD_TIMEPERIOD = "TIMEPERIOD";
+	public transient static final String FIELD_TIMEPERIOD = "TIMEPERIOD";
 	
 	public StudyScoreTable()
 	{

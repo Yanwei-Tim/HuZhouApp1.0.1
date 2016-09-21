@@ -232,7 +232,7 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
                 mManageList.add(new ManageInfo("邮箱地址", mEmailAddress, R.drawable.app_ailistview_item_three_back));
 
                 mManageList.add(new ManageInfo("性别", mSex, R.drawable.app_ailistview_item_three_back));
-                mManageList.add(new ManageInfo("警号", mPhoneNum, R.drawable.app_ailistview_item_three_back));
+                mManageList.add(new ManageInfo("警号", mPoliceNum, R.drawable.app_ailistview_item_three_back));
                 mManageList.add(new ManageInfo("教育程度", mEducation, R.drawable.app_ailistview_item_three_back));
                 mManageList.add(new ManageInfo("参加工作时间", mToWorkTime, R.drawable.app_ailistview_item_three_back));
                 mManageList.add(new ManageInfo("参加公安时间", mToPoliceTime, R.drawable.app_ailistview_item_three_back));
@@ -329,6 +329,7 @@ public class ManageActivity extends Activity implements AdapterView.OnItemClickL
             mUserTable.putField(UserTable.FIELD_RANK, mUpdate_rank.getText().toString());
         }
         if (!mUpdate_post.getText().toString().equals(mPolicePost)) {
+            //System.out.println("修改后的信息："+mUpdate_post.getText().toString());
             mUserTable.putField(UserTable.FIELD_POLICEPOST, mUpdate_post.getText().toString());
         }
         if (!mUpdate_card.getText().toString().equals(mIDcard)) {

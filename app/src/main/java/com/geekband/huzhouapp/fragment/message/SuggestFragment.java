@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.database.dto.DataOperation;
 import com.database.pojo.ContentTable;
@@ -120,20 +121,26 @@ public class SuggestFragment extends Fragment {
             OpinionTable opinionTable = new OpinionTable();
             opinionTable.putField(OpinionTable.FIELD_USERID, contentId);
             opinionTable.putField(OpinionTable.FIELD_POSTTIME, postTime);
+            opinionTable.putField(OpinionTable.FIELD_ISPASSED,"999");
             if (DataOperation.insertOrUpdateTable(opinionTable,(Document) null)){
-                //获取通用表并插入数据
+                //获取内容表并插入数据
                 ContentTable contentTable = new ContentTable();
                 contentTable.putField(ContentTable.FIELD_SUBSTANCE, params[0]);
                 contentTable.putField(ContentTable.FIELD_NEWSID, opinionTable.getContentId());
-                DataOperation.insertOrUpdateTable(contentTable,(Document) null);
+                if (DataOperation.insertOrUpdateTable(contentTable,(Document) null)){
+                    return 1;
+                }
             }
-            return null;
+            return 2;
         }
 
         @Override
         protected void onPostExecute(Integer integer) {
             pd.dismiss();
-            mSuggest_edit.setText(null);
+            if (integer==1){
+                Toast.makeText(mMainActivity,"提交成功",Toast.LENGTH_SHORT).show();
+                mSuggest_edit.setText(null);
+            }
         }
     }
 }

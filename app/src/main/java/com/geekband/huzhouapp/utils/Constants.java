@@ -62,4 +62,29 @@ public class Constants {
     public static final String AVATAR_DIRECTORY_NAME = "avatar";
     //应用缓存文件根目录
     public static final String ROOT_DIRECTORY_NAME = "HZGA";
+
+    //通知公告先关参数
+    //opinion表"1"审核通过"0"，审核未通过，其他未处理该信息
+    public static final String OPINION_PASSED = "1";
+    public static final String OPINION_NOT_PASSED = "0";
+
+    //上拉刷新，下拉加载
+    public static final int PULL_TO_REFRESH = 1;
+    public static final int PULL_TO_LOAD = 2;
+    //加载需求意见审核通知
+    public static final int REVIEW_INFORMATION = 3;
+    //加载需求建议审核结果通知
+    public static final int RESULT_INFORMATION = 4;
+    //加载学分达标通知
+    public static final int GRADE_INFORMATION = 5;
+    //加载生日通知
+    public static final int BIRTHDAY_INFORMATION = 6;
+    //加载生日祝福通知
+    public static final int BLESS_INFORMATION = 7;
+    //加载完毕
+    public static final int LOADED = 8;
+    //提交完成
+    public static final int COMMITED = 9;
+    public static final int UNCOMMIT = 10;
+
 }
