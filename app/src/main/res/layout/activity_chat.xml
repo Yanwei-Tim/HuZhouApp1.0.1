@@ -82,20 +82,24 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"/>
-        		<Button
-            		android:id="@+id/btn_chat_send"
-                    android:text="发送"
-            		android:textColor="#000"
-            		android:layout_width="0dp"
-            		android:layout_height="40dp"
-                    android:gravity="center"
-                    android:layout_gravity="center_vertical"
-                    android:background="@drawable/app_radio_normal"
-                    android:layout_weight="1"/>
-                <View
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.5"/>
+                    android:layout_weight="1.5">
+                    <Button
+                        android:id="@+id/btn_chat_send"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginLeft="10dp"
+                        android:gravity="center"
+                        android:layout_gravity="center_vertical"
+                        android:background="@drawable/send_message"/>
+                    <View
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
     		</LinearLayout>
     	</LinearLayout>
     	

@@ -8,7 +8,7 @@ public class Constants {
 	public static String USERID = "docadmin";
 	public static String PSWID = "passw0rd";
 
-//	public static final String CONNIP = "192.168.0.14:9080";//lmc本地测试用服务器
+//	public static final String CONNIP = "172.18.18.73:8974";//lmc本地测试用服务器
 	public static final String CONNIP = "119.98.121.116:9080";//lmc本地测试用服务器
 	public static final String FILE_PATH = "/IDOC/service/file/";
 
